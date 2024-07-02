@@ -3,6 +3,7 @@ package cz.cvut.kbss.ontodeside.patomat2.service;
 import cz.cvut.kbss.ontodeside.patomat2.config.ApplicationConfig;
 import cz.cvut.kbss.ontodeside.patomat2.exception.InvalidFileException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.Normalizer;
+import java.util.Comparator;
+import java.util.stream.Stream;
 
 @Service
 public class FileStorageService {
@@ -24,6 +30,31 @@ public class FileStorageService {
     public FileStorageService(ApplicationConfig config, HttpSession session) {
         this.config = config;
         this.session = session;
+    }
+
+    @PostConstruct
+    void init() {
+        final File storageDir = new File(config.getStorage());
+        if (!storageDir.exists()) {
+            LOG.debug("Creating storage directory '{}'.", storageDir.getAbsolutePath());
+            storageDir.mkdirs();
+        } else {
+            LOG.debug("Storage directory '{}' already exists. Cleaning it up.", storageDir.getAbsolutePath());
+            if (!storageDir.isDirectory()) {
+                throw new PatOMat2Exception("Storage directory must be a directory.");
+            }
+            Stream.of(storageDir.listFiles()).forEach(f -> {
+                try {
+                    Files.walk(f.toPath())
+                         .sorted(Comparator.reverseOrder())
+                         .map(Path::toFile)
+                         .forEach(File::delete);
+                } catch (IOException e) {
+                    LOG.error("Unable to delete pre-existing ontology files.", e);
+                }
+            });
+
+        }
     }
 
     /**
