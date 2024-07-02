@@ -1,9 +1,11 @@
 package cz.cvut.kbss.ontodeside.patomat2.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -13,15 +15,15 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Collections;
 import java.util.List;
 
-import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
-
+@Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests((auth) -> auth.requestMatchers(antMatcher("/**")).permitAll())
+        return http.authorizeHttpRequests((auth) -> auth.anyRequest().permitAll())
                    .cors(cc -> cc.configurationSource(createCorsConfiguration()))
+                   .csrf(AbstractHttpConfigurer::disable)
                    .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)).build();
     }
 

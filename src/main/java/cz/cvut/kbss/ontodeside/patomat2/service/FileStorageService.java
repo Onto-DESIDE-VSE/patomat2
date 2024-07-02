@@ -3,12 +3,14 @@ package cz.cvut.kbss.ontodeside.patomat2.service;
 import cz.cvut.kbss.ontodeside.patomat2.config.ApplicationConfig;
 import cz.cvut.kbss.ontodeside.patomat2.exception.InvalidFileException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.text.Normalizer;
 
 @Service
 public class FileStorageService {
@@ -17,7 +19,12 @@ public class FileStorageService {
 
     private final ApplicationConfig config;
 
-    public FileStorageService(ApplicationConfig config) {this.config = config;}
+    private final HttpSession session;
+
+    public FileStorageService(ApplicationConfig config, HttpSession session) {
+        this.config = config;
+        this.session = session;
+    }
 
     /**
      * Stores the specified file.
@@ -26,14 +33,14 @@ public class FileStorageService {
      * @return The newly created file on the host system
      */
     public File saveFile(MultipartFile file) {
-        final File targetDir = new File(config.getStorage());
+        final File targetDir = new File(config.getStorage() + File.separator + session.getId());
         if (!targetDir.exists()) {
             targetDir.mkdirs();
         }
         File newFile = new File(targetDir + File.separator + sanitizeFilename(file.getOriginalFilename()));
         try {
             LOG.debug("Storing file '{}' at '{}'.", file.getOriginalFilename(), newFile.getAbsolutePath());
-            file.transferTo(newFile);
+            file.transferTo(newFile.getAbsoluteFile());
         } catch (Exception e) {
             LOG.error("Unable to store file at {}", newFile.getAbsolutePath(), e);
             throw new PatOMat2Exception("Unable to store file " + file.getOriginalFilename());
@@ -42,6 +49,8 @@ public class FileStorageService {
     }
 
     private static String sanitizeFilename(String fileName) {
+        // Replace accented characters with ASCII equivalents
+        fileName = Normalizer.normalize(fileName, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
         // Remove special characters
         fileName = fileName.replaceAll("[^a-zA-Z0-9.\\-_]", "");
 
@@ -72,7 +81,7 @@ public class FileStorageService {
      * @throws PatOMat2Exception if the file does not exist in the storage directory
      */
     public File getFile(String fileName) {
-        final File result = new File(config.getStorage() + File.separator + fileName);
+        final File result = new File(config.getStorage() + File.separator + session.getId() + File.separator + fileName);
         if (!result.exists()) {
             throw new PatOMat2Exception("File " + fileName + " does not exist.");
         }
@@ -85,7 +94,7 @@ public class FileStorageService {
      * @param fileName the name of the file to delete
      */
     public void deleteFile(String fileName) {
-        final File result = new File(config.getStorage() + File.separator + fileName);
+        final File result = new File(config.getStorage() + File.separator + session.getId() + File.separator + fileName);
         if (!result.exists()) {
             // Nothing to delete
             return;

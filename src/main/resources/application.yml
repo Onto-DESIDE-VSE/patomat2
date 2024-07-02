@@ -3,4 +3,13 @@ spring:
         name: PatOMat2
 
 patomat2:
-    storage: ./data
+    storage: data
+server:
+    servlet:
+        context-path: /patomat2
+    port: 8080
+
+logging:
+    level:
+      cz.cvut.kbss.ontodeside.patomat2: TRACE
+      org.springframework: INFO

@@ -3,12 +3,9 @@
 **/.idea
 .vscode
 .gradle
-**/results
-**/testResults
-**/repositories
 build.out
-**/catalog-v001.xml
 .project
 .classpath
 org.*
 .factorypath
+data
