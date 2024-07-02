@@ -9,3 +9,5 @@ build.out
 org.*
 .factorypath
 data
+**/dist
+**/node_modules
