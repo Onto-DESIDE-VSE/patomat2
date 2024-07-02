@@ -32,7 +32,7 @@ public class FileStorageService {
         }
         File newFile = new File(targetDir + File.separator + sanitizeFilename(file.getOriginalFilename()));
         try {
-            LOG.trace("Storing file '{}' at '{}'.", file.getOriginalFilename(), newFile.getAbsolutePath());
+            LOG.debug("Storing file '{}' at '{}'.", file.getOriginalFilename(), newFile.getAbsolutePath());
             file.transferTo(newFile);
         } catch (Exception e) {
             LOG.error("Unable to store file at {}", newFile.getAbsolutePath(), e);
@@ -77,5 +77,20 @@ public class FileStorageService {
             throw new PatOMat2Exception("File " + fileName + " does not exist.");
         }
         return result;
+    }
+
+    /**
+     * Deletes the specified file if it exists.
+     *
+     * @param fileName the name of the file to delete
+     */
+    public void deleteFile(String fileName) {
+        final File result = new File(config.getStorage() + File.separator + fileName);
+        if (!result.exists()) {
+            // Nothing to delete
+            return;
+        }
+        result.delete();
+        LOG.debug("Deleted file '{}'.", fileName);
     }
 }
