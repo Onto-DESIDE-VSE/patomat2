@@ -1,0 +1,6 @@
+spring:
+    application:
+        name: PatOMat2
+
+patomat2:
+    storage: ./data
