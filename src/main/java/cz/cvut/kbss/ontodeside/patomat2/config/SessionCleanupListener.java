@@ -26,6 +26,7 @@ public class SessionCleanupListener implements HttpSessionListener {
     @Override
     public void sessionCreated(HttpSessionEvent se) {
         LOG.debug("Created new session {}.", se.getSession().getId());
+        se.getSession().setMaxInactiveInterval(Constants.SESSION_TIMEOUT);
     }
 
     @Override

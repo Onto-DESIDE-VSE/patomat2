@@ -12,6 +12,11 @@ public class Constants {
      */
     public static final String PATTERN_FILES_ATTRIBUTE = "patternFiles";
 
+    /**
+     * Session timeout in milliseconds.
+     */
+    public static final int SESSION_TIMEOUT = 30 * 60 * 1000;
+
     private Constants() {
         throw new AssertionError();
     }
