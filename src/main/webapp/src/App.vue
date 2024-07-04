@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import {RouterLink, RouterView} from "vue-router"
 import Constants from "./constants/Constants";
-import {mdiFileImport, mdiInformation} from "@mdi/js";
+import {mdiFileImport, mdiInformation, mdiTableCog} from "@mdi/js";
 
 const navItems = {
     import: {
         title: "Import",
         path: "import",
         icon: mdiFileImport,
+    },
+    patternMatches: {
+        title: "Pattern Matches",
+        path: "matches",
+        icon: mdiTableCog
     },
     about: {
         title: "About",
@@ -38,8 +43,16 @@ const navItems = {
             </v-toolbar-items>
         </v-toolbar>
 
-        <v-content>
+        <v-main class="main-container">
             <RouterView/>
-        </v-content>
+        </v-main>
     </v-app>
 </template>
+
+<style scoped>
+.main-container {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 15px
+}
+</style>
