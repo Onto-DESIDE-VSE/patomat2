@@ -2,6 +2,7 @@
 import {RouterLink, RouterView} from "vue-router"
 import Constants from "./constants/Constants";
 import {mdiFileImport, mdiInformation, mdiTableCog} from "@mdi/js";
+import Message from "@/components/Messages.vue";
 
 const navItems = {
     import: {
@@ -45,6 +46,7 @@ const navItems = {
 
         <v-main class="main-container">
             <RouterView/>
+            <Message />
         </v-main>
     </v-app>
 </template>
