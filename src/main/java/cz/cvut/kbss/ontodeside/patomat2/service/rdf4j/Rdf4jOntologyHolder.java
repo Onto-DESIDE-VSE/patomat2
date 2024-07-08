@@ -1,9 +1,9 @@
 package cz.cvut.kbss.ontodeside.patomat2.service.rdf4j;
 
+import cz.cvut.kbss.ontodeside.patomat2.dto.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyReadException;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
 import cz.cvut.kbss.ontodeside.patomat2.service.pattern.ResultBinding;
-import cz.cvut.kbss.ontodeside.patomat2.service.pattern.ResultRow;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -51,22 +51,24 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
     }
 
     @Override
-    public List<ResultRow> findMatches(File patternFile) {
+    public List<PatternMatch> findMatches(File patternFile) {
+        if (ontologyFileName == null || ontologyFileName.isBlank()) {
+            throw new IllegalStateException("Ontology has not been loaded.");
+        }
         final String query;
         try {
             query = String.join("\n", Files.readAllLines(patternFile.toPath()));
         } catch (IOException e) {
             throw new OntologyReadException("Unable to load pattern file " + patternFile.getName(), e);
         }
-        final List<ResultRow> result = new ArrayList<>();
+        final List<PatternMatch> result = new ArrayList<>();
         try (final RepositoryConnection conn = repository.getConnection()) {
             final TupleQuery tq = conn.prepareTupleQuery(query);
             try (final TupleQueryResult tqResult = tq.evaluate()) {
                 for (BindingSet bindings : tqResult) {
-                    final ResultRow row = new ResultRow();
-                    bindings.getBindingNames()
-                            .forEach(name -> row.addBinding(toResultBinding(name, bindings)));
-                    result.add(row);
+                    final List<ResultBinding> row = new ArrayList<>();
+                    bindings.getBindingNames().forEach(name -> row.add(toResultBinding(name, bindings)));
+                    result.add(new PatternMatch(patternFile.getName(), row));
                 }
             }
         }

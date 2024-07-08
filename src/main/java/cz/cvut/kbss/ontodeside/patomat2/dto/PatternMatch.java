@@ -8,6 +8,8 @@ import java.util.Objects;
 
 public class PatternMatch {
 
+    private int id;
+
     /**
      * File that contains the pattern represented by this match
      */
@@ -24,6 +26,15 @@ public class PatternMatch {
     public PatternMatch(String patternFile, List<ResultBinding> bindings) {
         this.patternFile = patternFile;
         this.bindings = bindings;
+        this.id = hashCode();
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getPatternFile() {
@@ -38,18 +49,14 @@ public class PatternMatch {
         return bindings;
     }
 
-    public void addBinding(ResultBinding binding) {
-        bindings.add(binding);
-    }
-
     public void setBindings(List<ResultBinding> bindings) {
         this.bindings = bindings;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PatternMatch that)) return false;
+        if (this == o) {return true;}
+        if (!(o instanceof PatternMatch that)) {return false;}
         return Objects.equals(getPatternFile(), that.getPatternFile()) && Objects.equals(getBindings(),
                 that.getBindings());
     }
