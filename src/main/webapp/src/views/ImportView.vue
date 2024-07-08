@@ -1,37 +1,26 @@
 <script setup lang="ts">
-import {computed, ref} from "vue";
+import {ref} from "vue";
 import Constants from "@/constants/Constants";
+import OntologyImport from "@/components/OntologyImport.vue";
 
-const ontologyFile = ref<File>();
-const patternFiles = ref<File[]>([]);
-const uploading = ref<boolean>(false);
+const alreadyUploaded = ref(false);
 
-const valid = computed(() => ontologyFile.value !== undefined && patternFiles.value.length > 0);
-
-const upload = async () =>  {
-    uploading.value = true;
-    const formData = new FormData();
-    formData.append("ontology", ontologyFile.value!);
-    patternFiles.value.forEach(file => formData.append("pattern", file));
-    await fetch(`${Constants.SERVER_URL}/ontology`, {
-        method: "POST",
-        body: formData
+const uploadedCheck = async () => {
+    const resp = await fetch(`${Constants.SERVER_URL}/ontology`, {
+        method: "HEAD"
     });
-    uploading.value = false;
+    alreadyUploaded.value = resp.status === 200;
 };
-
+uploadedCheck();
 </script>
 
 <template>
     <h3 class="text-h3">Import Ontology and Patterns</h3>
-    <v-form class="mt-2">
-        <v-file-input v-model="ontologyFile" label="Ontology file"/>
-        <v-file-input v-model="patternFiles" label="Pattern files" multiple/>
-
-        <div class="float-right">
-        <v-btn color="primary" :disabled="!valid || uploading" :loading="uploading" @click="upload">Import</v-btn>
-        </div>
-    </v-form>
+    <div v-if="alreadyUploaded" class="mb-3">
+        <p class="text-h6">Ontology and patterns already imported. Uploading new ones will replace the old ones.</p>
+        <RouterLink to="/matches">Go to Pattern Matches</RouterLink>
+    </div>
+    <OntologyImport/>
 </template>
 
 <style scoped>

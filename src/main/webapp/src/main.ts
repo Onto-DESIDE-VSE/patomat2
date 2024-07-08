@@ -8,6 +8,7 @@ import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
 
 import App from "./App.vue"
 import router from "./router"
+import {createPinia} from "pinia";
 
 const vuetify = createVuetify({
     components,
@@ -19,11 +20,13 @@ const vuetify = createVuetify({
             mdi,
         },
     }
-})
+});
+const pinia = createPinia();
 
 const app = createApp(App)
 
 app.use(router);
 app.use(vuetify);
+app.use(pinia);
 
 app.mount("#app")

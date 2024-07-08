@@ -60,7 +60,7 @@ public class FileStorageService {
     /**
      * Stores the specified file.
      *
-     * @param file File to store
+     * @param file File to messageStore
      * @return The newly created file on the host system
      */
     public File saveFile(MultipartFile file) {
@@ -73,8 +73,8 @@ public class FileStorageService {
             LOG.debug("Storing file '{}' at '{}'.", file.getOriginalFilename(), newFile.getAbsolutePath());
             file.transferTo(newFile.getAbsoluteFile());
         } catch (Exception e) {
-            LOG.error("Unable to store file at {}", newFile.getAbsolutePath(), e);
-            throw new PatOMat2Exception("Unable to store file " + file.getOriginalFilename());
+            LOG.error("Unable to messageStore file at {}", newFile.getAbsolutePath(), e);
+            throw new PatOMat2Exception("Unable to messageStore file " + file.getOriginalFilename());
         }
         return newFile;
     }

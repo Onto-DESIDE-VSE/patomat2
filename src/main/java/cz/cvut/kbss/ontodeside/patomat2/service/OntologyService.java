@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class OntologyService {
@@ -57,5 +58,14 @@ public class OntologyService {
             throw new OntologyNotUploadedException("Ontology has not been uploaded yet.");
         }
         return new FileSystemResource(storageService.getFile(ontologyFileName));
+    }
+
+    /**
+     * Checks whether an ontology file has been uploaded.
+     *
+     * @return {@code true} if ontology is available, {@code false} otherwise
+     */
+    public Optional<String> getUploadedOntologyFileName() {
+        return Optional.ofNullable((String) session.getAttribute(Constants.ONTOLOGY_FILE_ATTRIBUTE));
     }
 }
