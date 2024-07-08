@@ -1,7 +1,7 @@
 package cz.cvut.kbss.ontodeside.patomat2.rest;
 
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
-import cz.cvut.kbss.ontodeside.patomat2.service.OntologyService;
+import cz.cvut.kbss.ontodeside.patomat2.service.OntologyStoringService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -21,21 +21,22 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/ontology")
-public class OntologyController {
+public class OntologyStoringController {
 
-    private final OntologyService ontologyService;
+    private final OntologyStoringService ontologyStoringService;
 
-    public OntologyController(OntologyService ontologyService) {this.ontologyService = ontologyService;}
+    public OntologyStoringController(
+            OntologyStoringService ontologyStoringService) {this.ontologyStoringService = ontologyStoringService;}
 
     @PostMapping
     public void uploadFiles(@RequestParam("ontology") MultipartFile ontology,
                             @RequestParam("pattern") List<MultipartFile> patterns) {
-        ontologyService.saveOntologyAndPatterns(ontology, patterns);
+        ontologyStoringService.saveOntologyAndPatterns(ontology, patterns);
     }
 
     @RequestMapping(method = RequestMethod.HEAD)
     public ResponseEntity<Void> isOntologyUploaded() {
-        final Optional<String> uploadedOntology = ontologyService.getUploadedOntologyFileName();
+        final Optional<String> uploadedOntology = ontologyStoringService.getUploadedOntologyFileName();
         if (uploadedOntology.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } else {
@@ -45,7 +46,7 @@ public class OntologyController {
 
     @GetMapping
     public ResponseEntity<Resource> getOntologyFile() {
-        final Resource resource = ontologyService.getOntologyFile();
+        final Resource resource = ontologyStoringService.getOntologyFile();
         try {
             return ResponseEntity.ok()
                                  .contentLength(resource.contentLength())
