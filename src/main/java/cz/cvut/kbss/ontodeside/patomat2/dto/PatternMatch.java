@@ -4,6 +4,7 @@ import cz.cvut.kbss.ontodeside.patomat2.service.pattern.ResultBinding;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class PatternMatch {
 
@@ -43,5 +44,18 @@ public class PatternMatch {
 
     public void setBindings(List<ResultBinding> bindings) {
         this.bindings = bindings;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PatternMatch that)) return false;
+        return Objects.equals(getPatternFile(), that.getPatternFile()) && Objects.equals(getBindings(),
+                that.getBindings());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPatternFile(), getBindings());
     }
 }
