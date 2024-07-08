@@ -1,7 +1,9 @@
 package cz.cvut.kbss.ontodeside.patomat2.dto;
 
-import java.util.HashMap;
-import java.util.Map;
+import cz.cvut.kbss.ontodeside.patomat2.service.pattern.ResultBinding;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PatternMatch {
 
@@ -13,7 +15,15 @@ public class PatternMatch {
     /**
      * Bindings of values that represent the pattern match instance.
      */
-    private Map<String, String> bindings = new HashMap<>();
+    private List<ResultBinding> bindings = new ArrayList<>();
+
+    public PatternMatch() {
+    }
+
+    public PatternMatch(String patternFile, List<ResultBinding> bindings) {
+        this.patternFile = patternFile;
+        this.bindings = bindings;
+    }
 
     public String getPatternFile() {
         return patternFile;
@@ -23,15 +33,15 @@ public class PatternMatch {
         this.patternFile = patternFile;
     }
 
-    public Map<String, String> getBindings() {
+    public List<ResultBinding> getBindings() {
         return bindings;
     }
 
-    public void addBinding(String key, String value) {
-        bindings.put(key, value);
+    public void addBinding(ResultBinding binding) {
+        bindings.add(binding);
     }
 
-    public void setBindings(Map<String, String> bindings) {
+    public void setBindings(List<ResultBinding> bindings) {
         this.bindings = bindings;
     }
 }
