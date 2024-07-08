@@ -2,6 +2,7 @@ package cz.cvut.kbss.ontodeside.patomat2.rest.handler;
 
 import cz.cvut.kbss.ontodeside.patomat2.exception.InvalidFileException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
+import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyReadException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -40,5 +41,11 @@ public class RestExceptionHandler {
     public ResponseEntity<ErrorInfo> ontologyNotUploadedException(OntologyNotUploadedException ex, HttpServletRequest request) {
         logException(ex, request);
         return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(OntologyReadException.class)
+    public ResponseEntity<ErrorInfo> ontologyReadException(OntologyReadException ex, HttpServletRequest request) {
+        logException(ex, request);
+        return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
