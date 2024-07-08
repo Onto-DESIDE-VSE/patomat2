@@ -15,15 +15,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class OntologyService {
+public class OntologyStoringService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OntologyService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OntologyStoringService.class);
 
     private final FileStorageService storageService;
 
     private final HttpSession session;
 
-    public OntologyService(FileStorageService storageService, HttpSession session) {
+    public OntologyStoringService(FileStorageService storageService, HttpSession session) {
         this.storageService = storageService;
         this.session = session;
     }
