@@ -27,7 +27,7 @@ const navItems = {
     <v-app>
         <v-toolbar app>
             <v-toolbar-title>
-                <RouterLink  to="/" tag="span" style="cursor: pointer">
+                <RouterLink  to="/" class="v-btn v-theme--light v-btn--variant-text" style="cursor: pointer">
                     {{ Constants.APP_NAME }}
                 </RouterLink>
             </v-toolbar-title>
