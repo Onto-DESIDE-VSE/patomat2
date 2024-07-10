@@ -1,0 +1,5 @@
+// Dynamic configuration
+window.__config__ = {
+  SERVER_URL: '${SERVER_URL}',
+  CONTEXT_PATH: '${CONTEXT_PATH}'
+}
