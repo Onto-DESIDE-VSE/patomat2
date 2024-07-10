@@ -14,12 +14,12 @@ services:
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
     patomat2-server:
-        image: ghcr.io/Onto-DESIDE-VSE/patomat2-backend:latest
+        image: ghcr.io/onto-deside-vse/patomat2-backend:latest
         restart: always
         environment:
             PATOMAT2_CORSALLOWEDORIGINS: ${PUBLIC_URL:-http://localhost:${HOST_PORT:-1234}}
     patomat2:
-        image: ghcr.io/Onto-DESIDE-VSE/patomat2-frontend:latest
+        image: ghcr.io/onto-deside-vse/patomat2-frontend:latest
         restart: always
         depends_on:
             - patomat2-server
