@@ -28,6 +28,7 @@ const Constants = {
     APP_NAME: "PatOMat2",
     SERVER_URL: getEnv("SERVER_URL", ""),
     CONTEXT_PATH: getEnv("CONTEXT_PATH", ""),
+    MESSAGE_TIMEOUT: 2000,
 };
 
 export default Constants;
