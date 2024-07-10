@@ -38,8 +38,10 @@ The application can be deployed using Docker Compose. The following parameters c
 | `PUBLIC_URL` | `http://localhost:1234` | **Public** URL at which the application is running, without the context path (`ROOT`). |
 
 The easiest way to configure them is by creating a `.env` file and setting them there. This file will be automatically
-picked
-by Docker compose.
+picked by Docker compose.
 
-Run the application by calling `docker compose up -d`.
+Deployment process is thus as follows:
 
+1. Download/copy the `docker-compose.yml`.
+2. Create `.env` and configure the aforementioned parameters as necessary.
+3. Start the application by calling `docker compose up -d`.
