@@ -42,6 +42,6 @@ picked by Docker compose.
 
 Deployment process is thus as follows:
 
-1. Download/copy the `docker-compose.yml`.
-2. Create `.env` and configure the aforementioned parameters as necessary.
+1. Download/copy the `docker-compose.yml` file and the `nginx` directory.
+2. Create the `.env` file and configure the aforementioned parameters as necessary.
 3. Start the application by calling `docker compose up -d`.
