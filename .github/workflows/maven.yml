@@ -19,4 +19,5 @@ jobs:
           distribution: 'temurin'
           java-version: 21
       - name: Build with Maven
+        working-directory: backend
         run: mvn -B package --file pom.xml
