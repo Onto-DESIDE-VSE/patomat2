@@ -9,8 +9,8 @@ services:
             - patomat2-server
         environment:
             NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx
-            ROOT: ${ROOT}
-            ORIGIN: ${URL}
+            ROOT: ${ROOT:-/patomat2}
+            ORIGIN: ${PUBLIC_URL:-http://localhost:${HOST_PORT:-1234}}
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
     patomat2-server:
@@ -18,10 +18,8 @@ services:
             context: backend
             dockerfile: Dockerfile
         restart: always
-        ports:
-            -   8080:8080
         environment:
-            PATOMAT2_CORSALLOWEDORIGINS: ${URL}
+            PATOMAT2_CORSALLOWEDORIGINS: ${PUBLIC_URL:-http://localhost:${HOST_PORT:-1234}}
     patomat2:
         build:
             context: frontend
@@ -29,8 +27,6 @@ services:
         restart: always
         depends_on:
             - patomat2-server
-        ports:
-            -   3000:80
         environment:
-            SERVER_URL: ${URL}${ROOT}/service/server
-            CONTEXT_PATH: ${ROOT}
+            SERVER_URL: ${PUBLIC_URL:-http://localhost:${HOST_PORT:-1234}}${ROOT:-/patomat2}/service/server
+            CONTEXT_PATH: ${ROOT:-/patomat2}
