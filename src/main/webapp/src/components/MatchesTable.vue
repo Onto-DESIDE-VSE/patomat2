@@ -24,8 +24,8 @@ function valueToString(binding: ResultBinding) {
 <template>
     <v-data-table :headers="headers" :items="props.matches" show-select>
         <template v-slot:item.bindings="{ value }">
-            <ul>
-                <li v-for="binding in value">{{ binding.name }}: {{ valueToString(binding) }}</li>
+            <ul class="mt-1 mb-1">
+                <li v-for="binding in value"><span class="font-weight-bold">{{ binding.name }}</span>: {{ valueToString(binding) }}</li>
             </ul>
         </template>
     </v-data-table>
