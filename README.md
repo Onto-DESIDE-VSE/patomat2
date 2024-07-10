@@ -1,6 +1,6 @@
 # PatOMat2
 
-PatOMat2 is a tool for automatic processing of ontologies. It is an evolution of the
+PatOMat2 is a tool for automatic searching for and processing of patterns in ontologies. It is an evolution of the
 original [PatOMat](https://patomat.vse.cz/).
 
 ## Development

@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>cz.cvut.kbss.ontodeside</groupId>
-	<artifactId>patomat2</artifactId>
+	<artifactId>patomat2-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>PatOMat2</name>
 	<description>Patterns in Ontologies: AutoMatic Processing</description>
