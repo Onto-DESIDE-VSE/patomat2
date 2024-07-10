@@ -19,6 +19,10 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final ApplicationConfig config;
+
+    public SecurityConfig(ApplicationConfig config) {this.config = config;}
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.authorizeHttpRequests((auth) -> auth.anyRequest().permitAll())
@@ -27,12 +31,12 @@ public class SecurityConfig {
                    .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)).build();
     }
 
-    private static CorsConfigurationSource createCorsConfiguration() {
+    private CorsConfigurationSource createCorsConfiguration() {
         // Since we are using cookie-based sessions, we have to specify the URL of the clients (CORS allowed origins)
         final CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
         corsConfiguration.setAllowedMethods(Collections.singletonList("*"));
         // This is the frontend development server URL
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:5173"));
+        corsConfiguration.setAllowedOrigins(List.of(config.getCorsAllowedOrigins().split(",")));
         corsConfiguration.addExposedHeader(HttpHeaders.AUTHORIZATION);
         corsConfiguration.addExposedHeader(HttpHeaders.LOCATION);
         corsConfiguration.addExposedHeader(HttpHeaders.CONTENT_DISPOSITION);

@@ -4,6 +4,7 @@ spring:
 
 patomat2:
     storage: data
+    cors-allowed-origins: http://localhost:5173
 server:
     servlet:
         context-path: /patomat2

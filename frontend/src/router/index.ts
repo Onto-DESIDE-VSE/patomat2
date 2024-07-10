@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router"
 import HomeView from "../views/HomeView.vue"
+import Constants from "@/constants/Constants"
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(Constants.CONTEXT_PATH),
   routes: [
     {
       path: "/",

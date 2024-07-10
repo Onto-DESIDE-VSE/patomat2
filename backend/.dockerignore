@@ -1,0 +1,9 @@
+node_modules
+.idea
+.github
+.husky
+Dockerfile
+.dockerignore
+.gitignore
+.gitattributes
+.editorconfig
