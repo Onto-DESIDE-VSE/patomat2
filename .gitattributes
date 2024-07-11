@@ -1,3 +1,4 @@
+* text eol=lf
 # Graphics
 *.ai              binary
 *.bmp             binary
@@ -25,5 +26,3 @@
 *.tiff            binary
 *.wbmp            binary
 *.webp            binary
-
-* text eol=lf
