@@ -1,11 +1,8 @@
 package cz.cvut.kbss.ontodeside.patomat2.service;
 
-import cz.cvut.kbss.ontodeside.patomat2.Constants;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
-import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
@@ -25,43 +22,39 @@ public class MatchService {
 
     private final FileStorageService storageService;
 
-    private final HttpSession session;
-
     private final OntologyHolder ontologyHolder;
+
+    private Map<String, Pattern> patterns;
 
     private Map<Integer, PatternMatch> matches;
 
-    public MatchService(FileStorageService storageService, HttpSession session, OntologyHolder ontologyHolder) {
+    public MatchService(FileStorageService storageService, OntologyHolder ontologyHolder) {
         this.storageService = storageService;
-        this.session = session;
         this.ontologyHolder = ontologyHolder;
     }
 
     public List<PatternMatch> findMatches() {
-        final String ontologyFileName = (String) session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE);
-        if (ontologyFileName == null) {
-            throw new OntologyNotUploadedException("Ontology has not been uploaded yet.");
-        }
-        if (!ontologyHolder.isLoaded(ontologyFileName)) {
-            final File ontologyFile = storageService.getFile(ontologyFileName);
-            ontologyHolder.loadOntology(ontologyFile);
-            this.matches = new LinkedHashMap<>();
-        } else if (!matches.isEmpty()) {
+        if (matches != null) {
             return new ArrayList<>(matches.values());
         }
-        final List<Pattern> patterns = (List<Pattern>) session.getAttribute(Constants.PATTERNS_SESSION_ATTRIBUTE);
-        return patterns.stream()
-                           .map(ontologyHolder::findMatches)
-                           .flatMap(List::stream)
-                           .peek(pm -> matches.put(pm.hashCode(), pm))
-                           .toList();
+        this.matches = new LinkedHashMap<>();
+        return patterns.values().stream()
+                       .map(ontologyHolder::findMatches)
+                       .flatMap(List::stream)
+                       .peek(pm -> matches.put(pm.hashCode(), pm))
+                       .toList();
+    }
+
+    private void loadOntology(String fileName) {
+        final File ontologyFile = storageService.getFile(fileName);
+        ontologyHolder.loadOntology(ontologyFile);
     }
 
     @EventListener
     public void onOntologyFileUploaded(OntologyFileUploadedEvent event) {
-        if (matches != null) {
-            this.matches = null;
-            ontologyHolder.clear();
-        }
+        loadOntology(event.getOntologyFileName());
+        this.patterns = new LinkedHashMap<>();
+        event.getPatterns().forEach(p -> patterns.put(p.name(), p));
+        this.matches = null;
     }
 }
