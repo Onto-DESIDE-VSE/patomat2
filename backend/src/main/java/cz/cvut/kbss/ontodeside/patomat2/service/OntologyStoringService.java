@@ -44,7 +44,7 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
      * <p>
      * It saves the stored file paths in the session.
      *
-     * @param ontology Ontology file
+     * @param ontology      Ontology file
      * @param patternsFiles List of pattern files
      */
     public void saveOntologyAndPatterns(MultipartFile ontology, List<MultipartFile> patternsFiles) {
@@ -56,6 +56,7 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
                 .map(storageService::saveFile)
                 .map(patternParser::readPattern)
                 .toList();
+        session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream().map(Pattern::name).toList());
         eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns));
     }
 

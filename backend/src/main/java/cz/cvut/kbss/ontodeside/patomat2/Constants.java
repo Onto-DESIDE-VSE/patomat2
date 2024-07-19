@@ -10,7 +10,7 @@ public class Constants {
     /**
      * HTTP session attribute name for stored patterns.
      */
-    public static final String PATTERNS_SESSION_ATTRIBUTE = "patterns";
+    public static final String PATTERN_FILES_SESSION_ATTRIBUTE = "patternFiles";
 
     /**
      * Session timeout in milliseconds.
