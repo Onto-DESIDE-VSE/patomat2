@@ -32,4 +32,9 @@ public interface OntologyHolder {
      * @return List of found matches
      */
     List<PatternMatch> findMatches(File patternFile);
+
+    /**
+     * Clears the holder, discarding the previously loaded ontology.
+     */
+    void clear();
 }

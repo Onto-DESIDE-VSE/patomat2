@@ -82,4 +82,12 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
                                                                                                     .stringValue();
         return new ResultBinding(name, strValue, datatype);
     }
+
+    @Override
+    public void clear() {
+        this.ontologyFileName = null;
+        try (final RepositoryConnection conn = repository.getConnection()) {
+            conn.clear();
+        }
+    }
 }

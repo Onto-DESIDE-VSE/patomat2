@@ -1,10 +1,14 @@
 package cz.cvut.kbss.ontodeside.patomat2.service;
 
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
+import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
 import jakarta.servlet.http.HttpSession;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -15,13 +19,15 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class OntologyStoringService {
+public class OntologyStoringService implements ApplicationEventPublisherAware {
 
     private static final Logger LOG = LoggerFactory.getLogger(OntologyStoringService.class);
 
     private final FileStorageService storageService;
 
     private final HttpSession session;
+
+    private ApplicationEventPublisher eventPublisher;
 
     public OntologyStoringService(FileStorageService storageService, HttpSession session) {
         this.storageService = storageService;
@@ -38,12 +44,14 @@ public class OntologyStoringService {
      */
     public void saveOntologyAndPatterns(MultipartFile ontology, List<MultipartFile> patterns) {
         LOG.info("Storing ontology file '{}' and {} patterns for session {}.", ontology.getOriginalFilename(), patterns.size(), session.getId());
-        session.setAttribute(Constants.ONTOLOGY_FILE_ATTRIBUTE, storageService.saveFile(ontology).getName());
+        final File storedFile = storageService.saveFile(ontology);
+        session.setAttribute(Constants.ONTOLOGY_FILE_ATTRIBUTE, storedFile.getName());
         session.setAttribute(Constants.PATTERN_FILES_ATTRIBUTE, patterns
                 .stream()
                 .map(storageService::saveFile)
                 .map(File::getName)
                 .toList());
+        eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName()));
     }
 
     /**
@@ -67,5 +75,10 @@ public class OntologyStoringService {
      */
     public Optional<String> getUploadedOntologyFileName() {
         return Optional.ofNullable((String) session.getAttribute(Constants.ONTOLOGY_FILE_ATTRIBUTE));
+    }
+
+    @Override
+    public void setApplicationEventPublisher(@NotNull ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
     }
 }
