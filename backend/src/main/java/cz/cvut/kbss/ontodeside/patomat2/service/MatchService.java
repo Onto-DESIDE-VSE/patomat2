@@ -1,6 +1,7 @@
 package cz.cvut.kbss.ontodeside.patomat2.service;
 
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
+import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
@@ -37,7 +38,7 @@ public class MatchService {
     }
 
     public List<PatternMatch> findMatches() {
-        final String ontologyFileName = (String) session.getAttribute(Constants.ONTOLOGY_FILE_ATTRIBUTE);
+        final String ontologyFileName = (String) session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE);
         if (ontologyFileName == null) {
             throw new OntologyNotUploadedException("Ontology has not been uploaded yet.");
         }
@@ -48,9 +49,8 @@ public class MatchService {
         } else if (!matches.isEmpty()) {
             return new ArrayList<>(matches.values());
         }
-        final List<String> patternFiles = (List<String>) session.getAttribute(Constants.PATTERN_FILES_ATTRIBUTE);
-        return patternFiles.stream()
-                           .map(storageService::getFile)
+        final List<Pattern> patterns = (List<Pattern>) session.getAttribute(Constants.PATTERNS_SESSION_ATTRIBUTE);
+        return patterns.stream()
                            .map(ontologyHolder::findMatches)
                            .flatMap(List::stream)
                            .peek(pm -> matches.put(pm.hashCode(), pm))

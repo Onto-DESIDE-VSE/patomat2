@@ -1,6 +1,8 @@
 package cz.cvut.kbss.ontodeside.patomat2.service;
 
+import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
+import org.springframework.lang.NonNull;
 
 import java.io.File;
 import java.util.List;
@@ -26,12 +28,12 @@ public interface OntologyHolder {
     void loadOntology(File ontologyFile);
 
     /**
-     * Finds matches of the pattern declared in the specified file in the loaded ontology.
+     * Finds matches of the specified pattern in the loaded ontology.
      *
-     * @param patternFile File containing pattern definition
+     * @param pattern Pattern definition
      * @return List of found matches
      */
-    List<PatternMatch> findMatches(File patternFile);
+    List<PatternMatch> findMatches(@NonNull Pattern pattern);
 
     /**
      * Clears the holder, discarding the previously loaded ontology.

@@ -1,9 +1,10 @@
 package cz.cvut.kbss.ontodeside.patomat2.service.rdf4j;
 
-import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyReadException;
-import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
+import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
+import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.model.ResultBinding;
+import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
@@ -14,12 +15,12 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,24 +52,19 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
     }
 
     @Override
-    public List<PatternMatch> findMatches(File patternFile) {
+    public List<PatternMatch> findMatches(@NonNull Pattern pattern) {
+        Objects.requireNonNull(pattern);
         if (ontologyFileName == null || ontologyFileName.isBlank()) {
             throw new IllegalStateException("Ontology has not been loaded.");
         }
-        final String query;
-        try {
-            query = String.join("\n", Files.readAllLines(patternFile.toPath()));
-        } catch (IOException e) {
-            throw new OntologyReadException("Unable to load pattern file " + patternFile.getName(), e);
-        }
         final List<PatternMatch> result = new ArrayList<>();
         try (final RepositoryConnection conn = repository.getConnection()) {
-            final TupleQuery tq = conn.prepareTupleQuery(query);
+            final TupleQuery tq = conn.prepareTupleQuery(pattern.sourceSparql());
             try (final TupleQueryResult tqResult = tq.evaluate()) {
                 for (BindingSet bindings : tqResult) {
                     final List<ResultBinding> row = new ArrayList<>();
                     bindings.getBindingNames().forEach(name -> row.add(toResultBinding(name, bindings)));
-                    result.add(new PatternMatch(patternFile.getName(), row));
+                    result.add(new PatternMatch(pattern.name(), row));
                 }
             }
         }
