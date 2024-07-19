@@ -1,6 +1,4 @@
-package cz.cvut.kbss.ontodeside.patomat2.dto;
-
-import cz.cvut.kbss.ontodeside.patomat2.service.pattern.ResultBinding;
+package cz.cvut.kbss.ontodeside.patomat2.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +11,7 @@ public class PatternMatch {
     /**
      * File that contains the pattern represented by this match
      */
-    private String patternFile;
+    private String patternName;
 
     /**
      * Bindings of values that represent the pattern match instance.
@@ -23,8 +21,8 @@ public class PatternMatch {
     public PatternMatch() {
     }
 
-    public PatternMatch(String patternFile, List<ResultBinding> bindings) {
-        this.patternFile = patternFile;
+    public PatternMatch(String patternName, List<ResultBinding> bindings) {
+        this.patternName = patternName;
         this.bindings = bindings;
         this.id = hashCode();
     }
@@ -37,12 +35,12 @@ public class PatternMatch {
         this.id = id;
     }
 
-    public String getPatternFile() {
-        return patternFile;
+    public String getPatternName() {
+        return patternName;
     }
 
-    public void setPatternFile(String patternFile) {
-        this.patternFile = patternFile;
+    public void setPatternName(String patternName) {
+        this.patternName = patternName;
     }
 
     public List<ResultBinding> getBindings() {
@@ -57,12 +55,12 @@ public class PatternMatch {
     public boolean equals(Object o) {
         if (this == o) {return true;}
         if (!(o instanceof PatternMatch that)) {return false;}
-        return Objects.equals(getPatternFile(), that.getPatternFile()) && Objects.equals(getBindings(),
+        return Objects.equals(getPatternName(), that.getPatternName()) && Objects.equals(getBindings(),
                 that.getBindings());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPatternFile(), getBindings());
+        return Objects.hash(getPatternName(), getBindings());
     }
 }

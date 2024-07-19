@@ -1,6 +1,6 @@
 package cz.cvut.kbss.ontodeside.patomat2.service;
 
-import cz.cvut.kbss.ontodeside.patomat2.dto.PatternMatch;
+import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 
 import java.io.File;
 import java.util.List;
