@@ -17,6 +17,11 @@ public class Constants {
      */
     public static final int SESSION_TIMEOUT = 30 * 60 * 1000;
 
+    /**
+     * RDFS Resource
+     */
+    public static final String RDFS_RESOURCE = "http://www.w3.org/2000/01/rdf-schema#Resource";
+
     private Constants() {
         throw new AssertionError();
     }
