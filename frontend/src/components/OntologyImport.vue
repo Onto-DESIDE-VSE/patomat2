@@ -32,7 +32,7 @@ const upload = async () =>  {
 <template>
     <v-form class="mt-2">
         <v-file-input v-model="ontologyFile" label="Ontology file"/>
-        <v-file-input v-model="patternFiles" label="Pattern files" multiple/>
+        <v-file-input v-model="patternFiles" label="Pattern files" hint="Select at least one pattern file corresponding to the JSON format." multiple/>
 
         <div class="float-right">
             <v-btn color="primary" :disabled="!valid || uploading" :loading="uploading" @click="upload">Import</v-btn>
