@@ -5,12 +5,12 @@ public class Constants {
     /**
      * HTTP session attribute name for stored ontology file.
      */
-    public static final String ONTOLOGY_FILE_ATTRIBUTE = "ontologyFile";
+    public static final String ONTOLOGY_FILE_SESSION_ATTRIBUTE = "ontologyFile";
 
     /**
-     * HTTP session attribute name for stored pattern files.
+     * HTTP session attribute name for stored patterns.
      */
-    public static final String PATTERN_FILES_ATTRIBUTE = "patternFiles";
+    public static final String PATTERNS_SESSION_ATTRIBUTE = "patterns";
 
     /**
      * Session timeout in milliseconds.

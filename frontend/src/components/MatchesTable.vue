@@ -5,8 +5,8 @@ import type {PatternMatch, ResultBinding} from "@/types/PatternMatch";
 const props = defineProps<{ matches: PatternMatch[] }>();
 
 const headers = [{
-    title: "Pattern File",
-    value: "patternFile"
+    title: "Pattern Name",
+    value: "patternName"
 }, {
     title: "Matching Bindings",
     value: "bindings"

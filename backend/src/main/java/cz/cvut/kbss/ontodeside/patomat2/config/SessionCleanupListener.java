@@ -33,8 +33,8 @@ public class SessionCleanupListener implements HttpSessionListener {
     public void sessionDestroyed(HttpSessionEvent se) {
         final HttpSession session = se.getSession();
         LOG.debug("Cleaning up destroyed session {}.", session.getId());
-        final String ontologyFile = (String) session.getAttribute(Constants.ONTOLOGY_FILE_ATTRIBUTE);
-        final List<String> patternFiles = (List<String>) session.getAttribute(Constants.PATTERN_FILES_ATTRIBUTE);
+        final String ontologyFile = (String) session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE);
+        final List<String> patternFiles = (List<String>) session.getAttribute(Constants.PATTERNS_SESSION_ATTRIBUTE);
         if (ontologyFile != null) {
             fileStorageService.deleteFile(ontologyFile);
         }
