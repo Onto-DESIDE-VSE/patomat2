@@ -1,6 +1,6 @@
 package cz.cvut.kbss.ontodeside.patomat2.rest;
 
-import cz.cvut.kbss.ontodeside.patomat2.dto.PatternMatch;
+import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.service.MatchService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

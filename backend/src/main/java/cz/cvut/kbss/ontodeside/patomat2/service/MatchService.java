@@ -1,7 +1,7 @@
 package cz.cvut.kbss.ontodeside.patomat2.service;
 
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
-import cz.cvut.kbss.ontodeside.patomat2.dto.PatternMatch;
+import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
 import jakarta.servlet.http.HttpSession;

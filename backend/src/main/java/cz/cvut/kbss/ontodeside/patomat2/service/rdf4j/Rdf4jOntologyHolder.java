@@ -1,9 +1,9 @@
 package cz.cvut.kbss.ontodeside.patomat2.service.rdf4j;
 
-import cz.cvut.kbss.ontodeside.patomat2.dto.PatternMatch;
+import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyReadException;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
-import cz.cvut.kbss.ontodeside.patomat2.service.pattern.ResultBinding;
+import cz.cvut.kbss.ontodeside.patomat2.model.ResultBinding;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
