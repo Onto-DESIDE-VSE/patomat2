@@ -3,6 +3,7 @@ package cz.cvut.kbss.ontodeside.patomat2.service;
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
 import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
+import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.service.pattern.PatternParser;
 import jakarta.servlet.http.HttpSession;
 import org.jetbrains.annotations.NotNull;
@@ -44,18 +45,18 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
      * It saves the stored file paths in the session.
      *
      * @param ontology Ontology file
-     * @param patterns List of pattern files
+     * @param patternsFiles List of pattern files
      */
-    public void saveOntologyAndPatterns(MultipartFile ontology, List<MultipartFile> patterns) {
-        LOG.info("Storing ontology file '{}' and {} patterns for session {}.", ontology.getOriginalFilename(), patterns.size(), session.getId());
+    public void saveOntologyAndPatterns(MultipartFile ontology, List<MultipartFile> patternsFiles) {
+        LOG.info("Storing ontology file '{}' and {} patterns for session {}.", ontology.getOriginalFilename(), patternsFiles.size(), session.getId());
         final File storedFile = storageService.saveFile(ontology);
         session.setAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE, storedFile.getName());
-        session.setAttribute(Constants.PATTERNS_SESSION_ATTRIBUTE, patterns
+        final List<Pattern> patterns = patternsFiles
                 .stream()
                 .map(storageService::saveFile)
                 .map(patternParser::readPattern)
-                .toList());
-        eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName()));
+                .toList();
+        eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns));
     }
 
     /**

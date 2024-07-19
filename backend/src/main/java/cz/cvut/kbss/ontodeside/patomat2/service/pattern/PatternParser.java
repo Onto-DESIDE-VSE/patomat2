@@ -11,6 +11,8 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatternParserException;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +27,8 @@ import java.util.Set;
  */
 @Component
 public class PatternParser {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PatternParser.class);
 
     public PatternParser() {
         configureJsonPath();
@@ -49,11 +53,13 @@ public class PatternParser {
      * @throws PatternParserException When unable to read pattern
      */
     public Pattern readPattern(@NonNull File patternFile) {
+        LOG.debug("Parsing pattern from file {}.", patternFile.getName());
         try {
             final DocumentContext doc = JsonPath.parse(patternFile);
             final String name = doc.read("$.tp.name", String.class);
             final List<String> sourceTriples = readTriples(name, doc, TripleSource.SOURCE);
             final List<String> targetTriples = readTriples(name, doc, TripleSource.TARGET);
+            LOG.info("Parsed pattern {} from file {}.", name, patternFile.getName());
             return new Pattern(name, sourceTriples, targetTriples);
         } catch (IOException e) {
             throw new PatternParserException("Unable to read pattern from " + patternFile, e);
