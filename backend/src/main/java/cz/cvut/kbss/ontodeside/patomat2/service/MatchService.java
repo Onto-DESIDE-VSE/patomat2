@@ -2,8 +2,10 @@ package cz.cvut.kbss.ontodeside.patomat2.service;
 
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
 import cz.cvut.kbss.ontodeside.patomat2.dto.PatternMatch;
+import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
 
@@ -53,5 +55,13 @@ public class MatchService {
                            .flatMap(List::stream)
                            .peek(pm -> matches.put(pm.hashCode(), pm))
                            .toList();
+    }
+
+    @EventListener
+    public void onOntologyFileUploaded(OntologyFileUploadedEvent event) {
+        if (matches != null) {
+            this.matches = null;
+            ontologyHolder.clear();
+        }
     }
 }
