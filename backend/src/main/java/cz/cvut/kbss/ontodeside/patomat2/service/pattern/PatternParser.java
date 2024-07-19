@@ -30,6 +30,17 @@ public class PatternParser {
         configureJsonPath();
     }
 
+    private enum TripleSource {
+        SOURCE("op_source"),
+        TARGET("op_target");
+
+        private final String name;
+
+        TripleSource(String name) {
+            this.name = name;
+        }
+    }
+
     /**
      * Reads pattern from the specified file.
      *
@@ -38,20 +49,23 @@ public class PatternParser {
      * @throws PatternParserException When unable to read pattern
      */
     public Pattern readPattern(@NonNull File patternFile) {
-        final Pattern p = new Pattern();
         try {
             final DocumentContext doc = JsonPath.parse(patternFile);
-            p.setName(doc.read("$.tp.name", String.class));
-            p.setSourceTriples(readTriples(doc, "op_source"));
-            p.setTargetTriples(readTriples(doc, "op_target"));
+            final String name = doc.read("$.tp.name", String.class);
+            final List<String> sourceTriples = readTriples(name, doc, TripleSource.SOURCE);
+            final List<String> targetTriples = readTriples(name, doc, TripleSource.TARGET);
+            return new Pattern(name, sourceTriples, targetTriples);
         } catch (IOException e) {
             throw new PatternParserException("Unable to read pattern from " + patternFile, e);
         }
-        return p;
     }
 
-    private List<String> readTriples(DocumentContext doc, String parentNode) {
-        return doc.read("$.." + parentNode + ".triples.triple.*", new TypeRef<>() {});
+    private List<String> readTriples(String patternName, DocumentContext doc, TripleSource source) {
+        final List<String> triples = doc.read("$.." + source.name + ".triples.triple.*", new TypeRef<>() {});
+        if (triples.isEmpty()) {
+            throw new PatternParserException("No " + (source == TripleSource.SOURCE ? "source" : "target") + " triples found in pattern " + patternName);
+        }
+        return triples;
     }
 
     private static void configureJsonPath() {

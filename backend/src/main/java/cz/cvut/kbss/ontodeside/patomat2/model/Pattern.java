@@ -1,36 +1,25 @@
 package cz.cvut.kbss.ontodeside.patomat2.model;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class Pattern {
+public record Pattern(String name, List<String> sourceTriples, List<String> targetTriples) {
 
-    private String name;
-
-    private List<String> sourceTriples;
-
-    private List<String> targetTriples;
-
-    public String getName() {
-        return name;
+    @Override
+    public List<String> sourceTriples() {
+        return Collections.unmodifiableList(sourceTriples);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public List<String> targetTriples() {
+        return Collections.unmodifiableList(targetTriples);
     }
 
-    public List<String> getSourceTriples() {
-        return sourceTriples;
-    }
-
-    public void setSourceTriples(List<String> sourceTriples) {
-        this.sourceTriples = sourceTriples;
-    }
-
-    public List<String> getTargetTriples() {
-        return targetTriples;
-    }
-
-    public void setTargetTriples(List<String> targetTriples) {
-        this.targetTriples = targetTriples;
+    public String sourceSparql() {
+        return """
+                SELECT DISTINCT * WHERE {
+                %s
+                }""".formatted(sourceTriples.stream().map(t -> "  " + t + " .").collect(Collectors.joining("\n")));
     }
 }

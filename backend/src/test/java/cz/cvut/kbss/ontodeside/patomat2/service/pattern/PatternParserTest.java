@@ -15,8 +15,8 @@ class PatternParserTest {
     @Test
     void readPatternParsesPatternNameAndTriples() {
         final Pattern p = sut.readPattern(new File("src/test/resources/pattern-example.json"));
-        assertEquals("CAT1", p.getName());
-        assertEquals(List.of("?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"), p.getSourceTriples());
+        assertEquals("CAT1", p.name());
+        assertEquals(List.of("?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"), p.sourceTriples());
         assertEquals(List.of("?p rdfs:domain ?A",
                 "?p rdfs:range ?B",
                 "?C rdfs:subClassOf ?B",
@@ -24,6 +24,6 @@ class PatternParserTest {
                 "?G owl:equivalentClass _:restriction",
                 "_:restriction rdf:type owl:Restriction",
                 "_:restriction owl:onProperty ?p",
-                "_:restriction owl:someValuesFrom ?C"), p.getTargetTriples());
+                "_:restriction owl:someValuesFrom ?C"), p.targetTriples());
     }
 }
