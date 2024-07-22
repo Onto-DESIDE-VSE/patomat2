@@ -10,8 +10,8 @@ import org.eclipse.rdf4j.repository.sparql.query.SPARQLQueryBindingSet;
 public class Rdf4jSparqlQueryBuilder {
 
     /**
-     * Takes a SPARQL Update (INSERT/DELETE) statement and {@link PatternMatch} instance and returns a query string where variables in
-     * the query are bound to the values in the {@link PatternMatch}.
+     * Takes a SPARQL Update (INSERT/DELETE) statement and {@link PatternMatch} instance and returns a query string
+     * where variables in the query are bound to the values in the {@link PatternMatch}.
      *
      * @param statement SPARQL Update statement
      * @param instance  Pattern match

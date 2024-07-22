@@ -22,7 +22,8 @@ class PatternTest {
 
     @Test
     void sourceSparqlGeneratesSparqlFromSourceTriples() {
-        final Pattern p = new Pattern("name", List.of("?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"), List.of());
+        final Pattern p = new Pattern("name", List.of("?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"),
+                List.of());
         assertEquals("""
                 SELECT DISTINCT * WHERE {
                   ?p rdfs:domain ?A .

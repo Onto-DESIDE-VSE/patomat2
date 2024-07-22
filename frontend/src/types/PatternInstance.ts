@@ -1,3 +1,9 @@
+export type PatternInstance = {
+    id: number,
+    patternName: string,
+    match: PatternMatch,
+};
+
 export type PatternMatch = {
     id: number,
     patternFile: string,

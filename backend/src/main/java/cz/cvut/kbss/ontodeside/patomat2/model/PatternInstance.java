@@ -1,4 +1,4 @@
 package cz.cvut.kbss.ontodeside.patomat2.model;
 
-public record PatternInstance(int id, String patternName, PatternMatch match, String insertSparql) {
+public record PatternInstance(int id, String patternName, PatternMatch match, String insertSparql, String deleteSparql) {
 }
