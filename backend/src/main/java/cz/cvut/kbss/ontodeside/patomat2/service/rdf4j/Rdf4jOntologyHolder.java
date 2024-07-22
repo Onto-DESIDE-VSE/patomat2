@@ -1,5 +1,6 @@
 package cz.cvut.kbss.ontodeside.patomat2.service.rdf4j;
 
+import cz.cvut.kbss.ontodeside.patomat2.exception.AmbiguousOntologyException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyReadException;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
@@ -7,6 +8,7 @@ import cz.cvut.kbss.ontodeside.patomat2.model.ResultBinding;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.TupleQuery;
@@ -24,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @SessionScope
 @Component
@@ -32,6 +35,11 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
     private String ontologyFileName;
 
     private final Repository repository = new SailRepository(new MemoryStore());
+
+    @Override
+    public boolean isLoaded() {
+        return ontologyFileName != null;
+    }
 
     @Override
     public boolean isLoaded(String fileName) {
@@ -52,11 +60,29 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
     }
 
     @Override
+    public Optional<String> getOntologyIri() {
+        verifyOntologyLoaded();
+        try (final RepositoryConnection conn = repository.getConnection()) {
+            final TupleQuery q = conn.prepareTupleQuery("SELECT ?o WHERE { ?o a ?ontology . }");
+            q.setBinding("ontology", OWL.ONTOLOGY);
+
+            try (final TupleQueryResult result = q.evaluate()) {
+                if (result.hasNext()) {
+                    final BindingSet bs = result.next();
+                    if (result.hasNext()) {
+                        throw new AmbiguousOntologyException("Multiple ontologies found when trying to get ontology IRI");
+                    }
+                    return Optional.of(bs.getValue("o").stringValue());
+                }
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public List<PatternMatch> findMatches(@NonNull Pattern pattern) {
         Objects.requireNonNull(pattern);
-        if (ontologyFileName == null || ontologyFileName.isBlank()) {
-            throw new IllegalStateException("Ontology has not been loaded.");
-        }
+        verifyOntologyLoaded();
         final List<PatternMatch> result = new ArrayList<>();
         try (final RepositoryConnection conn = repository.getConnection()) {
             final TupleQuery tq = conn.prepareTupleQuery(pattern.sourceSparql());
@@ -69,6 +95,12 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
             }
         }
         return result;
+    }
+
+    private void verifyOntologyLoaded() {
+        if (ontologyFileName == null || ontologyFileName.isBlank()) {
+            throw new IllegalStateException("Ontology has not been loaded.");
+        }
     }
 
     private static ResultBinding toResultBinding(String name, BindingSet bs) {
