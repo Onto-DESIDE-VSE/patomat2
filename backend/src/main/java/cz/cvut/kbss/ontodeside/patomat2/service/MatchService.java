@@ -1,6 +1,7 @@
 package cz.cvut.kbss.ontodeside.patomat2.service;
 
 import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
+import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
 import cz.cvut.kbss.ontodeside.patomat2.model.NewEntityGenerator;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternInstance;
@@ -39,6 +40,9 @@ public class MatchService {
     }
 
     public List<PatternInstance> findMatches() {
+        if (patterns == null) {
+             throw new OntologyNotUploadedException("Ontology not uploaded, yet.");
+        }
         if (matches != null) {
             return new ArrayList<>(matches.values());
         }
