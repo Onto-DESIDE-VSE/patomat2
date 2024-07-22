@@ -2,6 +2,8 @@ export type PatternInstance = {
     id: number,
     patternName: string,
     match: PatternMatch,
+    sparqlInsert: string,
+    sparqlDelete: string
 };
 
 export type PatternMatch = {

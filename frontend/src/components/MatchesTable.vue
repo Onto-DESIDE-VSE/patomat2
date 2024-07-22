@@ -15,8 +15,8 @@ const headers = [{
     title: "Transformation SPARQL",
     key: "transformationSparql",
     value: item => ({
-        insert: item.insertSparql,
-        del: item.deleteSparql
+        insert: item.sparqlInsert,
+        del: item.sparqlDelete
     })
 }];
 
