@@ -1,8 +1,12 @@
 package cz.cvut.kbss.ontodeside.patomat2.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class PatternMatch {
 
@@ -23,7 +27,7 @@ public class PatternMatch {
 
     public PatternMatch(String patternName, List<ResultBinding> bindings) {
         this.patternName = patternName;
-        this.bindings = bindings;
+        this.bindings = new ArrayList<>(bindings);
         this.id = hashCode();
     }
 
@@ -49,6 +53,15 @@ public class PatternMatch {
 
     public void setBindings(List<ResultBinding> bindings) {
         this.bindings = bindings;
+    }
+
+    public void addBinding(String name, String value, String datatype) {
+        bindings.add(new ResultBinding(name, value, datatype));
+    }
+
+    @JsonIgnore
+    public Set<String> getVariables() {
+        return bindings.stream().map(ResultBinding::name).collect(Collectors.toSet());
     }
 
     @Override
