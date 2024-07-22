@@ -31,11 +31,12 @@ in `backend/src/main/resources/application.yml`.
 
 The application can be deployed using Docker Compose. The following parameters can be configured:
 
-| Parameter    | Default value           | Description                                                                            |
-|:-------------|:------------------------|:---------------------------------------------------------------------------------------|
-| `ROOT`       | `/patomat2`             | Context path at which the application should be available.                             |
-| `HOST_PORT`  | `1234`                  | Port at which the application should be available to the host system.                  |
-| `PUBLIC_URL` | `http://localhost:1234` | **Public** URL at which the application is running, without the context path (`ROOT`). |
+| Parameter             | Default value                  | Description                                                                            |
+|:----------------------|:-------------------------------|:---------------------------------------------------------------------------------------|
+| `ROOT`                | `/patomat2`                    | Context path at which the application should be available.                             |
+| `HOST_PORT`           | `1234`                         | Port at which the application should be available to the host system.                  |
+| `PUBLIC_URL`          | `http://localhost:1234`        | **Public** URL at which the application is running, without the context path (`ROOT`). |
+| `NEW_ENTITY_IRI_BASE` | `https://owl.vse.cz/patomat2/` | Default IRI base for new entities in case PatOMat2 is unable to get ontology IRI.      |
 
 The easiest way to configure them is by creating a `.env` file and setting them there. This file will be automatically
 picked by Docker compose.

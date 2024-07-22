@@ -18,6 +18,7 @@ services:
         restart: always
         environment:
             PATOMAT2_CORSALLOWEDORIGINS: ${PUBLIC_URL:-http://localhost:${HOST_PORT:-1234}}
+            PATOMAT2_NEWENTITYIRIBASE: ${NEW_ENTITY_IRI_BASE:-https://owl.vse.cz/patomat2/}
     patomat2:
         image: ghcr.io/onto-deside-vse/patomat2-frontend:latest
         restart: always
