@@ -14,7 +14,7 @@ const headers = [{
 }, {
     title: "Transformation SPARQL",
     key: "transformationSparql",
-    value: item => ({
+    value: (item: PatternInstance) => ({
         insert: item.sparqlInsert,
         del: item.sparqlDelete
     })

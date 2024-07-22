@@ -2,9 +2,9 @@
 import Constants from "@/constants/Constants";
 import {ref} from "vue";
 import MatchesTable from "@/components/MatchesTable.vue";
-import type {PatternMatch} from "@/types/PatternMatch";
+import type {PatternInstance} from "@/types/PatternInstance";
 
-const matches = ref<PatternMatch[]>([]);
+const matches = ref<PatternInstance[]>([]);
 
 const fetchMatches = async () => {
     const resp = await fetch(`${Constants.SERVER_URL}/matches`, {
