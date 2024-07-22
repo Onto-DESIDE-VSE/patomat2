@@ -44,7 +44,7 @@ class PatternTest {
                 "  <" + p + "> rdfs:domain <" + a + "> .\n" +
                 "  <" + p + "> rdfs:range <" + b + "> .\n" +
                 "  <" + c + "> rdfs:subClassOf <" + b + "> .\n" +
-                "}", sut.createTargetInsertSparql(new PatternMatch("test", List.of(
+                "}", sut.createTargetInsertSparql(new PatternMatch(sut, List.of(
                 new ResultBinding("p", p, Constants.RDFS_RESOURCE),
                 new ResultBinding("A", a, Constants.RDFS_RESOURCE),
                 new ResultBinding("B", b, Constants.RDFS_RESOURCE),
@@ -77,7 +77,7 @@ class PatternTest {
                 "  _:restriction rdf:type owl:Restriction .\n" +
                 "  _:restriction owl:onProperty <" + p + "> .\n" +
                 "  _:restriction owl:someValuesFrom <" + c + "> .\n" +
-                "}", sut.createTargetInsertSparql(new PatternMatch("test", List.of(
+                "}", sut.createTargetInsertSparql(new PatternMatch(sut, List.of(
                 new ResultBinding("p", p, Constants.RDFS_RESOURCE),
                 new ResultBinding("A", a, Constants.RDFS_RESOURCE),
                 new ResultBinding("B", b, Constants.RDFS_RESOURCE),

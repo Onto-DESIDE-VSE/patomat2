@@ -50,7 +50,7 @@ public record Pattern(String name, List<String> sourceTriples, List<String> targ
         final Set<String> actualVariables = instance.getVariables();
         final Set<String> newEntities = new HashSet<>(expectedVariables);
         newEntities.removeAll(actualVariables);
-        final PatternMatch instanceWithNewEntities = new PatternMatch(instance.getPatternName(), instance.getBindings());
+        final PatternMatch instanceWithNewEntities = new PatternMatch(instance.getPattern(), instance.getBindings());
         for (String name : newEntities) {
             instanceWithNewEntities.addBinding(name, newEntityGenerator.generateIdentifier()
                                                                        .toString(), Constants.RDFS_RESOURCE);
