@@ -6,11 +6,19 @@ import org.springframework.lang.NonNull;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Manages ontology and allows finding matches in it.
  */
 public interface OntologyHolder {
+
+    /**
+     * Checks whether any ontology has been loaded by this holder.
+     *
+     * @return {@code true} if an ontology has been loaded
+     */
+    boolean isLoaded();
 
     /**
      * Whether ontology from the specified file has been loaded.
@@ -26,6 +34,13 @@ public interface OntologyHolder {
      * @param ontologyFile File containing ontology
      */
     void loadOntology(File ontologyFile);
+
+    /**
+     * Resolves IRI of the loaded ontology, if available.
+     *
+     * @return Ontology IRI, possibly empty
+     */
+    Optional<String> getOntologyIri();
 
     /**
      * Finds matches of the specified pattern in the loaded ontology.
