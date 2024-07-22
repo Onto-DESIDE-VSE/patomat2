@@ -48,7 +48,8 @@ public class MatchService {
                        .flatMap(List::stream)
                        .map(pm -> {
                            final Pattern p = pm.getPattern();
-                           final PatternInstance instance = new PatternInstance(pm.hashCode(), p.name(), pm, p.createTargetInsertSparql(pm, newEntityGenerator));
+                           final PatternInstance instance = new PatternInstance(pm.hashCode(), p.name(), pm,
+                                   p.createTargetInsertSparql(pm, newEntityGenerator), p.createTargetDeleteSparql(pm));
                            matches.put(pm.hashCode(), instance);
                            return instance;
                        })
