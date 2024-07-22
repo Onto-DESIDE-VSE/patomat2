@@ -10,14 +10,14 @@ import org.eclipse.rdf4j.repository.sparql.query.SPARQLQueryBindingSet;
 public class Rdf4jSparqlQueryBuilder {
 
     /**
-     * Takes a SPARQL Update statement and {@link PatternMatch} instance and returns a query string where variables in
+     * Takes a SPARQL Update (INSERT/DELETE) statement and {@link PatternMatch} instance and returns a query string where variables in
      * the query are bound to the values in the {@link PatternMatch}.
      *
      * @param statement SPARQL Update statement
      * @param instance  Pattern match
      * @return SPARQL query string
      */
-    public static String populateSparqlInsert(String statement, PatternMatch instance) {
+    public static String populateSparqlUpdate(String statement, PatternMatch instance) {
         final ValueFactory vf = SimpleValueFactory.getInstance();
         final SPARQLQueryBindingSet bindings = new SPARQLQueryBindingSet();
         instance.getBindings().forEach(b -> bindings.addBinding(b.name(), Constants.RDFS_RESOURCE.equals(b.datatype()) ?

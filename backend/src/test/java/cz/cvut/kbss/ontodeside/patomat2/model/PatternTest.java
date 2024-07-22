@@ -85,4 +85,25 @@ class PatternTest {
         )), newEntityGenerator));
         verify(newEntityGenerator).generateIdentifier();
     }
+
+    @Test
+    void createTargetDeleteSparqlGeneratesSparqlFromSourceTriplesAndPatternMatch() {
+        final Pattern sut = new Pattern("name", List.of("?p rdfs:domain ?A",
+                "?p rdfs:range ?B",
+                "?C rdfs:subClassOf ?B"), List.of());
+        final String p = Generator.generateUri().toString();
+        final String a = Generator.generateUri().toString();
+        final String b = Generator.generateUri().toString();
+        final String c = Generator.generateUri().toString();
+        assertEquals("DELETE DATA {\n" +
+                "  <" + p + "> rdfs:domain <" + a + "> .\n" +
+                "  <" + p + "> rdfs:range <" + b + "> .\n" +
+                "  <" + c + "> rdfs:subClassOf <" + b + "> .\n" +
+                "}", sut.createTargetDeleteSparql(new PatternMatch(sut, List.of(
+                new ResultBinding("p", p, Constants.RDFS_RESOURCE),
+                new ResultBinding("A", a, Constants.RDFS_RESOURCE),
+                new ResultBinding("B", b, Constants.RDFS_RESOURCE),
+                new ResultBinding("C", c, Constants.RDFS_RESOURCE)
+        ))));
+    }
 }
