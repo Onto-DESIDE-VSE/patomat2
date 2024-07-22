@@ -90,7 +90,7 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
                 for (BindingSet bindings : tqResult) {
                     final List<ResultBinding> row = new ArrayList<>();
                     bindings.getBindingNames().forEach(name -> row.add(toResultBinding(name, bindings)));
-                    result.add(new PatternMatch(pattern.name(), row));
+                    result.add(new PatternMatch(pattern, row));
                 }
             }
         }

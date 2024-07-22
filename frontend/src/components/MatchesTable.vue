@@ -9,7 +9,11 @@ const headers = [{
     value: "patternName"
 }, {
     title: "Matching Bindings",
-    value: "bindings"
+    key: "bindings",
+    value: "match.bindings"
+}, {
+    title: "Transformation SPARQL INSERT",
+    value: "insertSparql"
 }];
 
 function valueToString(binding: ResultBinding) {
@@ -27,6 +31,9 @@ function valueToString(binding: ResultBinding) {
             <ul class="mt-1 mb-1">
                 <li v-for="binding in value"><span class="font-weight-bold">{{ binding.name }}</span>: {{ valueToString(binding) }}</li>
             </ul>
+        </template>
+        <template v-slot:item.insertSparql="{ value }">
+            <pre>{{ value }}</pre>
         </template>
     </v-data-table>
 </template>

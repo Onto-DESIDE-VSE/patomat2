@@ -1,8 +1,9 @@
 package cz.cvut.kbss.ontodeside.patomat2.service;
 
-import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
-import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
+import cz.cvut.kbss.ontodeside.patomat2.model.NewEntityGenerator;
+import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
+import cz.cvut.kbss.ontodeside.patomat2.model.PatternInstance;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
@@ -24,16 +25,20 @@ public class MatchService {
 
     private final OntologyHolder ontologyHolder;
 
+    private final NewEntityGenerator newEntityGenerator;
+
     private Map<String, Pattern> patterns;
 
-    private Map<Integer, PatternMatch> matches;
+    private Map<Integer, PatternInstance> matches;
 
-    public MatchService(FileStorageService storageService, OntologyHolder ontologyHolder) {
+    public MatchService(FileStorageService storageService, OntologyHolder ontologyHolder,
+                        NewEntityGenerator newEntityGenerator) {
         this.storageService = storageService;
         this.ontologyHolder = ontologyHolder;
+        this.newEntityGenerator = newEntityGenerator;
     }
 
-    public List<PatternMatch> findMatches() {
+    public List<PatternInstance> findMatches() {
         if (matches != null) {
             return new ArrayList<>(matches.values());
         }
@@ -41,7 +46,12 @@ public class MatchService {
         return patterns.values().stream()
                        .map(ontologyHolder::findMatches)
                        .flatMap(List::stream)
-                       .peek(pm -> matches.put(pm.hashCode(), pm))
+                       .map(pm -> {
+                           final Pattern p = pm.getPattern();
+                           final PatternInstance instance = new PatternInstance(pm.hashCode(), p.name(), pm, p.createTargetInsertSparql(pm, newEntityGenerator));
+                           matches.put(pm.hashCode(), instance);
+                           return instance;
+                       })
                        .toList();
     }
 

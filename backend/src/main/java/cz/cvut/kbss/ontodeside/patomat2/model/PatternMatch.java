@@ -10,41 +10,23 @@ import java.util.stream.Collectors;
 
 public class PatternMatch {
 
-    private int id;
-
-    /**
-     * File that contains the pattern represented by this match
-     */
-    private String patternName;
-
     /**
      * Bindings of values that represent the pattern match instance.
      */
     private List<ResultBinding> bindings = new ArrayList<>();
 
+    /**
+     * The pattern whose match this is.
+     */
+    @JsonIgnore
+    private Pattern pattern;
+
     public PatternMatch() {
     }
 
-    public PatternMatch(String patternName, List<ResultBinding> bindings) {
-        this.patternName = patternName;
+    public PatternMatch(Pattern pattern, List<ResultBinding> bindings) {
         this.bindings = new ArrayList<>(bindings);
-        this.id = hashCode();
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getPatternName() {
-        return patternName;
-    }
-
-    public void setPatternName(String patternName) {
-        this.patternName = patternName;
+        this.pattern = pattern;
     }
 
     public List<ResultBinding> getBindings() {
@@ -59,6 +41,14 @@ public class PatternMatch {
         bindings.add(new ResultBinding(name, value, datatype));
     }
 
+    public Pattern getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(Pattern pattern) {
+        this.pattern = pattern;
+    }
+
     @JsonIgnore
     public Set<String> getVariables() {
         return bindings.stream().map(ResultBinding::name).collect(Collectors.toSet());
@@ -68,12 +58,12 @@ public class PatternMatch {
     public boolean equals(Object o) {
         if (this == o) {return true;}
         if (!(o instanceof PatternMatch that)) {return false;}
-        return Objects.equals(getPatternName(), that.getPatternName()) && Objects.equals(getBindings(),
+        return Objects.equals(getPattern(), that.getPattern()) && Objects.equals(getBindings(),
                 that.getBindings());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPatternName(), getBindings());
+        return Objects.hash(getPattern(), getBindings());
     }
 }
