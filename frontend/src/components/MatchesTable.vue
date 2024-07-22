@@ -12,11 +12,12 @@ const headers = [{
     key: "bindings",
     value: "match.bindings"
 }, {
-    title: "Transformation SPARQL INSERT",
-    value: "insertSparql"
-}, {
-    title: "Transformation SPARQL DELETE",
-    value: "deleteSparql"
+    title: "Transformation SPARQL",
+    key: "transformationSparql",
+    value: item => ({
+        insert: item.insertSparql,
+        del: item.deleteSparql
+    })
 }];
 
 function valueToString(binding: ResultBinding) {
@@ -37,11 +38,9 @@ function valueToString(binding: ResultBinding) {
                 </li>
             </ul>
         </template>
-        <template v-slot:item.insertSparql="{ value }">
-            <pre>{{ value }}</pre>
-        </template>
-        <template v-slot:item.deleteSparql="{ value }">
-            <pre>{{ value }}</pre>
+        <template v-slot:item.transformationSparql="{ value }">
+            <pre class="mb-2">{{ value.del }}</pre>
+            <pre>{{ value.insert }}</pre>
         </template>
     </v-data-table>
 </template>
