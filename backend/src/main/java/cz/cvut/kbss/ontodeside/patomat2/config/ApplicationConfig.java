@@ -9,6 +9,8 @@ public class ApplicationConfig {
 
     private String corsAllowedOrigins;
 
+    private String newEntityIriBase;
+
     public String getStorage() {
         return storage;
     }
@@ -23,5 +25,13 @@ public class ApplicationConfig {
 
     public void setCorsAllowedOrigins(String corsAllowedOrigins) {
         this.corsAllowedOrigins = corsAllowedOrigins;
+    }
+
+    public String getNewEntityIriBase() {
+        return newEntityIriBase;
+    }
+
+    public void setNewEntityIriBase(String newEntityIriBase) {
+        this.newEntityIriBase = newEntityIriBase;
     }
 }

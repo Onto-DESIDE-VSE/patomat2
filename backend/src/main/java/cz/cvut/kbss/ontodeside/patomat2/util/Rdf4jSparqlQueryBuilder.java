@@ -1,4 +1,4 @@
-package cz.cvut.kbss.ontodeside.patomat2.service.rdf4j;
+package cz.cvut.kbss.ontodeside.patomat2.util;
 
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
@@ -20,9 +20,8 @@ public class Rdf4jSparqlQueryBuilder {
     public static String populateSparqlInsert(String statement, PatternMatch instance) {
         final ValueFactory vf = SimpleValueFactory.getInstance();
         final SPARQLQueryBindingSet bindings = new SPARQLQueryBindingSet();
-        instance.getBindings().forEach(b -> {
-            bindings.addBinding(b.name(), Constants.RDFS_RESOURCE.equals(b.datatype()) ? vf.createIRI(b.value()) : vf.createLiteral(b.value(), vf.createIRI(b.datatype())));
-        });
+        instance.getBindings().forEach(b -> bindings.addBinding(b.name(), Constants.RDFS_RESOURCE.equals(b.datatype()) ?
+                vf.createIRI(b.value()) : vf.createLiteral(b.value(), vf.createIRI(b.datatype()))));
         return QueryStringUtil.getUpdateString(statement, bindings);
     }
 }
