@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.net.URI;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,10 +34,10 @@ class Rdf4jNewEntityGeneratorTest {
         when(ontologyHolder.isLoaded()).thenReturn(true);
         final String ontologyIri = "http://www.w3.org/TR/2003/PR-owl-guide-20031209/wine#";
         when(ontologyHolder.getOntologyIri()).thenReturn(Optional.of(ontologyIri));
-        final URI result = sut.generateIdentifier();
+        final String result = sut.generateIdentifier();
         assertNotNull(result);
-        assertThat(result.toString(), startsWith(ontologyIri));
-        assertThat(result.toString().length(), greaterThan(ontologyIri.length()));
+        assertThat(result, startsWith(ontologyIri));
+        assertThat(result.length(), greaterThan(ontologyIri.length()));
     }
 
     @Test
@@ -47,9 +46,9 @@ class Rdf4jNewEntityGeneratorTest {
         configuration.setNewEntityIriBase(base);
         when(ontologyHolder.isLoaded()).thenReturn(true);
         when(ontologyHolder.getOntologyIri()).thenReturn(Optional.empty());
-        final URI result = sut.generateIdentifier();
+        final String result = sut.generateIdentifier();
         assertNotNull(result);
-        assertThat(result.toString(), startsWith(base));
-        assertThat(result.toString().length(), greaterThan(base.length()));
+        assertThat(result, startsWith(base));
+        assertThat(result.length(), greaterThan(base.length()));
     }
 }

@@ -67,7 +67,7 @@ class PatternTest {
         final String a = Generator.generateUri().toString();
         final String b = Generator.generateUri().toString();
         final String c = Generator.generateUri().toString();
-        final URI g = Generator.generateUri();
+        final String g = Generator.generateUri().toString();
         when(newEntityGenerator.generateIdentifier()).thenReturn(g);
         assertEquals("INSERT DATA {\n" +
                 "  <" + p + "> rdfs:domain <" + a + "> .\n" +
