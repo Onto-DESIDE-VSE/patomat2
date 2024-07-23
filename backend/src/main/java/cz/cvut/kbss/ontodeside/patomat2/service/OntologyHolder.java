@@ -26,14 +26,14 @@ public interface OntologyHolder {
      * @param fileName Ontology file name
      * @return {@code true} if ontology from the specified file has been loaded
      */
-    boolean isLoaded(String fileName);
+    boolean isLoaded(@NonNull String fileName);
 
     /**
      * Loads ontology from the specified file.
      *
      * @param ontologyFile File containing ontology
      */
-    void loadOntology(File ontologyFile);
+    void loadOntology(@NonNull File ontologyFile);
 
     /**
      * Resolves IRI of the loaded ontology, if available.
@@ -41,6 +41,14 @@ public interface OntologyHolder {
      * @return Ontology IRI, possibly empty
      */
     Optional<String> getOntologyIri();
+
+    /**
+     * Resolves label of a resource with the specified iri.
+     *
+     * @param iri Resource identifier
+     * @return Resource label (if found)
+     */
+    Optional<String> getLabel(@NonNull String iri);
 
     /**
      * Finds matches of the specified pattern in the loaded ontology.

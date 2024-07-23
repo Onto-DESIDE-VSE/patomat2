@@ -23,7 +23,7 @@ class PatternTest {
     @Test
     void sourceSparqlGeneratesSparqlFromSourceTriples() {
         final Pattern p = new Pattern("name", List.of("?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"),
-                List.of());
+                List.of(), List.of());
         assertEquals("""
                 SELECT DISTINCT * WHERE {
                   ?p rdfs:domain ?A .
@@ -36,7 +36,7 @@ class PatternTest {
     void createTargetInsertSparqlGeneratesSparqlFromTargetTriplesAndPatternMatch() {
         final Pattern sut = new Pattern("name", List.of(), List.of("?p rdfs:domain ?A",
                 "?p rdfs:range ?B",
-                "?C rdfs:subClassOf ?B"));
+                "?C rdfs:subClassOf ?B"), List.of());
         final String p = Generator.generateUri().toString();
         final String a = Generator.generateUri().toString();
         final String b = Generator.generateUri().toString();
@@ -62,7 +62,7 @@ class PatternTest {
                 "?G owl:equivalentClass _:restriction",
                 "_:restriction rdf:type owl:Restriction",
                 "_:restriction owl:onProperty ?p",
-                "_:restriction owl:someValuesFrom ?C"));
+                "_:restriction owl:someValuesFrom ?C"), List.of());
         final String p = Generator.generateUri().toString();
         final String a = Generator.generateUri().toString();
         final String b = Generator.generateUri().toString();
@@ -91,7 +91,7 @@ class PatternTest {
     void createTargetDeleteSparqlGeneratesSparqlFromSourceTriplesAndPatternMatch() {
         final Pattern sut = new Pattern("name", List.of("?p rdfs:domain ?A",
                 "?p rdfs:range ?B",
-                "?C rdfs:subClassOf ?B"), List.of());
+                "?C rdfs:subClassOf ?B"), List.of(), List.of());
         final String p = Generator.generateUri().toString();
         final String a = Generator.generateUri().toString();
         final String b = Generator.generateUri().toString();

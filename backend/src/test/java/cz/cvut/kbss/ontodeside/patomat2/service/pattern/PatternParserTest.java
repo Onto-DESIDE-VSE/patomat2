@@ -1,5 +1,6 @@
 package cz.cvut.kbss.ontodeside.patomat2.service.pattern;
 
+import cz.cvut.kbss.ontodeside.patomat2.model.NameTransformation;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import org.junit.jupiter.api.Test;
 
@@ -25,5 +26,11 @@ class PatternParserTest {
                 "_:restriction rdf:type owl:Restriction",
                 "_:restriction owl:onProperty ?p",
                 "_:restriction owl:someValuesFrom ?C"), p.targetTriples());
+    }
+
+    @Test
+    void readPatternParsesNameTransformations() {
+        final Pattern p = sut.readPattern(new File("src/test/resources/pattern-example.json"));
+        assertEquals(List.of(new NameTransformation("G", "?A that ?p a ?C")), p.nameTransformations());
     }
 }

@@ -1,5 +1,7 @@
 package cz.cvut.kbss.ontodeside.patomat2.service.pattern;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -10,6 +12,7 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatternParserException;
+import cz.cvut.kbss.ontodeside.patomat2.model.NameTransformation;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +21,11 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -60,7 +66,7 @@ public class PatternParser {
             final List<String> sourceTriples = readTriples(name, doc, TripleSource.SOURCE);
             final List<String> targetTriples = readTriples(name, doc, TripleSource.TARGET);
             LOG.info("Parsed pattern {} from file {}.", name, patternFile.getName());
-            return new Pattern(name, sourceTriples, targetTriples);
+            return new Pattern(name, sourceTriples, targetTriples, readNameTransformations(doc));
         } catch (IOException e) {
             throw new PatternParserException("Unable to read pattern from " + patternFile, e);
         }
@@ -72,6 +78,18 @@ public class PatternParser {
             throw new PatternParserException("No " + (source == TripleSource.SOURCE ? "source" : "target") + " triples found in pattern " + patternName);
         }
         return triples;
+    }
+
+    private List<NameTransformation> readNameTransformations(DocumentContext doc) {
+        final ObjectNode nameTransformations = doc.read("$.tp.naming_transformation[0].ntp[0]", new TypeRef<>() {});
+        final Iterator<Map.Entry<String, JsonNode>> it= nameTransformations.fields();
+        final List<NameTransformation> result = new ArrayList<>();
+        while (it.hasNext()) {
+            final Map.Entry<String, JsonNode> e = it.next();
+            // TODO Temporary, need to agree on the format (which seems overly complex at the moment)
+            result.add(new NameTransformation(e.getKey().substring(1), e.getValue().get(0).asText()));
+        }
+        return result;
     }
 
     private static void configureJsonPath() {
