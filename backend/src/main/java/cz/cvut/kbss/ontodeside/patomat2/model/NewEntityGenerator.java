@@ -2,8 +2,6 @@ package cz.cvut.kbss.ontodeside.patomat2.model;
 
 import org.springframework.lang.NonNull;
 
-import java.net.URI;
-
 /**
  * Generates new entities (RDF resources) to be inserted as part of transformation.
  */

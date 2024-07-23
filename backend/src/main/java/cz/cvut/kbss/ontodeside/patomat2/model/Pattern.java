@@ -5,7 +5,6 @@ import cz.cvut.kbss.ontodeside.patomat2.util.Rdf4jSparqlQueryBuilder;
 import cz.cvut.kbss.ontodeside.patomat2.util.StringUtil;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,6 +27,14 @@ public record Pattern(String name, List<String> sourceTriples, List<String> targ
         return Collections.unmodifiableList(nameTransformations);
     }
 
+    public Set<String> sourceVariables() {
+        return getVariables(sourceTriples);
+    }
+
+    public Set<String> targetVariables() {
+        return getVariables(targetTriples);
+    }
+
     /**
      * Creates a SPARQL SELECT query to find instances of this pattern in the source ontology.
      * <p>
@@ -48,36 +55,20 @@ public record Pattern(String name, List<String> sourceTriples, List<String> targ
      * <p>
      * The target triples are used to generate the query, being populated by the specified pattern match.
      *
-     * @param instance           Data to insert
-     * @param newEntityGenerator Generator of new entities
+     * @param instance    Data to insert
+     * @param newEntities List of new entities to create
      * @return SPARQL INSERT query
      */
-    public String createTargetInsertSparql(PatternMatch instance, NewEntityGenerator newEntityGenerator) {
-        final Set<String> expectedVariables = getVariables(targetTriples);
-        final Set<String> actualVariables = instance.getVariables();
-        final Set<String> newEntities = new HashSet<>(expectedVariables);
-        newEntities.removeAll(actualVariables);
+    public String createTargetInsertSparql(PatternMatch instance, List<NewEntity> newEntities) {
         final PatternMatch instanceWithNewEntities = new PatternMatch(instance.getPattern(), instance.getBindings());
-        for (String name : newEntities) {
-            instanceWithNewEntities.addBinding(name, newEntityGenerator.generateIdentifier(), Constants.RDFS_RESOURCE);
+        for (NewEntity newEntity : newEntities) {
+            instanceWithNewEntities.addBinding(newEntity.variableName(), newEntity.identifier(), Constants.RDFS_RESOURCE);
         }
         final String insert = """
                 INSERT DATA {
                 %s
                 }""".formatted(targetTriples.stream().map(t -> "  " + t + " .").collect(Collectors.joining("\n")));
         return Rdf4jSparqlQueryBuilder.populateSparqlUpdate(insert, instanceWithNewEntities);
-    }
-
-    /**
-     * Extracts distinct SPARQL variable names from the specified triple patterns.
-     * <p>
-     * Note that the variable extraction is not 100% per SPARQL standard, but should cover the most common cases.
-     *
-     * @param triplePatterns Triple patterns to process
-     * @return Set of SPARQL variables found in the triple patterns
-     */
-    private static Set<String> getVariables(List<String> triplePatterns) {
-        return triplePatterns.stream().map(StringUtil::extractSparqlVariables).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     /**
@@ -93,5 +84,18 @@ public record Pattern(String name, List<String> sourceTriples, List<String> targ
                 %s
                 }""".formatted(sourceTriples.stream().map(t -> "  " + t + " .").collect(Collectors.joining("\n")));
         return Rdf4jSparqlQueryBuilder.populateSparqlUpdate(delete, instance);
+    }
+
+    /**
+     * Extracts distinct SPARQL variable names from the specified triple patterns.
+     * <p>
+     * Note that the variable extraction is not 100% per SPARQL standard, but should cover the most common cases.
+     *
+     * @param triplePatterns Triple patterns to process
+     * @return Set of SPARQL variables found in the triple patterns
+     */
+    private static Set<String> getVariables(List<String> triplePatterns) {
+        return triplePatterns.stream().map(StringUtil::extractSparqlVariables).flatMap(Set::stream)
+                             .collect(Collectors.toSet());
     }
 }
