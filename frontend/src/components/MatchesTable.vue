@@ -18,6 +18,9 @@ const headers = [{
         insert: item.sparqlInsert,
         del: item.sparqlDelete
     })
+}, {
+    title: "New entities",
+    value: "newEntities"
 }];
 
 function valueToString(binding: ResultBinding) {
@@ -41,6 +44,17 @@ function valueToString(binding: ResultBinding) {
         <template v-slot:item.transformationSparql="{ value }">
             <pre class="mb-2">{{ value.del }}</pre>
             <pre>{{ value.insert }}</pre>
+        </template>
+        <template v-slot:item.newEntities="{ value }">
+            <ul class="mt-1 mb-1">
+                <li v-for="entity in value">
+                    <span class="font-weight-bold">{{ entity.variableName }}</span>:
+                    <{{ entity.identifier }}>
+                    <ul class="ml-4">
+                        <li>{{ entity.label }}</li>
+                    </ul>
+                </li>
+            </ul>
         </template>
     </v-data-table>
 </template>
