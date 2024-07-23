@@ -4,6 +4,7 @@ import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import org.springframework.lang.NonNull;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
@@ -19,14 +20,6 @@ public interface OntologyHolder {
      * @return {@code true} if an ontology has been loaded
      */
     boolean isLoaded();
-
-    /**
-     * Whether ontology from the specified file has been loaded.
-     *
-     * @param fileName Ontology file name
-     * @return {@code true} if ontology from the specified file has been loaded
-     */
-    boolean isLoaded(@NonNull String fileName);
 
     /**
      * Loads ontology from the specified file.
@@ -57,6 +50,21 @@ public interface OntologyHolder {
      * @return List of found matches
      */
     List<PatternMatch> findMatches(@NonNull Pattern pattern);
+
+    /**
+     * Applies the specified SPARQL Update to the loaded ontology.
+     *
+     * @param sparqlUpdate SPARQL Update to execute
+     */
+    void applyTransformationQuery(@NonNull String sparqlUpdate);
+
+    /**
+     * Exports the currently loaded ontology.
+     *
+     * @param mimeType MIME type of the exported ontology (e.g. "text/turtle")
+     * @return Exported ontology
+     */
+    ByteArrayOutputStream export(@NonNull String mimeType);
 
     /**
      * Clears the holder, discarding the previously loaded ontology.

@@ -47,6 +47,16 @@ public class OntologyStoringController {
     @GetMapping
     public ResponseEntity<Resource> getOntologyFile() {
         final Resource resource = ontologyStoringService.getOntologyFile();
+        return buildResponseWithAttachment(resource);
+    }
+
+    /**
+     * Builds an 200 OK response with the specified resource as attachment.
+     *
+     * @param resource Resource to attach to response
+     * @return ResponseEntity with attachment
+     */
+    static ResponseEntity<Resource> buildResponseWithAttachment(Resource resource) {
         try {
             return ResponseEntity.ok()
                                  .contentLength(resource.contentLength())
