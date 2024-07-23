@@ -2,6 +2,7 @@
 import {ref} from "vue";
 import Constants from "@/constants/Constants";
 import OntologyImport from "@/components/OntologyImport.vue";
+import {downloadAttachment} from "@/util/Utils";
 
 const alreadyUploaded = ref(false);
 
@@ -19,13 +20,7 @@ const downloadOntologyFile = async () => {
         method: "GET",
         credentials: "include"
     });
-    const blob = await resp.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = resp.headers.get("content-disposition")!.split(";")[1].split("=")[1].replace(/"/g, "");
-    a.click();
-    window.URL.revokeObjectURL(url);
+    downloadAttachment(resp);
 }
 </script>
 

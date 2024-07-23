@@ -1,8 +1,14 @@
 <script setup lang="ts">
 
+import {ref} from "vue";
 import type {PatternInstance, ResultBinding} from "@/types/PatternInstance";
 
-const props = defineProps<{ matches: PatternInstance[] }>();
+const props = defineProps<{
+    matches: PatternInstance[],
+    onTransform: (applyDeletes: boolean, instances: PatternInstanceTransformation[]) => void
+}>();
+
+const selected = ref<PatternInstance>([]);
 
 const headers = [{
     title: "Pattern Name",
@@ -30,10 +36,20 @@ function valueToString(binding: ResultBinding) {
         return `${binding.value}^^${binding.datatype}`;
     }
 }
+
+function applyTransformation() {
+    const instances = selected.value.map(v => ({
+        id: v.id
+    }) as PatternInstanceTransformation);
+    props.onTransform(false, instances);
+}
 </script>
 
 <template>
-    <v-data-table :headers="headers" :items="props.matches" show-select>
+    <v-btn id="apply-transformation-top" color="primary" @click="applyTransformation" :disabled="selected.length === 0">
+        Apply transformation
+    </v-btn>
+    <v-data-table :headers="headers" :items="props.matches" show-select v-model="selected" return-object>
         <template v-slot:item.bindings="{ value }">
             <ul class="mt-1 mb-1">
                 <li v-for="binding in value"><span class="font-weight-bold">{{ binding.name }}</span>:
@@ -57,4 +73,7 @@ function valueToString(binding: ResultBinding) {
             </ul>
         </template>
     </v-data-table>
+    <v-btn id="apply-transformation-bottom" color="primary" @click="applyTransformation" :disabled="selected.length === 0">
+        Apply transformation
+    </v-btn>
 </template>

@@ -62,6 +62,9 @@ public class TransformationService {
 
     private static void replaceGeneratedLabelsWithUserSpecified(PatternInstance instance,
                                                                 PatternInstanceTransformation pit) {
+        if (pit.getNewEntityLabels() == null) {
+            return;
+        }
         pit.getNewEntityLabels().forEach((var, label) -> {
             for (int i = 0; i < instance.newEntities().size(); i++) {
                 final NewEntity ne = instance.newEntities().get(i);
