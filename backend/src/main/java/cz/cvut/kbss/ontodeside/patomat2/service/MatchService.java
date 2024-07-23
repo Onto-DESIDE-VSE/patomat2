@@ -14,6 +14,7 @@ import org.springframework.web.context.annotation.SessionScope;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -94,5 +95,12 @@ public class MatchService {
         this.patterns = new LinkedHashMap<>();
         event.getPatterns().forEach(p -> patterns.put(p.name(), p));
         this.matches = null;
+    }
+
+    public Map<Integer, PatternInstance> getMatches() {
+        if (matches == null) {
+            findMatches();
+        }
+        return Collections.unmodifiableMap(matches);
     }
 }

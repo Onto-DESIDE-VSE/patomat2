@@ -2,6 +2,7 @@ package cz.cvut.kbss.ontodeside.patomat2.service.rdf4j;
 
 import cz.cvut.kbss.ontodeside.patomat2.exception.AmbiguousOntologyException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyReadException;
+import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.model.ResultBinding;
@@ -19,11 +20,15 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,11 +47,6 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
     @Override
     public boolean isLoaded() {
         return ontologyFileName != null;
-    }
-
-    @Override
-    public boolean isLoaded(@NonNull String fileName) {
-        return Objects.equals(ontologyFileName, fileName);
     }
 
     @Override
@@ -128,6 +128,44 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
         final String datatype = value.isResource() ? RDFS.RESOURCE.stringValue() : ((Literal) value).getDatatype()
                                                                                                     .stringValue();
         return new ResultBinding(name, strValue, datatype);
+    }
+
+    @Override
+    public void applyTransformationQuery(@NonNull String sparqlUpdate) {
+        Objects.requireNonNull(sparqlUpdate);
+        verifyOntologyLoaded();
+        try (final RepositoryConnection conn = repository.getConnection()) {
+            conn.prepareUpdate(sparqlUpdate).execute();
+        }
+    }
+
+    @Override
+    public ByteArrayOutputStream export(@NonNull String mimeType) {
+        final RDFFormat format = resolveRDFFormat(mimeType);
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (final RepositoryConnection conn = repository.getConnection()) {
+            final RDFWriter writer = Rio.createWriter(format, bos);
+            conn.export(writer);
+        }
+        return bos;
+    }
+
+    private RDFFormat resolveRDFFormat(String mimeType) {
+        if (RDFFormat.TURTLE.hasMIMEType(mimeType)) {
+            return RDFFormat.TURTLE;
+        } else if (RDFFormat.RDFXML.hasMIMEType(mimeType)) {
+            return RDFFormat.RDFXML;
+        } else if (RDFFormat.NTRIPLES.hasMIMEType(mimeType)) {
+            return RDFFormat.NTRIPLES;
+        } else if (RDFFormat.NQUADS.hasMIMEType(mimeType)) {
+            return RDFFormat.NQUADS;
+        } else if (RDFFormat.JSONLD.hasMIMEType(mimeType)) {
+            return RDFFormat.JSONLD;
+        } else if (RDFFormat.N3.hasMIMEType(mimeType)) {
+            return RDFFormat.N3;
+        } else {
+            throw new PatOMat2Exception("Unsupported export MIME type: " + mimeType);
+        }
     }
 
     @Override

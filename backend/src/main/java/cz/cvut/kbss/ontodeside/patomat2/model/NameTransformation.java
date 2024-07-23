@@ -3,7 +3,7 @@ package cz.cvut.kbss.ontodeside.patomat2.model;
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
 import cz.cvut.kbss.ontodeside.patomat2.exception.NameTransformationException;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
-import cz.cvut.kbss.ontodeside.patomat2.util.StringUtil;
+import cz.cvut.kbss.ontodeside.patomat2.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +30,7 @@ public record NameTransformation(String variableName, String rule) {
      * @return New entity name based on the transformation rule
      */
     public String generateName(PatternMatch match, OntologyHolder ontologyHolder) {
-        final Set<String> variables = StringUtil.extractSparqlVariables(rule);
+        final Set<String> variables = Utils.extractSparqlVariables(rule);
         final Map<String, String> variableLabels = new HashMap<>(variables.size());
         variables.forEach(v -> {
             final String value = match.getBinding(v).map(ResultBinding::value)

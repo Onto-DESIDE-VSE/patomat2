@@ -2,7 +2,7 @@ package cz.cvut.kbss.ontodeside.patomat2.model;
 
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
 import cz.cvut.kbss.ontodeside.patomat2.util.Rdf4jSparqlQueryBuilder;
-import cz.cvut.kbss.ontodeside.patomat2.util.StringUtil;
+import cz.cvut.kbss.ontodeside.patomat2.util.Utils;
 
 import java.util.Collections;
 import java.util.List;
@@ -95,7 +95,7 @@ public record Pattern(String name, List<String> sourceTriples, List<String> targ
      * @return Set of SPARQL variables found in the triple patterns
      */
     private static Set<String> getVariables(List<String> triplePatterns) {
-        return triplePatterns.stream().map(StringUtil::extractSparqlVariables).flatMap(Set::stream)
+        return triplePatterns.stream().map(Utils::extractSparqlVariables).flatMap(Set::stream)
                              .collect(Collectors.toSet());
     }
 }
