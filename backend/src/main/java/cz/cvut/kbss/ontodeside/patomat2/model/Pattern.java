@@ -10,7 +10,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
-public record Pattern(String name, List<String> sourceTriples, List<String> targetTriples) {
+public record Pattern(String name, List<String> sourceTriples, List<String> targetTriples,
+                      List<NameTransformation> nameTransformations) {
 
     @Override
     public List<String> sourceTriples() {
@@ -20,6 +21,11 @@ public record Pattern(String name, List<String> sourceTriples, List<String> targ
     @Override
     public List<String> targetTriples() {
         return Collections.unmodifiableList(targetTriples);
+    }
+
+    @Override
+    public List<NameTransformation> nameTransformations() {
+        return Collections.unmodifiableList(nameTransformations);
     }
 
     /**
@@ -42,7 +48,7 @@ public record Pattern(String name, List<String> sourceTriples, List<String> targ
      * <p>
      * The target triples are used to generate the query, being populated by the specified pattern match.
      *
-     * @param instance Data to insert
+     * @param instance           Data to insert
      * @param newEntityGenerator Generator of new entities
      * @return SPARQL INSERT query
      */
@@ -84,7 +90,9 @@ public record Pattern(String name, List<String> sourceTriples, List<String> targ
     }
 
     /**
-     * Creates a SPARQL DELETE query to delete data corresponding to the specified pattern match from the target ontology.
+     * Creates a SPARQL DELETE query to delete data corresponding to the specified pattern match from the target
+     * ontology.
+     *
      * @param instance Pattern instance to delete
      * @return SPARQL DELETE query
      */

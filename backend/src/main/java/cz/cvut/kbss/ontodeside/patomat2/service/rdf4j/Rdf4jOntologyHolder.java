@@ -7,7 +7,9 @@ import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.model.ResultBinding;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
 import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -15,6 +17,7 @@ import org.eclipse.rdf4j.query.TupleQuery;
 import org.eclipse.rdf4j.query.TupleQueryResult;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.springframework.lang.NonNull;
@@ -42,12 +45,12 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
     }
 
     @Override
-    public boolean isLoaded(String fileName) {
+    public boolean isLoaded(@NonNull String fileName) {
         return Objects.equals(ontologyFileName, fileName);
     }
 
     @Override
-    public void loadOntology(File ontologyFile) {
+    public void loadOntology(@NonNull File ontologyFile) {
         Objects.requireNonNull(ontologyFile);
         this.ontologyFileName = ontologyFile.getName();
         try (final RepositoryConnection conn = repository.getConnection()) {
@@ -75,6 +78,22 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
                     return Optional.of(bs.getValue("o").stringValue());
                 }
             }
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> getLabel(@NonNull String iri) {
+        Objects.requireNonNull(iri);
+        try (final RepositoryConnection conn = repository.getConnection()) {
+            final ValueFactory vf = conn.getValueFactory();
+            final RepositoryResult<Statement> result = conn.getStatements(vf.createIRI(iri), RDFS.LABEL, null);
+            if (result.hasNext()) {
+                String label = result.next().getObject().stringValue();
+                result.close();
+                return Optional.of(label);
+            }
+            result.close();
         }
         return Optional.empty();
     }

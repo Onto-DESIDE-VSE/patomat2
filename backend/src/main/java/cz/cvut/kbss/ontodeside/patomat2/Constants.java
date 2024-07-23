@@ -22,6 +22,11 @@ public class Constants {
      */
     public static final String RDFS_RESOURCE = "http://www.w3.org/2000/01/rdf-schema#Resource";
 
+    /**
+     * Prefix of a SPARQL variable
+     */
+    public static final String SPARQL_VARIABLE = "?";
+
     private Constants() {
         throw new AssertionError();
     }
