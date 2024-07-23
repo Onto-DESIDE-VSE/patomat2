@@ -2,12 +2,12 @@ package cz.cvut.kbss.ontodeside.patomat2.model;
 
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
 import cz.cvut.kbss.ontodeside.patomat2.util.Rdf4jSparqlQueryBuilder;
+import cz.cvut.kbss.ontodeside.patomat2.util.StringUtil;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 public record Pattern(String name, List<String> sourceTriples, List<String> targetTriples,
@@ -59,8 +59,7 @@ public record Pattern(String name, List<String> sourceTriples, List<String> targ
         newEntities.removeAll(actualVariables);
         final PatternMatch instanceWithNewEntities = new PatternMatch(instance.getPattern(), instance.getBindings());
         for (String name : newEntities) {
-            instanceWithNewEntities.addBinding(name, newEntityGenerator.generateIdentifier()
-                                                                       .toString(), Constants.RDFS_RESOURCE);
+            instanceWithNewEntities.addBinding(name, newEntityGenerator.generateIdentifier(), Constants.RDFS_RESOURCE);
         }
         final String insert = """
                 INSERT DATA {
@@ -78,15 +77,7 @@ public record Pattern(String name, List<String> sourceTriples, List<String> targ
      * @return Set of SPARQL variables found in the triple patterns
      */
     private static Set<String> getVariables(List<String> triplePatterns) {
-        final java.util.regex.Pattern variableRegex = java.util.regex.Pattern.compile("\\?([a-zA-Z0-9_]+)(?=\\W)");
-        return triplePatterns.stream().map(s -> {
-            final Matcher matcher = variableRegex.matcher(s);
-            final Set<String> vars = new HashSet<>();
-            while (matcher.find()) {
-                vars.add(matcher.group(1));
-            }
-            return vars;
-        }).flatMap(Set::stream).collect(Collectors.toSet());
+        return triplePatterns.stream().map(StringUtil::extractSparqlVariables).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     /**

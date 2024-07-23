@@ -1,11 +1,14 @@
 package cz.cvut.kbss.ontodeside.patomat2.service.rdf4j;
 
 import cz.cvut.kbss.ontodeside.patomat2.config.ApplicationConfig;
+import cz.cvut.kbss.ontodeside.patomat2.model.NameTransformation;
+import cz.cvut.kbss.ontodeside.patomat2.model.NewEntity;
 import cz.cvut.kbss.ontodeside.patomat2.model.NewEntityGenerator;
+import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
-import java.net.URI;
 import java.util.Random;
 
 /**
@@ -26,13 +29,19 @@ public class Rdf4jNewEntityGenerator implements NewEntityGenerator {
     }
 
     @Override
-    public URI generateIdentifier() {
+    public String generateIdentifier() {
         assert ontologyHolder.isLoaded();
         String ontologyIri = ontologyHolder.getOntologyIri().orElse(config.getNewEntityIriBase());
         final char last = ontologyIri.charAt(ontologyIri.length() - 1);
         if (last != '/' && last != '#') {
             ontologyIri += '/';
         }
-        return URI.create(ontologyIri + RAND.nextInt(100000));
+        return ontologyIri + RAND.nextInt(100000);
+    }
+
+    @Override
+    public NewEntity generateNewEntity(@NonNull String variableName, @NonNull NameTransformation nameTransformation, @NonNull PatternMatch match) {
+        final String id = generateIdentifier();
+        return new NewEntity(variableName, id, nameTransformation.generateName(match, ontologyHolder));
     }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,6 +40,11 @@ public class PatternMatch {
 
     public void addBinding(String name, String value, String datatype) {
         bindings.add(new ResultBinding(name, value, datatype));
+    }
+
+    @JsonIgnore
+    public Optional<ResultBinding> getBinding(String name) {
+        return bindings.stream().filter(b -> b.name().equals(name)).findFirst();
     }
 
     public Pattern getPattern() {

@@ -1,5 +1,7 @@
 package cz.cvut.kbss.ontodeside.patomat2;
 
+import java.util.regex.Pattern;
+
 public class Constants {
 
     /**
@@ -26,6 +28,13 @@ public class Constants {
      * Prefix of a SPARQL variable
      */
     public static final String SPARQL_VARIABLE = "?";
+
+    /**
+     * Regex pattern that extracts SPARQL variable names from strings.
+     * <p>
+     * That it, it looks for names prefix with {@link #SPARQL_VARIABLE}.
+     */
+    public static Pattern SPARQL_VARIABLE_PATTERN = Pattern.compile("\\?([a-zA-Z0-9_]+)(?=\\W|$)");
 
     private Constants() {
         throw new AssertionError();
