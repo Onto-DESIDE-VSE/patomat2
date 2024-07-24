@@ -5,14 +5,21 @@ import MatchesTable from "@/components/MatchesTable.vue";
 import type {PatternInstance} from "@/types/PatternInstance";
 import type {PatternInstanceTransformation} from "@/types/PatternInstanceTransformation";
 import {downloadAttachment} from "@/util/Utils";
+import useMessageStore from "@/store/messageStore";
+
+const messageStore = useMessageStore();
 
 const matches = ref<PatternInstance[]>([]);
 
 const fetchMatches = async () => {
-    const resp = await fetch(`${Constants.SERVER_URL}/matches`, {
-        credentials: "include"
-    });
-    matches.value = await resp.json();
+        const resp = await fetch(`${Constants.SERVER_URL}/matches`, {
+            credentials: "include"
+        });
+        if (resp.status === 200) {
+            matches.value = await resp.json();
+        } else if (resp.status === 409) {
+            messageStore.publishMessage("Ontology not uploaded, yet.");
+        }
 };
 fetchMatches();
 
