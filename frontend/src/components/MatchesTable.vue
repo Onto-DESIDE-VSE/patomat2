@@ -2,13 +2,15 @@
 
 import {ref} from "vue";
 import type {PatternInstance, ResultBinding} from "@/types/PatternInstance";
+import type {PatternInstanceTransformation} from "@/types/PatternInstanceTransformation";
+import {mdiMenuDown} from "@mdi/js";
 
 const props = defineProps<{
     matches: PatternInstance[],
     onTransform: (applyDeletes: boolean, instances: PatternInstanceTransformation[]) => void
 }>();
 
-const selected = ref<PatternInstance>([]);
+const selected = ref<PatternInstance[]>([]);
 
 const headers = [{
     title: "Pattern Name",
@@ -37,18 +39,35 @@ function valueToString(binding: ResultBinding) {
     }
 }
 
-function applyTransformation() {
-    const instances = selected.value.map(v => ({
+function applyTransformation(applyDeletes: boolean) {
+    const instances = selected.value.map((v : PatternInstance) => ({
         id: v.id
     }) as PatternInstanceTransformation);
-    props.onTransform(false, instances);
+    props.onTransform(applyDeletes, instances);
 }
 </script>
 
 <template>
-    <v-btn id="apply-transformation-top" color="primary" @click="applyTransformation" :disabled="selected.length === 0">
-        Apply transformation
-    </v-btn>
+    <div class="mb-3">
+        <v-menu :location="'bottom'">
+            <template v-slot:activator="{ props  }">
+                <v-btn id="apply-transformation-top" color="primary" v-bind="props"
+                       :disabled="selected.length === 0">
+                    Apply transformation
+                    <v-icon dark end size="medium">{{mdiMenuDown}}</v-icon>
+                </v-btn>
+            </template>
+            <v-list>
+                <v-list-item @click="() => applyTransformation(false)">
+                    <v-list-item-title>Apply only inserts</v-list-item-title>
+                </v-list-item>
+                <v-list-item @click="() => applyTransformation(true)">
+                    <v-list-item-title>Apply deletes and inserts</v-list-item-title>
+                </v-list-item>
+            </v-list>
+        </v-menu>
+
+    </div>
     <v-data-table :headers="headers" :items="props.matches" show-select v-model="selected" return-object>
         <template v-slot:item.bindings="{ value }">
             <ul class="mt-1 mb-1">
@@ -73,7 +92,8 @@ function applyTransformation() {
             </ul>
         </template>
     </v-data-table>
-    <v-btn id="apply-transformation-bottom" color="primary" @click="applyTransformation" :disabled="selected.length === 0">
+    <v-btn id="apply-transformation-bottom" color="primary" @click="applyTransformation"
+           :disabled="selected.length === 0">
         Apply transformation
     </v-btn>
 </template>
