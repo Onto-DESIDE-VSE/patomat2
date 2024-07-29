@@ -18,14 +18,18 @@ const upload = async () => {
   const formData = new FormData()
   formData.append("ontology", ontologyFile.value!)
   patternFiles.value.forEach((file) => formData.append("pattern", file))
-  await fetch(`${Constants.SERVER_URL}/ontology`, {
+  const resp = await fetch(`${Constants.SERVER_URL}/ontology`, {
     credentials: Constants.SERVER_URL.length > 0 ? "include" : "same-origin",
     method: "POST",
     body: formData
   })
-  uploading.value = false
-  messageStore.publishMessage("Ontology and patterns uploaded.")
-  await router.push("/matches")
+  if (resp.ok) {
+    uploading.value = false
+    messageStore.publishMessage("Ontology and patterns uploaded.")
+    router.push("/matches")
+  } else {
+    messageStore.publishMessage("Failed to upload and process ontology and patterns. Got message: " + resp.body)
+  }
 }
 </script>
 
