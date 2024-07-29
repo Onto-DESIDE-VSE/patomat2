@@ -41,15 +41,21 @@ public class TransformationService {
         if (!ontologyHolder.isLoaded()) {
             throw new OntologyNotUploadedException("Ontology has not been uploaded yet.");
         }
-        final Map<Integer, PatternInstance> matches = matchService.getMatches();
-        transformation.getPatternInstances().forEach(pit -> {
-            final PatternInstance instance = matches.get(pit.getId()).deepCopy();
-            replaceGeneratedLabelsWithUserSpecified(instance, pit);
-            applyTransformation(instance, transformation.isApplyDeletes());
-        });
-        final String ontologyFilename = storingService.getUploadedOntologyFileName().orElse(null);
-        return new FileAwareByteArrayResource(ontologyHolder.export(Utils.filenameToMimeType(ontologyFilename))
-                                                            .toByteArray(), ontologyFilename);
+        try {
+            final Map<Integer, PatternInstance> matches = matchService.getMatches();
+            transformation.getPatternInstances().forEach(pit -> {
+                final PatternInstance instance = matches.get(pit.getId()).deepCopy();
+                replaceGeneratedLabelsWithUserSpecified(instance, pit);
+                applyTransformation(instance, transformation.isApplyDeletes());
+            });
+            final String ontologyFilename = storingService.getUploadedOntologyFileName().orElse(null);
+            return new FileAwareByteArrayResource(ontologyHolder.export(Utils.filenameToMimeType(ontologyFilename))
+                                                                .toByteArray(), ontologyFilename);
+        } catch (RuntimeException e) {
+            ontologyHolder.clear();
+            matchService.clear();
+            throw e;
+        }
     }
 
     private void applyTransformation(PatternInstance instance, boolean applyDeletes) {

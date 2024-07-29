@@ -52,20 +52,26 @@ public class MatchService {
         if (matches != null) {
             return new ArrayList<>(matches.values());
         }
-        this.matches = new LinkedHashMap<>();
-        return patterns.values().stream()
-                       .map(ontologyHolder::findMatches)
-                       .flatMap(List::stream)
-                       .map(pm -> {
-                           final Pattern p = pm.getPattern();
-                           final List<NewEntity> newEntities = initNewEntities(pm);
-                           final PatternInstance instance = new PatternInstance(pm.hashCode(), p.name(), pm,
-                                   p.createTargetInsertSparql(pm, newEntities), p.createTargetDeleteSparql(pm),
-                                   newEntities);
-                           matches.put(pm.hashCode(), instance);
-                           return instance;
-                       })
-                       .toList();
+        try {
+            this.matches = new LinkedHashMap<>();
+            return patterns.values().stream()
+                           .map(ontologyHolder::findMatches)
+                           .flatMap(List::stream)
+                           .map(pm -> {
+                               final Pattern p = pm.getPattern();
+                               final List<NewEntity> newEntities = initNewEntities(pm);
+                               final PatternInstance instance = new PatternInstance(pm.hashCode(), p.name(), pm,
+                                       p.createTargetInsertSparql(pm, newEntities), p.createTargetDeleteSparql(pm),
+                                       newEntities);
+                               matches.put(pm.hashCode(), instance);
+                               return instance;
+                           })
+                           .toList();
+        } catch (RuntimeException e) {
+            ontologyHolder.clear();
+            this.matches = null;
+            throw e;
+        }
     }
 
     private List<NewEntity> initNewEntities(PatternMatch match) {
@@ -102,5 +108,10 @@ public class MatchService {
             findMatches();
         }
         return Collections.unmodifiableMap(matches);
+    }
+
+    public void clear() {
+        ontologyHolder.clear();
+        this.matches = null;
     }
 }
