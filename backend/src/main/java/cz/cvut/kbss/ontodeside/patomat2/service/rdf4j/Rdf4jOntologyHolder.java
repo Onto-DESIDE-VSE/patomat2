@@ -1,6 +1,7 @@
 package cz.cvut.kbss.ontodeside.patomat2.service.rdf4j;
 
 import cz.cvut.kbss.ontodeside.patomat2.exception.AmbiguousOntologyException;
+import cz.cvut.kbss.ontodeside.patomat2.exception.BlankNodeResultException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyReadException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
@@ -24,6 +25,8 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
@@ -39,6 +42,8 @@ import java.util.Optional;
 @SessionScope
 @Component
 public class Rdf4jOntologyHolder implements OntologyHolder {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Rdf4jOntologyHolder.class);
 
     private String ontologyFileName;
 
@@ -94,6 +99,9 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
                 return Optional.of(label);
             }
             result.close();
+        } catch (RuntimeException e) {
+            LOG.warn("Unable to resolve label of <{}>.", iri, e);
+            return Optional.empty();
         }
         return Optional.empty();
     }
@@ -108,7 +116,12 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
             try (final TupleQueryResult tqResult = tq.evaluate()) {
                 for (BindingSet bindings : tqResult) {
                     final List<ResultBinding> row = new ArrayList<>();
-                    bindings.getBindingNames().forEach(name -> row.add(toResultBinding(name, bindings)));
+                    try {
+                        bindings.getBindingNames().forEach(name -> row.add(toResultBinding(name, bindings)));
+                    } catch (BlankNodeResultException e) {
+                        LOG.warn("Skipping result because it contains a blank node.");
+                        continue;
+                    }
                     result.add(new PatternMatch(pattern, row));
                 }
             }
@@ -125,6 +138,9 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
     private static ResultBinding toResultBinding(String name, BindingSet bs) {
         final Value value = bs.getValue(name);
         final String strValue = value.stringValue();
+        if (value.isBNode()) {
+            throw new BlankNodeResultException("Value " + value + " is a blank node");
+        }
         final String datatype = value.isResource() ? RDFS.RESOURCE.stringValue() : ((Literal) value).getDatatype()
                                                                                                     .stringValue();
         return new ResultBinding(name, strValue, datatype);

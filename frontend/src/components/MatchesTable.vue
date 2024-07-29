@@ -40,7 +40,7 @@ function valueToString(binding: ResultBinding) {
 }
 
 function applyTransformation(applyDeletes: boolean) {
-    const instances = selected.value.map((v : PatternInstance) => ({
+    const instances = selected.value.map((v: PatternInstance) => ({
         id: v.id
     }) as PatternInstanceTransformation);
     props.onTransform(applyDeletes, instances);
@@ -54,7 +54,7 @@ function applyTransformation(applyDeletes: boolean) {
                 <v-btn id="apply-transformation-top" color="primary" v-bind="props"
                        :disabled="selected.length === 0">
                     Apply transformation
-                    <v-icon dark end size="medium">{{mdiMenuDown}}</v-icon>
+                    <v-icon dark end size="medium">{{ mdiMenuDown }}</v-icon>
                 </v-btn>
             </template>
             <v-list>
@@ -85,7 +85,7 @@ function applyTransformation(applyDeletes: boolean) {
                 <li v-for="entity in value">
                     <span class="font-weight-bold">{{ entity.variableName }}</span>:
                     <{{ entity.identifier }}>
-                    <ul class="ml-4">
+                    <ul v-if="entity.label.length > 0" class="ml-4">
                         <li>{{ entity.label }}</li>
                     </ul>
                 </li>

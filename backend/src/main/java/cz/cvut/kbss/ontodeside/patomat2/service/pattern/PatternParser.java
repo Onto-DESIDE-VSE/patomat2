@@ -6,6 +6,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.TypeRef;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
@@ -73,23 +74,33 @@ public class PatternParser {
     }
 
     private List<String> readTriples(String patternName, DocumentContext doc, TripleSource source) {
-        final List<String> triples = doc.read("$.." + source.name + ".triples.triple.*", new TypeRef<>() {});
-        if (triples.isEmpty()) {
-            throw new PatternParserException("No " + (source == TripleSource.SOURCE ? "source" : "target") + " triples found in pattern " + patternName);
+        try {
+            final List<String> triples = doc.read("$.." + source.name + ".triples.triple.*", new TypeRef<>() {});
+            if (triples.isEmpty()) {
+                throw new PatternParserException("No " + (source == TripleSource.SOURCE ? "source" : "target") + " triples found in pattern " + patternName);
+            }
+            return triples;
+        } catch (PathNotFoundException e) {
+            LOG.error("No triple patterns of type {} found in pattern {}.", source.name, patternName);
+            return List.of();
         }
-        return triples;
     }
 
     private List<NameTransformation> readNameTransformations(DocumentContext doc) {
-        final ObjectNode nameTransformations = doc.read("$.tp.naming_transformation[0].ntp[0]", new TypeRef<>() {});
-        final Iterator<Map.Entry<String, JsonNode>> it= nameTransformations.fields();
-        final List<NameTransformation> result = new ArrayList<>();
-        while (it.hasNext()) {
-            final Map.Entry<String, JsonNode> e = it.next();
-            // TODO Temporary, need to agree on the format (which seems overly complex at the moment)
-            result.add(new NameTransformation(e.getKey().substring(1), e.getValue().get(0).asText()));
+        try {
+            final ObjectNode nameTransformations = doc.read("$.tp.naming_transformation[0].ntp[0]", new TypeRef<>() {});
+            final Iterator<Map.Entry<String, JsonNode>> it = nameTransformations.fields();
+            final List<NameTransformation> result = new ArrayList<>();
+            while (it.hasNext()) {
+                final Map.Entry<String, JsonNode> e = it.next();
+                // TODO Temporary, need to agree on the format (which seems overly complex at the moment)
+                result.add(new NameTransformation(e.getKey().substring(1), e.getValue().get(0).asText()));
+            }
+            return result;
+        } catch (PathNotFoundException e) {
+            LOG.warn("No name transformations found in pattern.");
+            return List.of();
         }
-        return result;
     }
 
     private static void configureJsonPath() {

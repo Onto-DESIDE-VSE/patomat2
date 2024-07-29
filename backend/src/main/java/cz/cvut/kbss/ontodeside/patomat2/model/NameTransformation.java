@@ -33,9 +33,17 @@ public record NameTransformation(String variableName, String rule) {
         final Set<String> variables = Utils.extractSparqlVariables(rule);
         final Map<String, String> variableLabels = new HashMap<>(variables.size());
         variables.forEach(v -> {
-            final String value = match.getBinding(v).map(ResultBinding::value)
-                                      .orElseThrow(() -> new NameTransformationException("No value for name transformation rule variable " + Constants.SPARQL_VARIABLE + v));
-            variableLabels.put(v, ontologyHolder.getLabel(value).orElseGet(() -> extractLabelFromIdentifier(value)));
+            final ResultBinding binding = match.getBinding(v)
+                                               .orElseThrow(() -> new NameTransformationException("No value for name transformation rule variable " + Constants.SPARQL_VARIABLE + v));
+            final String value = binding.value();
+            final String datatype = binding.datatype();
+            final String label;
+            if (Constants.RDFS_RESOURCE.equals(datatype)) {
+                label = ontologyHolder.getLabel(value).orElseGet(() -> extractLabelFromIdentifier(value));
+            } else {
+                label = value;
+            }
+            variableLabels.put(v, label);
         });
         String label = rule;
         for (Map.Entry<String, String> entry : variableLabels.entrySet()) {
