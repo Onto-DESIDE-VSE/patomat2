@@ -19,6 +19,8 @@ const fetchMatches = async () => {
     matches.value = await resp.json()
   } else if (resp.status === 409) {
     messageStore.publishMessage("Ontology not uploaded, yet.")
+  } else {
+    messageStore.publishMessage("Unable to get pattern matches. Got message: " + resp.body)
   }
 }
 fetchMatches()
@@ -35,7 +37,11 @@ const applyTransformation = async (applyDeletes: boolean, instances: PatternInst
       "Content-Type": "application/json"
     }
   })
-  downloadAttachment(resp)
+  if (resp.ok) {
+    downloadAttachment(resp)
+  } else {
+    messageStore.publishMessage("Failed to apply transformation. Got message: " + resp.body)
+  }
 }
 </script>
 
