@@ -40,6 +40,7 @@ const upload = async () => {
       v-model="patternFiles"
       label="Pattern files"
       hint="Select at least one pattern file corresponding to the JSON format."
+      persistent-hint
       multiple
     />
 

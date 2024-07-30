@@ -2,6 +2,7 @@
 import { ref } from "vue"
 import type { PatternInstance, ResultBinding } from "@/types/PatternInstance"
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation"
+import EditableLabel from "@/components/EditableLabel.vue"
 import { mdiMenuDown } from "@mdi/js"
 
 const props = defineProps<{
@@ -31,7 +32,11 @@ const headers = [
   },
   {
     title: "New entities",
-    value: "newEntities"
+    key: "newEntities",
+    value: (item: PatternInstance) => ({
+      id: item.id,
+      newEntities: item.newEntities
+    })
   }
 ]
 
@@ -89,11 +94,13 @@ function applyTransformation(applyDeletes: boolean) {
     </template>
     <template v-slot:item.newEntities="{ value }">
       <ul class="mt-1 mb-1">
-        <li v-for="entity in value">
+        <li v-for="entity in value.newEntities">
           <span class="font-weight-bold">{{ entity.variableName }}</span
           >: <{{ entity.identifier }}>
           <ul v-if="entity.label.length > 0" class="ml-4">
-            <li>{{ entity.label }}</li>
+            <li>
+              <EditableLabel :patternInstanceId="value.id" :entity="entity" :onSave="() => {}"></EditableLabel>
+            </li>
           </ul>
         </li>
       </ul>
