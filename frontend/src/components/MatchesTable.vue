@@ -99,12 +99,22 @@ function applyTransformation(applyDeletes: boolean) {
       </ul>
     </template>
   </v-data-table>
-  <v-btn
-    id="apply-transformation-bottom"
-    color="primary"
-    @click="applyTransformation"
-    :disabled="selected.length === 0"
-  >
-    Apply transformation
-  </v-btn>
+  <div class="mt-3">
+    <v-menu :location="'top'">
+      <template v-slot:activator="{ props }">
+        <v-btn id="apply-transformation-bottom" color="primary" v-bind="props" :disabled="selected.length === 0">
+          Apply transformation
+          <v-icon dark end size="medium">{{ mdiMenuDown }}</v-icon>
+        </v-btn>
+      </template>
+      <v-list>
+        <v-list-item @click="() => applyTransformation(false)">
+          <v-list-item-title>Apply only inserts</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click="() => applyTransformation(true)">
+          <v-list-item-title>Apply deletes and inserts</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+  </div>
 </template>

@@ -52,5 +52,6 @@ const navItems = {
   padding-left: 15px;
   padding-right: 15px;
   padding-top: 15px;
+  margin-bottom: 15px;
 }
 </style>
