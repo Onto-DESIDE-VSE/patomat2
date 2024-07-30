@@ -56,13 +56,13 @@ function onNewEntityLabelChanged(patternInstanceId: number, ne: NewEntity) {
   const instance = props.matches.find((inst) => inst.id === patternInstanceId);
   if (instance) {
     const change = _.cloneDeep(instance);
-    const newLabel = {};
+    const newLabel: any = {};
     newLabel[ne.variableName] = ne.label;
     newEntityLabels.value.set(
       patternInstanceId,
       Object.assign({}, newEntityLabels.value.get(patternInstanceId), newLabel)
     );
-    const index = change.newEntities.findIndex((entity) => entity.variableName === ne.variableName);
+    const index = change.newEntities.findIndex((entity: NewEntity) => entity.variableName === ne.variableName);
     change.newEntities.splice(index, 1, ne);
     props.onInstanceChange(change);
   }

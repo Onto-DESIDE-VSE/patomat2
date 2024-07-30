@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { mdiPencil, mdiCancel, mdiContentSave } from "@mdi/js";
-import type { NewEntity } from "@/types/PatternInstanceTransformation";
+import type { NewEntity } from "@/types/PatternInstance";
 
 const props = defineProps<{
   patternInstanceId: number;

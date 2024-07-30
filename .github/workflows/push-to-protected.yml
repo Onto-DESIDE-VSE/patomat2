@@ -1,0 +1,29 @@
+name: Build
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up JDK
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "temurin"
+                  java-version: 21
+            - name: Set up Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+            - name: Build with Maven
+              working-directory: backend
+              run: mvn -B package --file pom.xml
+            - name: Build frontend
+              working-directory: frontend
+              run: npm install && npm run build
