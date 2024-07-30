@@ -52,7 +52,6 @@ public class TransformationService {
             return new FileAwareByteArrayResource(ontologyHolder.export(Utils.filenameToMimeType(ontologyFilename))
                                                                 .toByteArray(), ontologyFilename);
         } catch (RuntimeException e) {
-            ontologyHolder.clear();
             matchService.clear();
             throw e;
         }

@@ -1,29 +1,37 @@
 <script setup lang="ts">
-import Constants from "@/constants/Constants"
-import { ref } from "vue"
-import MatchesTable from "@/components/MatchesTable.vue"
-import type { PatternInstance } from "@/types/PatternInstance"
-import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation"
-import { downloadAttachment } from "@/util/Utils"
-import useMessageStore from "@/store/messageStore"
+import Constants from "@/constants/Constants";
+import { ref } from "vue";
+import MatchesTable from "@/components/MatchesTable.vue";
+import type { PatternInstance } from "@/types/PatternInstance";
+import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
+import { downloadAttachment } from "@/util/Utils";
+import useMessageStore from "@/store/messageStore";
+import { useRouter } from "vue-router";
 
-const messageStore = useMessageStore()
+const router = useRouter();
+const messageStore = useMessageStore();
 
-const matches = ref<PatternInstance[]>([])
+const matches = ref<PatternInstance[]>([]);
 
 const fetchMatches = async () => {
   const resp = await fetch(`${Constants.SERVER_URL}/matches`, {
     credentials: "include"
-  })
+  });
   if (resp.status === 200) {
-    matches.value = await resp.json()
+    matches.value = await resp.json();
   } else if (resp.status === 409) {
-    messageStore.publishMessage("Ontology not uploaded, yet.")
+    messageStore.publishMessage("Ontology not uploaded, yet.");
+    router.push("/import");
   } else {
-    messageStore.publishMessage("Unable to get pattern matches. Got message: " + resp.body)
+    messageStore.publishMessage("Unable to get pattern matches. Got message: " + resp.body);
   }
+};
+fetchMatches();
+
+function onInstanceChange(change: PatternInstance) {
+  const index = matches.value.findIndex((match) => match.id === change.id);
+  matches.value.splice(index, 1, change);
 }
-fetchMatches()
 
 const applyTransformation = async (applyDeletes: boolean, instances: PatternInstanceTransformation[]) => {
   const resp = await fetch(`${Constants.SERVER_URL}/transformation`, {
@@ -36,16 +44,16 @@ const applyTransformation = async (applyDeletes: boolean, instances: PatternInst
     headers: {
       "Content-Type": "application/json"
     }
-  })
+  });
   if (resp.ok) {
-    downloadAttachment(resp)
+    downloadAttachment(resp);
   } else {
-    messageStore.publishMessage("Failed to apply transformation. Got message: " + resp.body)
+    messageStore.publishMessage("Failed to apply transformation. Got message: " + resp.body);
   }
-}
+};
 </script>
 
 <template>
   <h3 class="text-h3 mb-6">Pattern matches</h3>
-  <MatchesTable :matches="matches" :on-transform="applyTransformation" />
+  <MatchesTable :matches="matches" :on-instance-change="onInstanceChange" :on-transform="applyTransformation" />
 </template>

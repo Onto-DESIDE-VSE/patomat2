@@ -83,6 +83,11 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
         return Optional.ofNullable((String) session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE));
     }
 
+    public void removeUploadedOntology(String ontologyFilename) {
+        storageService.deleteFile(ontologyFilename);
+        session.removeAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE);
+    }
+
     @Override
     public void setApplicationEventPublisher(@NotNull ApplicationEventPublisher eventPublisher) {
         this.eventPublisher = eventPublisher;

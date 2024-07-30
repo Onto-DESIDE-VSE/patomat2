@@ -15,7 +15,9 @@ public class PatternInstanceTransformation {
     private Integer id;
 
     /**
-     * Labels of new entities to override the generated ones
+     * Labels of new entities to override the generated ones.
+     * <p>
+     * The map maps variable names to entity labels.
      */
     private Map<String, String> newEntityLabels;
 

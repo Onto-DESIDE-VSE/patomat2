@@ -77,14 +77,14 @@ public class MatchService {
     private List<NewEntity> initNewEntities(PatternMatch match) {
         final Set<String> newEntityVars = new HashSet<>(match.getPattern().targetVariables());
         newEntityVars.removeAll(match.getPattern().sourceVariables());
-        return newEntityVars.stream()
+        return new ArrayList<>(newEntityVars.stream()
                             .map(v -> newEntityGenerator.generateNewEntity(v, match.getPattern().nameTransformations()
                                                                                    .stream()
                                                                                    .filter(nt -> nt.variableName()
                                                                                                    .equals(v))
                                                                                    .findFirst()
                                                                                    .orElse(NameTransformation.EMPTY), match))
-                            .toList();
+                            .toList());
     }
 
     private void loadOntology(String fileName) {

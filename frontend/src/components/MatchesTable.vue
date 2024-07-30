@@ -1,16 +1,20 @@
 <script setup lang="ts">
-import { ref } from "vue"
-import type { PatternInstance, ResultBinding } from "@/types/PatternInstance"
-import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation"
-import EditableLabel from "@/components/EditableLabel.vue"
-import { mdiMenuDown } from "@mdi/js"
+import { ref } from "vue";
+import _ from "lodash";
+import type { NewEntity, PatternInstance, ResultBinding } from "@/types/PatternInstance";
+import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
+import EditableLabel from "@/components/EditableLabel.vue";
+import { mdiMenuDown } from "@mdi/js";
 
 const props = defineProps<{
-  matches: PatternInstance[]
-  onTransform: (applyDeletes: boolean, instances: PatternInstanceTransformation[]) => void
-}>()
+  matches: PatternInstance[];
+  onInstanceChange: (instance: PatternInstance) => void;
+  onTransform: (applyDeletes: boolean, instances: PatternInstanceTransformation[]) => void;
+}>();
 
-const selected = ref<PatternInstance[]>([])
+const selected = ref<PatternInstance[]>([]);
+// keys are pattern instance ids, value are mapping of variable names to new labels
+const newEntityLabels = ref<Map<number, { [key: string]: string }>>(new Map());
 
 const headers = [
   {
@@ -38,13 +42,29 @@ const headers = [
       newEntities: item.newEntities
     })
   }
-]
+];
 
 function valueToString(binding: ResultBinding) {
   if (binding.datatype === "http://www.w3.org/2000/01/rdf-schema#Resource") {
-    return `<${binding.value}>`
+    return `<${binding.value}>`;
   } else {
-    return `${binding.value}^^${binding.datatype}`
+    return `${binding.value}^^${binding.datatype}`;
+  }
+}
+
+function onNewEntityLabelChanged(patternInstanceId: number, ne: NewEntity) {
+  const instance = props.matches.find((inst) => inst.id === patternInstanceId);
+  if (instance) {
+    const change = _.cloneDeep(instance);
+    const newLabel = {};
+    newLabel[ne.variableName] = ne.label;
+    newEntityLabels.value.set(
+      patternInstanceId,
+      Object.assign({}, newEntityLabels.value.get(patternInstanceId), newLabel)
+    );
+    const index = change.newEntities.findIndex((entity) => entity.variableName === ne.variableName);
+    change.newEntities.splice(index, 1, ne);
+    props.onInstanceChange(change);
   }
 }
 
@@ -52,10 +72,11 @@ function applyTransformation(applyDeletes: boolean) {
   const instances = selected.value.map(
     (v: PatternInstance) =>
       ({
-        id: v.id
+        id: v.id,
+        newEntityLabels: newEntityLabels.value.has(v.id) ? newEntityLabels.value.get(v.id) : undefined
       }) as PatternInstanceTransformation
-  )
-  props.onTransform(applyDeletes, instances)
+  );
+  props.onTransform(applyDeletes, instances);
 }
 </script>
 
@@ -97,9 +118,13 @@ function applyTransformation(applyDeletes: boolean) {
         <li v-for="entity in value.newEntities">
           <span class="font-weight-bold">{{ entity.variableName }}</span
           >: <{{ entity.identifier }}>
-          <ul v-if="entity.label.length > 0" class="ml-4">
+          <ul class="ml-4">
             <li>
-              <EditableLabel :patternInstanceId="value.id" :entity="entity" :onSave="() => {}"></EditableLabel>
+              <EditableLabel
+                :patternInstanceId="value.id"
+                :entity="entity"
+                :onSave="onNewEntityLabelChanged"
+              ></EditableLabel>
             </li>
           </ul>
         </li>

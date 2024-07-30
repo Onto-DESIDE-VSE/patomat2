@@ -1,29 +1,26 @@
 <script setup lang="ts">
-import { ref } from "vue"
-import { mdiPencil, mdiCancel, mdiContentSave } from "@mdi/js"
+import { ref } from "vue";
+import { mdiPencil, mdiCancel, mdiContentSave } from "@mdi/js";
+import type { NewEntity } from "@/types/PatternInstanceTransformation";
 
 const props = defineProps<{
-  patternInstanceId: number
-  entity: {
-    identifier: string
-    label: string
-    variableName: string
-  }
-  onSave: (patternInstanceId: number, variable: string, label: string) => void
-}>()
+  patternInstanceId: number;
+  entity: NewEntity;
+  onSave: (patternInstanceId: number, entity: NewEntity) => void;
+}>();
 
-const label = ref(props.entity.label)
-const editing = ref(false)
+const label = ref(props.entity.label);
+const editing = ref(false);
 
 function cancelEdit() {
-  label.value = props.entity.label
-  editing.value = false
+  label.value = props.entity.label;
+  editing.value = false;
 }
 
 function save() {
-  const nameMapping = {}
-  nameMapping[props.entity.variableName] = label.value
-  props.onSave(props.patternInstanceId, nameMapping)
+  editing.value = false;
+  const update = Object.assign({}, props.entity, { label: label.value });
+  props.onSave(props.patternInstanceId, update);
 }
 </script>
 
