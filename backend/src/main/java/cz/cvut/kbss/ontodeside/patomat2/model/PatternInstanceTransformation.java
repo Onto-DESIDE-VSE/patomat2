@@ -1,6 +1,5 @@
 package cz.cvut.kbss.ontodeside.patomat2.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
