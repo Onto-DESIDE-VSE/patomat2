@@ -1,6 +1,10 @@
 spring:
     application:
         name: PatOMat2
+    servlet:
+        multipart:
+            max-request-size: 12MB
+            max-file-size: 10MB
 
 patomat2:
     storage: data
@@ -13,5 +17,5 @@ server:
 
 logging:
     level:
-      cz.cvut.kbss.ontodeside.patomat2: TRACE
-      org.springframework: INFO
+        cz.cvut.kbss.ontodeside.patomat2: TRACE
+        org.springframework: INFO
