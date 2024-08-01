@@ -56,10 +56,16 @@ public record NameTransformation(String variableName, String rule) {
         final String localPart = id.contains("#") ? id.substring(id.lastIndexOf('#') + 1) : id.substring(id.lastIndexOf('/') + 1);
         String label = localPart.replace('-', ' ');
         label = label.replace('_', ' ');
+        label = splitCamelCaseStringToWords(label);
         final String[] parts = label.split(" ");
         for (int i = 0; i < parts.length; i++) {
             parts[i] = parts[i].substring(0, 1).toUpperCase() + parts[i].substring(1);
         }
         return String.join(" ", parts);
+    }
+
+    private static String splitCamelCaseStringToWords(String str) {
+        String[] words = str.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
+        return String.join(" ", words);
     }
 }

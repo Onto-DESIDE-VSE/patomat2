@@ -77,4 +77,23 @@ class NameTransformationTest {
         when(ontologyHolder.getLabel(a)).thenReturn(Optional.empty());
         assertThrows(NameTransformationException.class, () -> sut.generateName(match, ontologyHolder));
     }
+
+    @Test
+    void generateReplacesCamelCaseWordsInIdentifierWithSpaces() {
+        final NameTransformation sut = new NameTransformation("G", "?A that ?p a ?C");
+        final String p = Generator.generateUri().toString();
+        final String pLabel = "knows";
+        final String a = "https://example.com/users/john-doe";
+        final String c = SKOS.TOP_CONCEPT_OF.stringValue();
+        final PatternMatch match = new PatternMatch(null, List.of(
+                new ResultBinding("p", p, Constants.RDFS_RESOURCE),
+                new ResultBinding("A", a, Constants.RDFS_RESOURCE),
+                new ResultBinding("C", c, Constants.RDFS_RESOURCE)
+        ));
+        when(ontologyHolder.getLabel(p)).thenReturn(Optional.of(pLabel));
+        when(ontologyHolder.getLabel(a)).thenReturn(Optional.empty());
+        when(ontologyHolder.getLabel(c)).thenReturn(Optional.empty());
+        final String result = sut.generateName(match, ontologyHolder);
+        assertEquals("John Doe that knows a Top Concept Of", result);
+    }
 }
