@@ -22,6 +22,8 @@ const fetchMatches = async () => {
   } else if (resp.status === 409) {
     messageStore.publishMessage("Ontology not uploaded, yet.");
     router.push("/import");
+  } else if (resp.status === 401) {
+    messageStore.publishMessage("PatOMat2 is currently fully utilized. Please try again later.");
   } else {
     messageStore.publishMessage("Unable to get pattern matches. Got message: " + resp.body);
   }
