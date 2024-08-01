@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from "vue-router"
-import Constants from "./constants/Constants"
-import { mdiFileImport, mdiInformation, mdiTableCog } from "@mdi/js"
-import Message from "@/components/Messages.vue"
+import { RouterLink, RouterView } from "vue-router";
+import Constants from "./constants/Constants";
+import { mdiFileImport, mdiInformation, mdiTableCog } from "@mdi/js";
+import Message from "@/components/Messages.vue";
 
 const navItems = {
   import: {
-    title: "Import",
-    path: "import",
+    title: "Load",
+    path: "load",
     icon: mdiFileImport
   },
   patternMatches: {
@@ -20,7 +20,7 @@ const navItems = {
     path: "about",
     icon: mdiInformation
   }
-}
+};
 </script>
 
 <template>
