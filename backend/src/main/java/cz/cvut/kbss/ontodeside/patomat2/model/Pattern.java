@@ -1,5 +1,6 @@
 package cz.cvut.kbss.ontodeside.patomat2.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
 import cz.cvut.kbss.ontodeside.patomat2.util.Rdf4jSparqlQueryBuilder;
 import cz.cvut.kbss.ontodeside.patomat2.util.Utils;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record Pattern(String name, List<String> sourceTriples, List<String> targetTriples,
+public record Pattern(@JsonIgnore String fileName, String name, List<String> sourceTriples, List<String> targetTriples,
                       List<NameTransformation> nameTransformations) {
 
     @Override

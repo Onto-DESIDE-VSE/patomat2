@@ -67,7 +67,7 @@ public class PatternParser {
             final List<String> sourceTriples = readTriples(name, doc, TripleSource.SOURCE);
             final List<String> targetTriples = readTriples(name, doc, TripleSource.TARGET);
             LOG.info("Parsed pattern {} from file {}.", name, patternFile.getName());
-            return new Pattern(name, sourceTriples, targetTriples, readNameTransformations(doc));
+            return new Pattern(patternFile.getName(), name, sourceTriples, targetTriples, readNameTransformations(doc));
         } catch (IOException e) {
             throw new PatternParserException("Unable to read pattern from " + patternFile, e);
         }

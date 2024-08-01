@@ -56,7 +56,7 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
                 .map(storageService::saveFile)
                 .map(patternParser::readPattern)
                 .toList();
-        session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream().map(Pattern::name).toList());
+        session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream().map(Pattern::fileName).toList());
         eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns));
     }
 
@@ -84,7 +84,7 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
     }
 
     public void removeUploadedOntology(String ontologyFilename) {
-        storageService.deleteFile(ontologyFilename);
+        storageService.deleteFile(ontologyFilename, session.getId());
         session.removeAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE);
     }
 
