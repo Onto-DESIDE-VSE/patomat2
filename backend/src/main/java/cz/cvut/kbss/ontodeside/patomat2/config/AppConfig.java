@@ -10,7 +10,9 @@ import org.springframework.context.annotation.Configuration;
 public class AppConfig {
 
     @Bean
-    public ServletListenerRegistrationBean<HttpSessionListener> sessionListener(ApplicationConfig config, FileStorageService fileStorageService) {
-        return new ServletListenerRegistrationBean<>(new SessionCleanupListener(config, fileStorageService));
+    public ServletListenerRegistrationBean<HttpSessionListener> sessionListener(ApplicationConfig config,
+                                                                                InvalidSessionTracker invalidSessionTracker,
+                                                                                FileStorageService fileStorageService) {
+        return new ServletListenerRegistrationBean<>(new SessionCleanupListener(config, invalidSessionTracker, fileStorageService));
     }
 }

@@ -10,6 +10,8 @@ patomat2:
     storage: data
     cors-allowed-origins: http://localhost:5173
     new-entity-iri-base: https://owl.vse.cz/patomat2/
+    security:
+        max-sessions: 20
 server:
     servlet:
         context-path: /patomat2
