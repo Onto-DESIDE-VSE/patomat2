@@ -2,10 +2,10 @@
 import { ref } from "vue";
 import { mdiDownload } from "@mdi/js";
 import Constants from "../constants/Constants";
-import { LoadedTransformationInput } from "../types/LoadedTransformationInput";
+import type { LoadedTransformationInput } from "../types/LoadedTransformationInput";
 import { downloadAttachment } from "../util/Utils";
 
-const loadedData = ref<LoadedTransformationInput>(null);
+const loadedData = ref<LoadedTransformationInput | null>(null);
 const getLoadedInput = async () => {
   const resp = await fetch(`${Constants.SERVER_URL}/ontology`, {
     method: "GET",
