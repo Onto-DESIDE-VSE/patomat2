@@ -11,6 +11,16 @@ public class ApplicationConfig {
 
     private String newEntityIriBase;
 
+    private Security security = new Security();
+
+    public Security getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(Security security) {
+        this.security = security;
+    }
+
     public String getStorage() {
         return storage;
     }
@@ -33,5 +43,23 @@ public class ApplicationConfig {
 
     public void setNewEntityIriBase(String newEntityIriBase) {
         this.newEntityIriBase = newEntityIriBase;
+    }
+
+    public static class Security {
+
+        /**
+         * Maximum number of concurrent sessions in the application.
+         * <p>
+         * Used to limit the number of loaded ontologies to prevent memory or disk space exhaustion.
+         */
+        private int maxSessions = 20;
+
+        public int getMaxSessions() {
+            return maxSessions;
+        }
+
+        public void setMaxSessions(int maxSessions) {
+            this.maxSessions = maxSessions;
+        }
     }
 }

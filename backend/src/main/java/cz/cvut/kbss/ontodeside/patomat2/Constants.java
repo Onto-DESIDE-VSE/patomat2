@@ -15,9 +15,9 @@ public class Constants {
     public static final String PATTERN_FILES_SESSION_ATTRIBUTE = "patternFiles";
 
     /**
-     * Session timeout in milliseconds.
+     * Session timeout in seconds.
      */
-    public static final int SESSION_TIMEOUT = 30 * 60 * 1000;
+    public static final int SESSION_TIMEOUT = 60 * 30;
 
     /**
      * RDFS Resource

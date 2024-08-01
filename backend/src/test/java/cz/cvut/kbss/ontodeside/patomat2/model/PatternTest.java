@@ -15,7 +15,7 @@ class PatternTest {
 
     @Test
     void sourceSparqlGeneratesSparqlFromSourceTriples() {
-        final Pattern p = new Pattern("name", List.of("?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"),
+        final Pattern p = new Pattern("filename.json", "name", List.of("?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"),
                 List.of(), List.of());
         assertEquals("""
                 SELECT DISTINCT * WHERE {
@@ -27,7 +27,7 @@ class PatternTest {
 
     @Test
     void createTargetInsertSparqlGeneratesSparqlFromTargetTriplesAndPatternMatch() {
-        final Pattern sut = new Pattern("name", List.of(), List.of("?p rdfs:domain ?A",
+        final Pattern sut = new Pattern("filename.json", "name", List.of(), List.of("?p rdfs:domain ?A",
                 "?p rdfs:range ?B",
                 "?C rdfs:subClassOf ?B"), List.of());
         final String p = Generator.generateUri().toString();
@@ -47,8 +47,8 @@ class PatternTest {
     }
 
     @Test
-    void createTargetInsertSparqlUsesnewEntitiesInTargetQuery() {
-        final Pattern sut = new Pattern("name", List.of(), List.of("?p rdfs:domain ?A",
+    void createTargetInsertSparqlUsesNewEntitiesInTargetQuery() {
+        final Pattern sut = new Pattern("filename.json","name", List.of(), List.of("?p rdfs:domain ?A",
                 "?p rdfs:range ?B",
                 "?C rdfs:subClassOf ?B",
                 "?G rdfs:subClassOf ?A",
@@ -80,7 +80,7 @@ class PatternTest {
 
     @Test
     void createTargetDeleteSparqlGeneratesSparqlFromSourceTriplesAndPatternMatch() {
-        final Pattern sut = new Pattern("name", List.of("?p rdfs:domain ?A",
+        final Pattern sut = new Pattern("filename.json","name", List.of("?p rdfs:domain ?A",
                 "?p rdfs:range ?B",
                 "?C rdfs:subClassOf ?B"), List.of(), List.of());
         final String p = Generator.generateUri().toString();

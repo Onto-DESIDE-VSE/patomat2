@@ -118,7 +118,7 @@ function applyTransformation(applyDeletes: boolean) {
         <li v-for="entity in value.newEntities">
           <span class="font-weight-bold">{{ entity.variableName }}</span
           >: <{{ entity.identifier }}>
-          <ul class="ml-4">
+          <ul v-if="entity.label?.length > 0" class="ml-4">
             <li>
               <EditableLabel
                 :patternInstanceId="value.id"

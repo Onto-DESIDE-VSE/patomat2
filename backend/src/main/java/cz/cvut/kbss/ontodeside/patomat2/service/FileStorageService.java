@@ -122,15 +122,20 @@ public class FileStorageService {
     /**
      * Deletes the specified file if it exists.
      *
-     * @param fileName the name of the file to delete
+     * @param fileName  the name of the file to delete
+     * @param sessionId ID of the session under which the file was stored created
      */
-    public void deleteFile(String fileName) {
-        final File result = new File(config.getStorage() + File.separator + session.getId() + File.separator + fileName);
+    public void deleteFile(String fileName, String sessionId) {
+        final File result = new File(config.getStorage() + File.separator + sessionId + File.separator + fileName);
         if (!result.exists()) {
             // Nothing to delete
             return;
         }
         result.delete();
+        assert result.getParentFile().isDirectory();
+        if (result.getParentFile().listFiles().length == 0) {
+            result.getParentFile().delete();
+        }
         LOG.debug("Deleted file '{}'.", fileName);
     }
 }

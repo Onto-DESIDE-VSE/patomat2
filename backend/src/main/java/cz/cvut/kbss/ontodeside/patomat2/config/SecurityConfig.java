@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,11 +22,13 @@ public class SecurityConfig {
 
     private final ApplicationConfig config;
 
-    public SecurityConfig(ApplicationConfig config) {this.config = config;}
+    public SecurityConfig(ApplicationConfig config) {
+        this.config = config;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests((auth) -> auth.anyRequest().permitAll())
+        return http.anonymous(auth -> auth.authenticationFilter(new AnonymousAuthenticationFilter("NotImportant")))
                    .cors(cc -> cc.configurationSource(createCorsConfiguration()))
                    .csrf(AbstractHttpConfigurer::disable)
                    .sessionManagement(smc -> smc.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)).build();
