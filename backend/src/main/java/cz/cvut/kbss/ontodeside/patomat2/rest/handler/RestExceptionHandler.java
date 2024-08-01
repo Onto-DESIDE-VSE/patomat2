@@ -2,6 +2,7 @@ package cz.cvut.kbss.ontodeside.patomat2.rest.handler;
 
 import cz.cvut.kbss.ontodeside.patomat2.exception.AmbiguousOntologyException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.InvalidFileException;
+import cz.cvut.kbss.ontodeside.patomat2.exception.NotFoundException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyReadException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
@@ -56,5 +57,10 @@ public class RestExceptionHandler {
                                                                 HttpServletRequest request) {
         logException(ex, request);
         return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<Void> notFoundException() {
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

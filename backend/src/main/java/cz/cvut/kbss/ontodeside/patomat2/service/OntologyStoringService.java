@@ -2,7 +2,9 @@ package cz.cvut.kbss.ontodeside.patomat2.service;
 
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
 import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
+import cz.cvut.kbss.ontodeside.patomat2.exception.NotFoundException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
+import cz.cvut.kbss.ontodeside.patomat2.model.LoadedTransformationInput;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.service.pattern.PatternParser;
 import jakarta.servlet.http.HttpSession;
@@ -56,8 +58,20 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
                 .map(storageService::saveFile)
                 .map(patternParser::readPattern)
                 .toList();
-        session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream().map(Pattern::fileName).toList());
+        session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream().map(Pattern::fileName)
+                                                                                .toList());
         eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns));
+    }
+
+    public LoadedTransformationInput getTransformationInput() {
+        try {
+            final LoadedTransformationInput result = new LoadedTransformationInput();
+            result.setOntologyFile(getRequiredUploadedOntologyFileName());
+            result.setPatternFiles((List<String>) session.getAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE));
+            return result;
+        } catch (OntologyNotUploadedException e) {
+            throw new NotFoundException("Ontology not uploaded, yet.");
+        }
     }
 
     /**
@@ -66,12 +80,13 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
      * @return Ontology file
      * @throws OntologyNotUploadedException if the ontology has not been uploaded
      */
-    public Resource getOntologyFile() {
-        final String ontologyFileName = (String) session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE);
-        if (ontologyFileName == null) {
-            throw new OntologyNotUploadedException("Ontology has not been uploaded yet.");
-        }
-        return new FileSystemResource(storageService.getFile(ontologyFileName));
+    public Resource getOntologyFileContent() {
+        return new FileSystemResource(storageService.getFile(getRequiredUploadedOntologyFileName()));
+    }
+
+    private String getRequiredUploadedOntologyFileName() {
+        return Optional.ofNullable((String) session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE))
+                       .orElseThrow(() -> new OntologyNotUploadedException("Ontology has not been uploaded yet."));
     }
 
     /**
@@ -81,11 +96,6 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
      */
     public Optional<String> getUploadedOntologyFileName() {
         return Optional.ofNullable((String) session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE));
-    }
-
-    public void removeUploadedOntology(String ontologyFilename) {
-        storageService.deleteFile(ontologyFilename, session.getId());
-        session.removeAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE);
     }
 
     @Override

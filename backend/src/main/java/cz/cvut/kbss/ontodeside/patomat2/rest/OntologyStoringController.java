@@ -1,6 +1,7 @@
 package cz.cvut.kbss.ontodeside.patomat2.rest;
 
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
+import cz.cvut.kbss.ontodeside.patomat2.model.LoadedTransformationInput;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyStoringService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -45,8 +46,13 @@ public class OntologyStoringController {
     }
 
     @GetMapping
+    public LoadedTransformationInput getTransformationInput() {
+        return ontologyStoringService.getTransformationInput();
+    }
+
+    @GetMapping("/content")
     public ResponseEntity<Resource> getOntologyFile() {
-        final Resource resource = ontologyStoringService.getOntologyFile();
+        final Resource resource = ontologyStoringService.getOntologyFileContent();
         return buildResponseWithAttachment(resource);
     }
 

@@ -1,6 +1,6 @@
-import { createRouter, createWebHistory } from "vue-router"
-import HomeView from "../views/HomeView.vue"
-import Constants from "@/constants/Constants"
+import { createRouter, createWebHistory } from "vue-router";
+import HomeView from "../views/HomeView.vue";
+import Constants from "@/constants/Constants";
 
 const router = createRouter({
   history: createWebHistory(Constants.CONTEXT_PATH),
@@ -11,8 +11,8 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: "/import",
-      name: "import",
+      path: "/load",
+      name: "load",
       component: () => import("../views/ImportView.vue")
     },
     {
@@ -29,6 +29,6 @@ const router = createRouter({
       component: () => import("../views/AboutView.vue")
     }
   ]
-})
+});
 
-export default router
+export default router;
