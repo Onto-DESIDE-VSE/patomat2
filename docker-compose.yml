@@ -21,7 +21,9 @@ services:
             PATOMAT2_NEWENTITYIRIBASE: ${NEW_ENTITY_IRI_BASE:-https://owl.vse.cz/patomat2/}
             PATOMAT2_SECURITY_MAXSESSIONS: ${MAX_SESSIONS:-20}
     patomat2:
-        image: ghcr.io/onto-deside-vse/patomat2-frontend:latest
+        #        image: ghcr.io/onto-deside-vse/patomat2-frontend:latest
+        build:
+            context: frontend
         restart: always
         depends_on:
             - patomat2-server
