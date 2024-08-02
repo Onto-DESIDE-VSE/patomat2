@@ -5,9 +5,22 @@ import Changelog from "../components/Changelog.vue";
 <template>
   <div class="about">
     <h1>About PatOMat2</h1>
+    <p class="mb-1">
+      The PatOMat2 application aims at pattern-based transformation of existing ontologies. It allows bridging different
+      modeling styles of web ontologies.
+    </p>
+    <p class="mb-1">
+      Its source code is available at
+      <a href="https://github.com/Onto-DESIDE-VSE/patomat2" target="_blank"
+        >https://github.com/Onto-DESIDE-VSE/patomat2</a
+      >.
+    </p>
     <p>
-      PatOMat2 is a tool for automatic searching for and processing of patterns in ontologies. It is an evolution of the
-      original <a href="https://patomat.vse.cz/">PatOMat</a>.
+      Its development was supported by the EU’s Horizon Europe grant no. 101058682 (<a
+        href="https://ontodeside.eu/"
+        target="_blank"
+        >Onto-DESIDE</a
+      >).
     </p>
   </div>
 
