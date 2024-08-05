@@ -3,11 +3,7 @@
         "name": "CAT1",
         "op_source": {
             "triples": {
-                "triple": [
-                    "?p rdfs:domain ?A",
-                    "?p rdfs:range ?B",
-                    "?C rdfs:subClassOf ?B"
-                ]
+                "triple": ["?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"]
             }
         },
         "op_target": {
@@ -24,19 +20,13 @@
                 ]
             }
         },
-        "naming_transformation": [
-            {                
-                "lex": [
-                    {
-                        "?G": ["?C", "?A"]
-                    }
-                ],
-                "ntp": [
-                    {
-                        "?G": ["?A that ?p a ?C"]
-                    }
-                ]
+        "naming_transformation": {
+            "lex": {
+                "?G": ["?C", "?A"]
+            },
+            "ntp": {
+                "?G": ["?A that ?p a ?C"]
             }
-        ]
+        }
     }
 }

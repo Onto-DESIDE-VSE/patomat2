@@ -88,12 +88,12 @@ public class PatternParser {
 
     private List<NameTransformation> readNameTransformations(DocumentContext doc) {
         try {
-            final ObjectNode nameTransformations = doc.read("$.tp.naming_transformation[0].ntp[0]", new TypeRef<>() {});
+            final ObjectNode nameTransformations = doc.read("$.tp.naming_transformation.ntp", new TypeRef<>() {});
             final Iterator<Map.Entry<String, JsonNode>> it = nameTransformations.fields();
             final List<NameTransformation> result = new ArrayList<>();
             while (it.hasNext()) {
                 final Map.Entry<String, JsonNode> e = it.next();
-                // TODO Temporary, need to agree on the format (which seems overly complex at the moment)
+                assert e.getKey().startsWith("?");
                 result.add(new NameTransformation(e.getKey().substring(1), e.getValue().get(0).asText()));
             }
             return result;
