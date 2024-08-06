@@ -66,6 +66,9 @@ public record NameTransformation(String variableName, String rule) {
 
     private static String splitCamelCaseStringToWords(String str) {
         String[] words = str.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
+        for (int i = 0; i < words.length; i++) {
+            words[i] = words[i].trim();
+        }
         return String.join(" ", words);
     }
 }
