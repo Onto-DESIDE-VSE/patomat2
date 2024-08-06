@@ -31,7 +31,8 @@ const headers = [
     key: "transformationSparql",
     value: (item: PatternInstance) => ({
       insert: item.sparqlInsert,
-      del: item.sparqlDelete
+      del: item.sparqlDelete,
+      newEntities: item.newEntities
     })
   },
   {
@@ -78,6 +79,14 @@ function applyTransformation(applyDeletes: boolean) {
   );
   props.onTransform(applyDeletes, instances);
 }
+
+function highlightNewVariables(insert: string, newEntities: NewEntity[]) {
+  insert = insert.replace(/</g, `&lt;`).replace(/>/g, `&gt;`);
+  for (const ne of newEntities) {
+    insert = insert.replace(new RegExp(`&lt;${ne.identifier}&gt;`, "g"), (match) => `<b>${match}</b>`);
+  }
+  return insert;
+}
 </script>
 
 <template>
@@ -110,8 +119,8 @@ function applyTransformation(applyDeletes: boolean) {
       </ul>
     </template>
     <template v-slot:item.transformationSparql="{ value }">
-      <pre class="mb-2">{{ value.del }}</pre>
-      <pre>{{ value.insert }}</pre>
+      <pre class="mb-2 mt-1">{{ value.del }}</pre>
+      <div v-html="`<pre>${highlightNewVariables(value.insert, value.newEntities)}</pre>`" class="mb-1" />
     </template>
     <template v-slot:item.newEntities="{ value }">
       <ul class="mt-1 mb-1">
