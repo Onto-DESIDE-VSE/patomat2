@@ -2,6 +2,7 @@ package cz.cvut.kbss.ontodeside.patomat2.service;
 
 import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
+import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
 import cz.cvut.kbss.ontodeside.patomat2.model.NameTransformation;
 import cz.cvut.kbss.ontodeside.patomat2.model.NewEntity;
 import cz.cvut.kbss.ontodeside.patomat2.model.NewEntityGenerator;
@@ -68,9 +69,12 @@ public class MatchService {
                            })
                            .toList();
         } catch (RuntimeException e) {
-            ontologyHolder.clear();
+            // Clear matches so that they can be reloaded
             this.matches = null;
-            throw e;
+            if (e instanceof PatOMat2Exception) {
+                throw e;
+            }
+            throw new PatOMat2Exception(e);
         }
     }
 
@@ -111,7 +115,6 @@ public class MatchService {
     }
 
     public void clear() {
-        ontologyHolder.clear();
         this.matches = null;
     }
 }

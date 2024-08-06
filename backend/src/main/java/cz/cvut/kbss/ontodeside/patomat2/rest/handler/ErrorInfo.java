@@ -33,11 +33,11 @@ public class ErrorInfo {
     /**
      * Creates a new instance with the specified message and request URI.
      *
-     * @param message    Error message
      * @param requestUri URI of the request which caused the error
+     * @param message    Error message
      * @return New {@code ErrorInfo} instance
      */
-    public static ErrorInfo createWithMessage(String message, String requestUri) {
-        return new ErrorInfo(message, requestUri);
+    public static ErrorInfo createWithMessage(String requestUri, String message) {
+        return new ErrorInfo(requestUri, message);
     }
 }

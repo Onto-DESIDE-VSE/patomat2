@@ -30,7 +30,7 @@ public class RestExceptionHandler {
     }
 
     private static ErrorInfo errorInfo(HttpServletRequest request, Throwable e) {
-        return ErrorInfo.createWithMessage(e.getMessage(), request.getRequestURI());
+        return ErrorInfo.createWithMessage(request.getRequestURI(), e.getMessage());
     }
 
     @ExceptionHandler(InvalidFileException.class)

@@ -21,11 +21,12 @@ const fetchMatches = async () => {
     matches.value = await resp.json();
   } else if (resp.status === 409) {
     messageStore.publishMessage("Ontology not uploaded, yet.");
-    router.push("/import");
+    router.push("/load");
   } else if (resp.status === 401) {
     messageStore.publishMessage("PatOMat2 is currently fully utilized. Please try again later.");
   } else {
-    messageStore.publishMessage("Unable to get pattern matches. Got message: " + resp.body);
+    const error = await resp.json();
+    messageStore.publishMessage("Unable to get pattern matches. Got message: " + error.message);
   }
 };
 fetchMatches();
@@ -50,7 +51,7 @@ const applyTransformation = async (applyDeletes: boolean, instances: PatternInst
   if (resp.ok) {
     downloadAttachment(resp);
   } else {
-    messageStore.publishMessage("Failed to apply transformation. Got message: " + resp.body);
+    messageStore.publishMessage("Failed to apply transformation. Got message: " + JSON.parse(resp.body).message);
   }
 };
 </script>
