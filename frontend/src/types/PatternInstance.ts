@@ -22,5 +22,5 @@ export type ResultBinding = {
 export type NewEntity = {
   identifier: string;
   variableName: string;
-  label: string;
+  labels: string[];
 };

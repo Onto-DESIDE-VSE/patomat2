@@ -57,7 +57,7 @@ function onNewEntityLabelChanged(patternInstanceId: number, ne: NewEntity) {
   if (instance) {
     const change = _.cloneDeep(instance);
     const newLabel: any = {};
-    newLabel[ne.variableName] = ne.label;
+    newLabel[ne.variableName] = ne.labels;
     newEntityLabels.value.set(
       patternInstanceId,
       Object.assign({}, newEntityLabels.value.get(patternInstanceId), newLabel)
@@ -118,15 +118,13 @@ function applyTransformation(applyDeletes: boolean) {
         <li v-for="entity in value.newEntities">
           <span class="font-weight-bold">{{ entity.variableName }}</span
           >: <{{ entity.identifier }}>
-          <ul v-if="entity.label?.length > 0" class="ml-4">
-            <li>
-              <EditableLabel
-                :patternInstanceId="value.id"
-                :entity="entity"
-                :onSave="onNewEntityLabelChanged"
-              ></EditableLabel>
-            </li>
-          </ul>
+          <div v-if="entity.labels?.length > 0" class="ml-4">
+            <EditableLabel
+              :patternInstanceId="value.id"
+              :entity="entity"
+              :onSave="onNewEntityLabelChanged"
+            ></EditableLabel>
+          </div>
         </li>
       </ul>
     </template>
