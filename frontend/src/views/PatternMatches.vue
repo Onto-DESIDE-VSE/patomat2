@@ -49,10 +49,23 @@ const applyTransformation = async (applyDeletes: boolean, instances: PatternInst
     }
   });
   if (resp.ok) {
-    downloadAttachment(resp);
+    downloadTransformedOntology();
   } else {
     const error = await resp.json();
     messageStore.publishMessage("Failed to apply transformation. Got message: " + error.message);
+  }
+};
+
+const downloadTransformedOntology = async () => {
+  const resp = await fetch(`${Constants.SERVER_URL}/transformation/ontology`, {
+    method: "GET",
+    credentials: "include"
+  });
+  if (resp.ok) {
+    downloadAttachment(resp);
+  } else {
+    const error = await resp.json();
+    messageStore.publishMessage("Failed to download transformed ontology. Got message: " + error.message);
   }
 };
 </script>
