@@ -84,6 +84,15 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
         return new FileSystemResource(storageService.getFile(getRequiredUploadedOntologyFileName()));
     }
 
+    /**
+     * Gets the uploaded ontology file as {@link File}.
+     *
+     * @return Ontology file
+     */
+    public File getOntologyFile() {
+        return storageService.getFile(getRequiredUploadedOntologyFileName());
+    }
+
     private String getRequiredUploadedOntologyFileName() {
         return Optional.ofNullable((String) session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE))
                        .orElseThrow(() -> new OntologyNotUploadedException("Ontology has not been uploaded yet."));
