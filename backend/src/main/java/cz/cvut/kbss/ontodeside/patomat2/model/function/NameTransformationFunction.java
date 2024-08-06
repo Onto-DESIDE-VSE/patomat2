@@ -3,8 +3,6 @@ package cz.cvut.kbss.ontodeside.patomat2.model.function;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
 
-import java.util.regex.Matcher;
-
 public abstract class NameTransformationFunction {
 
     protected final OntologyHolder ontologyHolder;

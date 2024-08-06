@@ -70,11 +70,11 @@ public class TransformationService {
         if (pit.getNewEntityLabels() == null) {
             return;
         }
-        pit.getNewEntityLabels().forEach((var, label) -> {
+        pit.getNewEntityLabels().forEach((var, labels) -> {
             for (int i = 0; i < instance.newEntities().size(); i++) {
                 final NewEntity ne = instance.newEntities().get(i);
                 if (ne.variableName().equals(var)) {
-                    instance.newEntities().set(i, new NewEntity(ne.variableName(), ne.identifier(), label));
+                    instance.newEntities().set(i, new NewEntity(ne.variableName(), ne.identifier(), labels));
                 }
             }
         });

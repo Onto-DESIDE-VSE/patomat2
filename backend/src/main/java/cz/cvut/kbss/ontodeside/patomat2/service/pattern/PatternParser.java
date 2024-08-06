@@ -1,6 +1,7 @@
 package cz.cvut.kbss.ontodeside.patomat2.service.pattern;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
@@ -94,7 +95,14 @@ public class PatternParser {
             while (it.hasNext()) {
                 final Map.Entry<String, JsonNode> e = it.next();
                 assert e.getKey().startsWith("?");
-                result.add(new NameTransformation(e.getKey().substring(1), e.getValue().get(0).asText()));
+                if (e.getValue().isArray()) {
+                    final ArrayNode array = (ArrayNode) e.getValue();
+                    for (int i = 0; i < array.size(); i++) {
+                        result.add(new NameTransformation(e.getKey().substring(1), array.get(i).asText()));
+                    }
+                } else {
+                    result.add(new NameTransformation(e.getKey().substring(1), e.getValue().asText()));
+                }
             }
             return result;
         } catch (PathNotFoundException e) {

@@ -3,7 +3,6 @@ package cz.cvut.kbss.ontodeside.patomat2.service;
 import cz.cvut.kbss.ontodeside.patomat2.event.OntologyFileUploadedEvent;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
-import cz.cvut.kbss.ontodeside.patomat2.model.NameTransformation;
 import cz.cvut.kbss.ontodeside.patomat2.model.NewEntity;
 import cz.cvut.kbss.ontodeside.patomat2.model.NewEntityGenerator;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
@@ -82,13 +81,13 @@ public class MatchService {
         final Set<String> newEntityVars = new HashSet<>(match.getPattern().targetVariables());
         newEntityVars.removeAll(match.getPattern().sourceVariables());
         return new ArrayList<>(newEntityVars.stream()
-                            .map(v -> newEntityGenerator.generateNewEntity(v, match.getPattern().nameTransformations()
-                                                                                   .stream()
-                                                                                   .filter(nt -> nt.variableName()
-                                                                                                   .equals(v))
-                                                                                   .findFirst()
-                                                                                   .orElse(NameTransformation.EMPTY), match))
-                            .toList());
+                                            .map(v -> newEntityGenerator.generateNewEntity(v, match.getPattern()
+                                                                                                   .nameTransformations()
+                                                                                                   .stream()
+                                                                                                   .filter(nt -> nt.variableName()
+                                                                                                                   .equals(v))
+                                                                                                   .toList(), match))
+                                            .toList());
     }
 
     private void loadOntology(String fileName) {
