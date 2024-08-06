@@ -4,7 +4,9 @@ import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
 import cz.cvut.kbss.ontodeside.patomat2.model.NewEntity;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternInstance;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternInstanceTransformation;
+import cz.cvut.kbss.ontodeside.patomat2.model.TransformationResult;
 import cz.cvut.kbss.ontodeside.patomat2.model.TransformationSpecification;
+import cz.cvut.kbss.ontodeside.patomat2.model.TransformationSummary;
 import cz.cvut.kbss.ontodeside.patomat2.util.FileAwareByteArrayResource;
 import cz.cvut.kbss.ontodeside.patomat2.util.Utils;
 import org.springframework.core.io.Resource;
@@ -36,7 +38,7 @@ public class TransformationService {
      * @param transformation Transformation specification
      * @return Transformed ontology
      */
-    public Resource transform(@NonNull TransformationSpecification transformation) {
+    public TransformationResult transform(@NonNull TransformationSpecification transformation) {
         Objects.requireNonNull(transformation);
         if (!ontologyHolder.isLoaded()) {
             throw new OntologyNotUploadedException("Ontology has not been uploaded yet.");
@@ -49,11 +51,16 @@ public class TransformationService {
                 applyTransformation(instance, transformation.isApplyDeletes());
             });
             final String ontologyFilename = storingService.getUploadedOntologyFileName().orElse(null);
-            return new FileAwareByteArrayResource(ontologyHolder.export(Utils.filenameToMimeType(ontologyFilename))
-                                                                .toByteArray(), ontologyFilename);
+            final Resource newOntology = new FileAwareByteArrayResource(ontologyHolder.export(Utils.filenameToMimeType(ontologyFilename))
+                                                                                      .toByteArray(), ontologyFilename);
+            return new TransformationResult(newOntology, new TransformationSummary("", ""));
         } catch (RuntimeException e) {
             matchService.clear();
             throw e;
+        } finally {
+            // Reload the original untransformed ontology
+            ontologyHolder.clear();
+            ontologyHolder.loadOntology(storingService.getOntologyFile());
         }
     }
 

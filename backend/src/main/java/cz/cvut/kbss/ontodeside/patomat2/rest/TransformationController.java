@@ -1,5 +1,6 @@
 package cz.cvut.kbss.ontodeside.patomat2.rest;
 
+import cz.cvut.kbss.ontodeside.patomat2.model.TransformationResult;
 import cz.cvut.kbss.ontodeside.patomat2.model.TransformationSpecification;
 import cz.cvut.kbss.ontodeside.patomat2.service.TransformationService;
 import org.springframework.core.io.Resource;
@@ -21,7 +22,7 @@ public class TransformationController {
 
     @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> transform(@RequestBody TransformationSpecification transformation) {
-        final Resource result = transformationService.transform(transformation);
-        return OntologyStoringController.buildResponseWithAttachment(result);
+        final TransformationResult result = transformationService.transform(transformation);
+        return OntologyStoringController.buildResponseWithAttachment(result.ontology());
     }
 }
