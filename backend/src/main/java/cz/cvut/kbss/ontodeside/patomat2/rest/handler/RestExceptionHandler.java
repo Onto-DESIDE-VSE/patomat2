@@ -19,7 +19,7 @@ public class RestExceptionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestExceptionHandler.class);
 
-    private static void logException(PatOMat2Exception ex, HttpServletRequest request) {
+    private static void logException(Throwable ex, HttpServletRequest request) {
         LOG.error("Exception caught when processing request to '{}'.", request.getRequestURI(), ex);
     }
 
@@ -62,5 +62,11 @@ public class RestExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Void> notFoundException() {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorInfo> illegalStateException(IllegalStateException ex, HttpServletRequest request) {
+        logException(ex, request);
+        return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
