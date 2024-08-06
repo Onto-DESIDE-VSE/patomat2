@@ -7,6 +7,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -45,5 +46,31 @@ public class Utils {
         final Optional<RDFFormat> mimeType = Rio.getParserFormatForFileName(filename);
         return mimeType.map(FileFormat::getDefaultMIMEType)
                        .orElseThrow(() -> new PatOMat2Exception("Unable to determine MIME type for file '" + filename + "'."));
+    }
+
+    /**
+     * Creates an entity label from its specified identifier.
+     * @param id Entity identifier (IRI)
+     * @return Extracted label
+     */
+    public static String createLabelFromIdentifier(String id) {
+        Objects.requireNonNull(id);
+        final String localPart = id.contains("#") ? id.substring(id.lastIndexOf('#') + 1) : id.substring(id.lastIndexOf('/') + 1);
+        String label = localPart.replace('-', ' ');
+        label = label.replace('_', ' ');
+        label = splitCamelCaseStringToWords(label);
+        final String[] parts = label.split(" ");
+        for (int i = 0; i < parts.length; i++) {
+            parts[i] = parts[i].substring(0, 1).toUpperCase() + parts[i].substring(1);
+        }
+        return String.join(" ", parts);
+    }
+
+    private static String splitCamelCaseStringToWords(String str) {
+        String[] words = str.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
+        for (int i = 0; i < words.length; i++) {
+            words[i] = words[i].trim();
+        }
+        return String.join(" ", words);
     }
 }
