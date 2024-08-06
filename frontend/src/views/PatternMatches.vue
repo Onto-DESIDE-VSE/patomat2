@@ -51,7 +51,8 @@ const applyTransformation = async (applyDeletes: boolean, instances: PatternInst
   if (resp.ok) {
     downloadAttachment(resp);
   } else {
-    messageStore.publishMessage("Failed to apply transformation. Got message: " + JSON.parse(resp.body).message);
+    const error = await resp.json();
+    messageStore.publishMessage("Failed to apply transformation. Got message: " + error.message);
   }
 };
 </script>
