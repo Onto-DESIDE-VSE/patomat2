@@ -33,4 +33,10 @@ class PatternParserTest {
         final Pattern p = sut.readPattern(new File("src/test/resources/pattern-example.json"));
         assertEquals(List.of(new NameTransformation("G", "?A that ?p a ?C")), p.nameTransformations());
     }
+
+    @Test
+    void readPatternParsesMultipleNameTransformationsForOneVariable() {
+        final Pattern p = sut.readPattern(new File("src/test/resources/pattern-example-multiple-ntp.json"));
+        assertEquals(List.of(new NameTransformation("G", "?A that ?p a ?C"), new NameTransformation("G", "?p ?C")), p.nameTransformations());
+    }
 }

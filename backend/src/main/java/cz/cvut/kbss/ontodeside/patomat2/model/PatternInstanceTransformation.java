@@ -1,5 +1,6 @@
 package cz.cvut.kbss.ontodeside.patomat2.model;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,7 +20,7 @@ public class PatternInstanceTransformation {
      * <p>
      * The map maps variable names to entity labels.
      */
-    private Map<String, String> newEntityLabels;
+    private Map<String, List<String>> newEntityLabels;
 
     public Integer getId() {
         return id;
@@ -29,11 +30,11 @@ public class PatternInstanceTransformation {
         this.id = id;
     }
 
-    public Map<String, String> getNewEntityLabels() {
+    public Map<String, List<String>> getNewEntityLabels() {
         return newEntityLabels;
     }
 
-    public void setNewEntityLabels(Map<String, String> newEntityLabels) {
+    public void setNewEntityLabels(Map<String, List<String>> newEntityLabels) {
         this.newEntityLabels = newEntityLabels;
     }
 }

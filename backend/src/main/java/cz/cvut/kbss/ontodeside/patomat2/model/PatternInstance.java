@@ -8,7 +8,7 @@ public record PatternInstance(int id, String patternName, PatternMatch match, St
 
     public PatternInstance deepCopy() {
         return new PatternInstance(id, patternName, match, sparqlInsert, sparqlDelete, new ArrayList<>(newEntities.stream()
-                                                                                                                .map(ne -> new NewEntity(ne.variableName(), ne.identifier(), ne.label()))
+                                                                                                                .map(ne -> new NewEntity(ne.variableName(), ne.identifier(), ne.labels()))
                                                                                                                 .toList()));
     }
 }

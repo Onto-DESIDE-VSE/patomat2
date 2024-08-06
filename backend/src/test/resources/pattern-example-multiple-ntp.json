@@ -1,0 +1,32 @@
+{
+    "tp": {
+        "name": "CAT1",
+        "op_source": {
+            "triples": {
+                "triple": ["?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"]
+            }
+        },
+        "op_target": {
+            "triples": {
+                "triple": [
+                    "?p rdfs:domain ?A",
+                    "?p rdfs:range ?B",
+                    "?C rdfs:subClassOf ?B",
+                    "?G rdfs:subClassOf ?A",
+                    "?G owl:equivalentClass _:restriction",
+                    "_:restriction rdf:type owl:Restriction",
+                    "_:restriction owl:onProperty ?p",
+                    "_:restriction owl:someValuesFrom ?C"
+                ]
+            }
+        },
+        "naming_transformation": {
+            "lex": {
+                "?G": ["?C", "?A"]
+            },
+            "ntp": {
+                "?G": ["?A that ?p a ?C", "?p ?C"]
+            }
+        }
+    }
+}
