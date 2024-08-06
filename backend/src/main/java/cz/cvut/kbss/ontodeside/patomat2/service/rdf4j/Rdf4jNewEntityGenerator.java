@@ -9,6 +9,7 @@ import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -40,8 +41,12 @@ public class Rdf4jNewEntityGenerator implements NewEntityGenerator {
     }
 
     @Override
-    public NewEntity generateNewEntity(@NonNull String variableName, @NonNull NameTransformation nameTransformation, @NonNull PatternMatch match) {
+    public NewEntity generateNewEntity(@NonNull String variableName,
+                                       @NonNull List<NameTransformation> nameTransformations,
+                                       @NonNull PatternMatch match) {
         final String id = generateIdentifier();
-        return new NewEntity(variableName, id, nameTransformation.generateName(match, ontologyHolder));
+        return new NewEntity(variableName, id, nameTransformations.stream()
+                                                                  .map(n -> n.generateName(match, ontologyHolder))
+                                                                  .toList());
     }
 }
