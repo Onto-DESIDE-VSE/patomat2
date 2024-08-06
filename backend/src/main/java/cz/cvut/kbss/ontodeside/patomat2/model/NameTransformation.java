@@ -2,6 +2,8 @@ package cz.cvut.kbss.ontodeside.patomat2.model;
 
 import cz.cvut.kbss.ontodeside.patomat2.Constants;
 import cz.cvut.kbss.ontodeside.patomat2.exception.NameTransformationException;
+import cz.cvut.kbss.ontodeside.patomat2.model.function.LabelFunction;
+import cz.cvut.kbss.ontodeside.patomat2.model.function.NameTransformationFunction;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
 import cz.cvut.kbss.ontodeside.patomat2.util.Utils;
 
@@ -30,45 +32,29 @@ public record NameTransformation(String variableName, String rule) {
      * @return New entity name based on the transformation rule
      */
     public String generateName(PatternMatch match, OntologyHolder ontologyHolder) {
-        final Set<String> variables = Utils.extractSparqlVariables(rule);
+        final NameTransformationFunction functions = transformationFunctions(ontologyHolder);
+        String ruleWithAppliedFunctions = functions.apply(match, rule);
+        final Set<String> variables = Utils.extractSparqlVariables(ruleWithAppliedFunctions);
         final Map<String, String> variableLabels = new HashMap<>(variables.size());
         variables.forEach(v -> {
             final ResultBinding binding = match.getBinding(v)
                                                .orElseThrow(() -> new NameTransformationException("No value for name transformation rule variable " + Constants.SPARQL_VARIABLE + v));
-            final String value = binding.value();
-            final String datatype = binding.datatype();
-            final String label;
-            if (Constants.RDFS_RESOURCE.equals(datatype)) {
-                label = ontologyHolder.getLabel(value).orElseGet(() -> extractLabelFromIdentifier(value));
+            String label;
+            if (!Constants.RDFS_RESOURCE.equals(binding.datatype())) {
+                label = binding.value();
             } else {
-                label = value;
+                label = Utils.createLabelFromIdentifier(binding.value());
             }
             variableLabels.put(v, label);
         });
-        String label = rule;
+        String label = ruleWithAppliedFunctions;
         for (Map.Entry<String, String> entry : variableLabels.entrySet()) {
             label = label.replace(Constants.SPARQL_VARIABLE + entry.getKey(), entry.getValue());
         }
         return label;
     }
 
-    private static String extractLabelFromIdentifier(String id) {
-        final String localPart = id.contains("#") ? id.substring(id.lastIndexOf('#') + 1) : id.substring(id.lastIndexOf('/') + 1);
-        String label = localPart.replace('-', ' ');
-        label = label.replace('_', ' ');
-        label = splitCamelCaseStringToWords(label);
-        final String[] parts = label.split(" ");
-        for (int i = 0; i < parts.length; i++) {
-            parts[i] = parts[i].substring(0, 1).toUpperCase() + parts[i].substring(1);
-        }
-        return String.join(" ", parts);
-    }
-
-    private static String splitCamelCaseStringToWords(String str) {
-        String[] words = str.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
-        for (int i = 0; i < words.length; i++) {
-            words[i] = words[i].trim();
-        }
-        return String.join(" ", words);
+    private static NameTransformationFunction transformationFunctions(OntologyHolder ontologyHolder) {
+        return new LabelFunction(ontologyHolder, null);
     }
 }
