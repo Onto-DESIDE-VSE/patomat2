@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2024-08-08
+
+- Show transformation summary on successful transformation.
+
 ### 2024-08-06
 
 - Support the `label` function in name transformation patterns. PatOMat2 no longer automatically attempts to extract
