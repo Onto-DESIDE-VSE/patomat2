@@ -1,5 +1,7 @@
 package cz.cvut.kbss.ontodeside.patomat2.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.List;
 import java.util.Map;
 
@@ -8,11 +10,13 @@ import java.util.Map;
  * <p>
  * More specifically, it contains information how to augment the default generated transformation.
  */
+@Schema(description = "Specifies how a particular pattern instance should be transformed")
 public class PatternInstanceTransformation {
 
     /**
      * Pattern instance id
      */
+    @Schema(description = "Pattern instance identifier")
     private Integer id;
 
     /**
@@ -20,6 +24,7 @@ public class PatternInstanceTransformation {
      * <p>
      * The map maps variable names to entity labels.
      */
+    @Schema(description = "Labels of new entities to override the generated ones. It is a map of variable names to lists of entity labels")
     private Map<String, List<String>> newEntityLabels;
 
     public Integer getId() {
