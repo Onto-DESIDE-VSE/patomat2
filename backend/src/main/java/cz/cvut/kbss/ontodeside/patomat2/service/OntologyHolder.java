@@ -1,5 +1,6 @@
 package cz.cvut.kbss.ontodeside.patomat2.service;
 
+import cz.cvut.kbss.ontodeside.patomat2.model.OntologyDiff;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import org.springframework.lang.NonNull;
@@ -70,4 +71,12 @@ public interface OntologyHolder {
      * Clears the holder, discarding the previously loaded ontology.
      */
     void clear();
+
+    /**
+     * Calculates the difference of the loaded and the specified ontologies.
+     *
+     * @param otherOntologyFile File containing the other ontology
+     * @return Ontology difference
+     */
+    OntologyDiff difference(@NonNull File otherOntologyFile);
 }

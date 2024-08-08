@@ -4,14 +4,17 @@ import cz.cvut.kbss.ontodeside.patomat2.exception.AmbiguousOntologyException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.BlankNodeResultException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyReadException;
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
+import cz.cvut.kbss.ontodeside.patomat2.model.OntologyDiff;
 import cz.cvut.kbss.ontodeside.patomat2.model.Pattern;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternMatch;
 import cz.cvut.kbss.ontodeside.patomat2.model.ResultBinding;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyHolder;
 import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.eclipse.rdf4j.model.vocabulary.OWL;
 import org.eclipse.rdf4j.model.vocabulary.RDFS;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -21,6 +24,7 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryResult;
 import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.repository.util.RepositoryUtil;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
@@ -35,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -190,5 +195,29 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
         try (final RepositoryConnection conn = repository.getConnection()) {
             conn.clear();
         }
+    }
+
+    @Override
+    public OntologyDiff difference(@NonNull File otherOntologyFile) {
+        Objects.requireNonNull(otherOntologyFile);
+        verifyOntologyLoaded();
+        final Repository otherRepository = new SailRepository(new MemoryStore());
+        try (final RepositoryConnection otherConn = otherRepository.getConnection()) {
+            otherConn.add(otherOntologyFile);
+        } catch (IOException e) {
+            throw new PatOMat2Exception("Unable to load ontology for diff.", e);
+        }
+        final Collection<? extends Statement> added = RepositoryUtil.difference(repository, otherRepository);
+        final Collection<? extends Statement> removed = RepositoryUtil.difference(otherRepository, repository);
+        otherRepository.shutDown();
+
+        return new OntologyDiff(serializeToNTriples(added), serializeToNTriples(removed));
+    }
+
+    private static String serializeToNTriples(Collection<? extends Statement> statements) {
+        final Model m = new LinkedHashModel(statements);
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        Rio.write(m, bos, RDFFormat.NTRIPLES);
+        return bos.toString();
     }
 }

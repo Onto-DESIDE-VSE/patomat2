@@ -2,6 +2,7 @@ package cz.cvut.kbss.ontodeside.patomat2.service;
 
 import cz.cvut.kbss.ontodeside.patomat2.exception.OntologyNotUploadedException;
 import cz.cvut.kbss.ontodeside.patomat2.model.NewEntity;
+import cz.cvut.kbss.ontodeside.patomat2.model.OntologyDiff;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternInstance;
 import cz.cvut.kbss.ontodeside.patomat2.model.PatternInstanceTransformation;
 import cz.cvut.kbss.ontodeside.patomat2.model.TransformationSpecification;
@@ -61,9 +62,9 @@ public class TransformationService {
             final Resource newOntology = new FileAwareByteArrayResource(ontologyHolder.export(Utils.filenameToMimeType(ontologyFilename))
                                                                                       .toByteArray(), ontologyFilename);
             transformedOntologyHolder.setTransformedOntology(newOntology);
-            return new TransformationSummary("", "", appliedInstances.stream()
-                                                                     .map(pi -> pi.newEntities().size())
-                                                                     .reduce(0, Integer::sum));
+            final OntologyDiff diff = ontologyHolder.difference(storingService.getOntologyFile());
+            return new TransformationSummary(diff.addedStatements(), diff.removedStatements(),
+                    appliedInstances.stream().map(pi -> pi.newEntities().size()).reduce(0, Integer::sum));
         } catch (RuntimeException e) {
             matchService.clear();
             throw e;
