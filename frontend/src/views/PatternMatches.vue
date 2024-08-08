@@ -7,11 +7,14 @@ import type { PatternInstanceTransformation } from "@/types/PatternInstanceTrans
 import { downloadAttachment } from "@/util/Utils";
 import useMessageStore from "@/store/messageStore";
 import { useRouter } from "vue-router";
+import type { TransformationSummary } from "@/types/TransformationSummary";
+import TransformationSummaryView from "@/components/TransformationSummaryView.vue";
 
 const router = useRouter();
 const messageStore = useMessageStore();
 
 const matches = ref<PatternInstance[]>([]);
+const transformationSummary = ref<TransformationSummary | null>(null);
 
 const fetchMatches = async () => {
   const resp = await fetch(`${Constants.SERVER_URL}/matches`, {
@@ -50,6 +53,7 @@ const applyTransformation = async (applyDeletes: boolean, instances: PatternInst
   });
   if (resp.ok) {
     downloadTransformedOntology();
+    transformationSummary.value = await resp.json();
   } else {
     const error = await resp.json();
     messageStore.publishMessage("Failed to apply transformation. Got message: " + error.message);
@@ -73,4 +77,5 @@ const downloadTransformedOntology = async () => {
 <template>
   <h3 class="text-h3 mb-6">Pattern matches</h3>
   <MatchesTable :matches="matches" :on-instance-change="onInstanceChange" :on-transform="applyTransformation" />
+  <TransformationSummaryView :summary="transformationSummary" />
 </template>
