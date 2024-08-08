@@ -53,3 +53,7 @@ Deployment process is thus as follows:
 The application does not require authentication. However, there is a limit on how many concurrent sessions can be open at
 any given moment. If this limit is reached, any new sessions (i.e., requests from new clients) are rejected until enough
 existing sessions time out due to inactivity.
+
+## License
+
+MIT
