@@ -3,6 +3,10 @@ package cz.cvut.kbss.ontodeside.patomat2.rest;
 import cz.cvut.kbss.ontodeside.patomat2.exception.PatOMat2Exception;
 import cz.cvut.kbss.ontodeside.patomat2.model.LoadedTransformationInput;
 import cz.cvut.kbss.ontodeside.patomat2.service.OntologyStoringService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -20,6 +24,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+@Tag(name = "Ontology storage", description = "Ontology storage API")
 @RestController
 @RequestMapping("/ontology")
 public class OntologyStoringController {
@@ -29,12 +34,19 @@ public class OntologyStoringController {
     public OntologyStoringController(
             OntologyStoringService ontologyStoringService) {this.ontologyStoringService = ontologyStoringService;}
 
+    @Operation(summary = "Upload ontology and transformation pattern files")
+    @ApiResponse(responseCode = "200")
     @PostMapping
-    public void uploadFiles(@RequestParam("ontology") MultipartFile ontology,
+    public void uploadFiles(@Parameter(description = "Ontology file")
+                            @RequestParam("ontology") MultipartFile ontology,
+                            @Parameter(description = "Transformation pattern files")
                             @RequestParam("pattern") List<MultipartFile> patterns) {
         ontologyStoringService.saveOntologyAndPatterns(ontology, patterns);
     }
 
+    @Operation(summary = "Check if an ontology has been uploaded")
+    @ApiResponse(responseCode = "200", description = "Ontology has been uploaded")
+    @ApiResponse(responseCode = "404", description = "Ontology has not been uploaded")
     @RequestMapping(method = RequestMethod.HEAD)
     public ResponseEntity<Void> isOntologyUploaded() {
         final Optional<String> uploadedOntology = ontologyStoringService.getUploadedOntologyFileName();
@@ -45,11 +57,17 @@ public class OntologyStoringController {
         }
     }
 
+    @Operation(summary = "Get information about the uploaded transformation input")
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "409", description = "Ontology has not been uploaded")
     @GetMapping
     public LoadedTransformationInput getTransformationInput() {
         return ontologyStoringService.getTransformationInput();
     }
 
+    @Operation(summary = "Download the uploaded ontology file")
+    @ApiResponse(responseCode = "200", description = "Ontology file returned as attachment")
+    @ApiResponse(responseCode = "409", description = "Ontology has not been uploaded")
     @GetMapping("/content")
     public ResponseEntity<Resource> getOntologyFile() {
         final Resource resource = ontologyStoringService.getOntologyFileContent();
