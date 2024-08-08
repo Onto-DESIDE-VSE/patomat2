@@ -8,7 +8,7 @@
 		<version>3.3.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>cz.cvut.kbss.ontodeside</groupId>
+	<groupId>cz.vse.swoe.ontodeside</groupId>
 	<artifactId>patomat2-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>PatOMat2</name>
