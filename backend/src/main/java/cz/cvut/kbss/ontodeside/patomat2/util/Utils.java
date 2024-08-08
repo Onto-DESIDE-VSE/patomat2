@@ -19,6 +19,16 @@ public class Utils {
     }
 
     /**
+     * Stringifies the specified identifier, wrapping it in angle brackets.
+     *
+     * @param uri Identifier
+     * @return Identifier as a string
+     */
+    public static String uriToString(String uri) {
+        return "<" + uri + ">";
+    }
+
+    /**
      * Extracts SPARQL variables from the specified string.
      * <p>
      * The string may be a triple pattern, name transformation rule or a part of a SPARQL query.
@@ -50,6 +60,7 @@ public class Utils {
 
     /**
      * Creates an entity label from its specified identifier.
+     *
      * @param id Entity identifier (IRI)
      * @return Extracted label
      */
