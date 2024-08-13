@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.stream.Stream;
 
 public class Utils {
 
@@ -57,21 +58,36 @@ public class Utils {
     public static String createLabelFromIdentifier(String id) {
         Objects.requireNonNull(id);
         final String localPart = id.contains("#") ? id.substring(id.lastIndexOf('#') + 1) : id.substring(id.lastIndexOf('/') + 1);
-        String label = localPart.replace('-', ' ');
-        label = label.replace('_', ' ');
-        label = splitCamelCaseStringToWords(label);
-        final String[] parts = label.split(" ");
-        for (int i = 0; i < parts.length; i++) {
-            parts[i] = parts[i].substring(0, 1).toUpperCase() + parts[i].substring(1);
-        }
+        final String[] parts = tokenize(localPart);
+        capitalize(parts);
         return String.join(" ", parts);
     }
 
-    private static String splitCamelCaseStringToWords(String str) {
-        String[] words = str.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])");
-        for (int i = 0; i < words.length; i++) {
-            words[i] = words[i].trim();
+    /**
+     * Tokenizes the specified string.
+     * <p>
+     * It splits it by underscore, dash, whitespace and camel case words.
+     *
+     * @param str String to tokenize
+     * @return Array of tokens
+     */
+    public static String[] tokenize(String str) {
+        Objects.requireNonNull(str);
+        String[] tokens = str.split("[\\s-_]");
+        return Stream.of(tokens).flatMap(s -> Stream.of(s.split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])")))
+                     .toArray(String[]::new);
+    }
+
+    /**
+     * Capitalizes the specified tokens in place.
+     * <p>
+     * This means making the first letter of each token uppercase.
+     *
+     * @param tokens Tokens to capitalize
+     */
+    public static void capitalize(String[] tokens) {
+        for (int i = 0; i < tokens.length; i++) {
+            tokens[i] = tokens[i].substring(0, 1).toUpperCase() + tokens[i].substring(1);
         }
-        return String.join(" ", words);
     }
 }
