@@ -9,12 +9,12 @@ const messageStore = useMessageStore();
 
 const ontologyFile = ref<File>();
 const patternFiles = ref<File[]>([]);
-const uploading = ref<boolean>(false);
+const showProgress = ref<boolean>(false);
 
 const valid = computed(() => ontologyFile.value !== undefined && patternFiles.value.length > 0);
 
 const upload = async () => {
-  uploading.value = true;
+  showProgress.value = true;
   const formData = new FormData();
   formData.append("ontology", ontologyFile.value!);
   patternFiles.value.forEach((file) => formData.append("pattern", file));
@@ -23,8 +23,8 @@ const upload = async () => {
     method: "POST",
     body: formData
   });
+  showProgress.value = false;
   if (resp.ok) {
-    uploading.value = false;
     messageStore.publishMessage("Ontology and patterns uploaded.");
     router.push("/matches");
   } else if (resp.status === 401) {
@@ -36,6 +36,9 @@ const upload = async () => {
 </script>
 
 <template>
+  <v-overlay :model-value="showProgress" class="align-center justify-center">
+    <v-progress-circular color="primary" size="64" indeterminate></v-progress-circular>
+  </v-overlay>
   <v-form class="mt-2">
     <v-file-input v-model="ontologyFile" label="Ontology file" />
     <v-file-input
@@ -47,7 +50,7 @@ const upload = async () => {
     />
 
     <div class="float-right">
-      <v-btn color="primary" :disabled="!valid || uploading" :loading="uploading" @click="upload">Load</v-btn>
+      <v-btn color="primary" :disabled="!valid || showProgress" :loading="showProgress" @click="upload">Load</v-btn>
     </div>
   </v-form>
 </template>

@@ -15,11 +15,14 @@ const messageStore = useMessageStore();
 
 const matches = ref<PatternInstance[]>([]);
 const transformationSummary = ref<TransformationSummary | null>(null);
+const showProgress = ref(false);
 
 const fetchMatches = async () => {
+  showProgress.value = true;
   const resp = await fetch(`${Constants.SERVER_URL}/matches`, {
     credentials: "include"
   });
+  showProgress.value = false;
   if (resp.status === 200) {
     matches.value = await resp.json();
   } else if (resp.status === 409) {
@@ -40,6 +43,7 @@ function onInstanceChange(change: PatternInstance) {
 }
 
 const applyTransformation = async (applyDeletes: boolean, instances: PatternInstanceTransformation[]) => {
+  showProgress.value = true;
   const resp = await fetch(`${Constants.SERVER_URL}/transformation`, {
     method: "PUT",
     body: JSON.stringify({
@@ -51,6 +55,7 @@ const applyTransformation = async (applyDeletes: boolean, instances: PatternInst
       "Content-Type": "application/json"
     }
   });
+  showProgress.value = false;
   if (resp.ok) {
     downloadTransformedOntology();
     transformationSummary.value = await resp.json();
@@ -76,6 +81,9 @@ const downloadTransformedOntology = async () => {
 
 <template>
   <h3 class="text-h3 mb-6">Pattern matches</h3>
+  <v-overlay :model-value="showProgress" class="align-center justify-center">
+    <v-progress-circular color="primary" size="64" indeterminate></v-progress-circular>
+  </v-overlay>
   <MatchesTable :matches="matches" :on-instance-change="onInstanceChange" :on-transform="applyTransformation" />
   <TransformationSummaryView :summary="transformationSummary" />
 </template>
