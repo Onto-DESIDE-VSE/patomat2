@@ -4,6 +4,7 @@ import cz.vse.swoe.ontodeside.patomat2.Constants;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
 import cz.vse.swoe.ontodeside.patomat2.model.ResultBinding;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyHolder;
+import cz.vse.swoe.ontodeside.patomat2.util.NLPPipelineProvider;
 import cz.vse.swoe.ontodeside.patomat2.util.Utils;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.trees.HeadFinder;
@@ -32,15 +33,15 @@ public class HeadNounFunction extends NameTransformationFunction {
     }
 
     @Override
-    Pattern getPattern() {
+    protected Pattern getPattern() {
         return PATTERN;
     }
 
     @Override
-    String applyInternal(PatternMatch match, String argument) {
+    protected String applyInternal(PatternMatch match, String argument) {
         final String value = argument.startsWith("?") ? getBindingValue(match, argument.substring(1)) : argument;
         CoreDocument document = new CoreDocument(value);
-        NLP_PIPELINE.annotate(document);
+        NLPPipelineProvider.getNLPPipeline().annotate(document);
         HeadFinder hf = new PennTreebankLanguagePack().headFinder();
 
         final Tree myTree = document.sentences().getFirst().constituencyParse();

@@ -24,12 +24,12 @@ public class LabelFunction extends NameTransformationFunction {
     }
 
     @Override
-    Pattern getPattern() {
+    protected Pattern getPattern() {
         return PATTERN;
     }
 
     @Override
-    String applyInternal(PatternMatch match, String argument) {
+    protected String applyInternal(PatternMatch match, String argument) {
         final ResultBinding binding = getBinding(match, argument);
         if (!Constants.RDFS_RESOURCE.equals(binding.datatype())) {
             throw new NameTransformationException("Value of variable '" + argument + "' used in a label function is not a resource.");

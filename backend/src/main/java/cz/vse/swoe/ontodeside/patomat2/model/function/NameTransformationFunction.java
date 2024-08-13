@@ -4,26 +4,11 @@ import cz.vse.swoe.ontodeside.patomat2.exception.NameTransformationException;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
 import cz.vse.swoe.ontodeside.patomat2.model.ResultBinding;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyHolder;
-import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class NameTransformationFunction {
-
-    protected static final StanfordCoreNLP NLP_PIPELINE = initNLPPipeline();
-
-    private static StanfordCoreNLP initNLPPipeline() {
-        // set up pipeline properties
-        Properties props = new Properties();
-        // set the list of annotators to run
-        props.setProperty("annotators", "tokenize,pos,lemma,ner,parse,depparse,coref,kbp,quote");
-        // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
-        props.setProperty("coref.algorithm", "neural");
-        // build pipeline
-        return new StanfordCoreNLP(props);
-    }
 
     protected final OntologyHolder ontologyHolder;
 
@@ -56,12 +41,12 @@ public abstract class NameTransformationFunction {
         return next != null ? next.apply(match, result) : result;
     }
 
-    ResultBinding getBinding(PatternMatch match, String name) {
+    protected ResultBinding getBinding(PatternMatch match, String name) {
         return match.getBinding(name)
                     .orElseThrow(() -> new NameTransformationException("Variable '" + name + "' not found in pattern instance."));
     }
 
-    abstract Pattern getPattern();
+    protected abstract Pattern getPattern();
 
-    abstract String applyInternal(PatternMatch match, String argument);
+    protected abstract String applyInternal(PatternMatch match, String argument);
 }
