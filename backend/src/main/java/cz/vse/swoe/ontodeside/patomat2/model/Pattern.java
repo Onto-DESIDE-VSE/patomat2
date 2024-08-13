@@ -9,8 +9,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public record Pattern(@JsonIgnore String fileName, String name, List<String> sourceTriples, List<String> filters, List<String> targetTriples,
+public record Pattern(@JsonIgnore String fileName, String name, List<String> sourceTriples, List<String> filters,
+                      List<String> targetTriples,
                       List<NameTransformation> nameTransformations) {
 
     @Override
@@ -49,10 +51,12 @@ public record Pattern(@JsonIgnore String fileName, String name, List<String> sou
      * @return SPARQL SELECT query
      */
     public String sourceSparql() {
+        final Stream<String> lines = Stream.concat(sourceTriples.stream().map(t -> "  " + t + " ."),
+                filters.stream().map(f -> "  " + f));
         return """
                 SELECT DISTINCT * WHERE {
                 %s
-                }""".formatted(sourceTriples.stream().map(t -> "  " + t + " .").collect(Collectors.joining("\n")));
+                }""".formatted(lines.collect(Collectors.joining("\n")));
     }
 
     /**
