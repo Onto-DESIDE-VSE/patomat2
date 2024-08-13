@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2024-08-13
+
+- Support filters in transformation patterns.
+
 ### 2024-08-08
 
 - Show transformation summary on successful transformation.
