@@ -57,21 +57,6 @@ class LabelFunctionTest {
     }
 
     @Test
-    void applyAppliesFunctionOnDifferentVariables() {
-        final LabelFunction sut = new LabelFunction(ontologyHolder, null);
-        final String rule = "label(?A) and label(?B)";
-        final String iriA = Generator.generateUri().toString();
-        final String iriB = Generator.generateUri().toString();
-        when(ontologyHolder.getLabel(iriA)).thenReturn(Optional.of("Test"));
-        when(ontologyHolder.getLabel(iriB)).thenReturn(Optional.of("Test2"));
-        final ResultBinding bindingA = new ResultBinding("A", iriA, "http://www.w3.org/2000/01/rdf-schema#Resource");
-        final ResultBinding bindingB = new ResultBinding("B", iriB, "http://www.w3.org/2000/01/rdf-schema#Resource");
-        final PatternMatch match = new PatternMatch(null, List.of(bindingA, bindingB));
-        final String result = sut.apply(match, rule);
-        assertEquals("Test and Test2", result);
-    }
-
-    @Test
     void applyThrowsNameTransformationExceptionWhenVariableDoesNotExistInResult() {
         final LabelFunction sut = new LabelFunction(ontologyHolder, null);
         final String rule = "label(?x)";

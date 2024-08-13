@@ -97,4 +97,18 @@ class NameTransformationTest {
         final String result = sut.generateName(match, ontologyHolder);
         assertEquals("John Doe that knows a Top Concept Of", result);
     }
+
+    @Test
+    void applyAppliesFunctionOnDifferentVariables() {
+        final NameTransformation sut = new NameTransformation("G", "label(?A) and label(?B)");
+        final String iriA = Generator.generateUri().toString();
+        final String iriB = Generator.generateUri().toString();
+        when(ontologyHolder.getLabel(iriA)).thenReturn(Optional.of("Test"));
+        when(ontologyHolder.getLabel(iriB)).thenReturn(Optional.of("Test2"));
+        final ResultBinding bindingA = new ResultBinding("A", iriA, "http://www.w3.org/2000/01/rdf-schema#Resource");
+        final ResultBinding bindingB = new ResultBinding("B", iriB, "http://www.w3.org/2000/01/rdf-schema#Resource");
+        final PatternMatch match = new PatternMatch(null, List.of(bindingA, bindingB));
+        final String result = sut.generateName(match, ontologyHolder);
+        assertEquals("Test and Test2", result);
+    }
 }

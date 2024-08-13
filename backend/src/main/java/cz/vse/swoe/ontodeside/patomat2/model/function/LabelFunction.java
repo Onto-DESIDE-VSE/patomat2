@@ -7,7 +7,6 @@ import cz.vse.swoe.ontodeside.patomat2.model.ResultBinding;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyHolder;
 import cz.vse.swoe.ontodeside.patomat2.util.Utils;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LabelFunction extends NameTransformationFunction {
@@ -19,19 +18,18 @@ public class LabelFunction extends NameTransformationFunction {
     }
 
     @Override
-    String applyInternal(PatternMatch match, String nameTransformationRule) {
-        final Matcher matcher = PATTERN.matcher(nameTransformationRule);
-        while (matcher.find()) {
-            final String instance = matcher.group(0);
-            final String variable = matcher.group(1);
-            final ResultBinding binding = match.getBinding(variable)
-                                               .orElseThrow(() -> new NameTransformationException("Variable '" + variable + "' not found in pattern instance."));
-            if (!Constants.RDFS_RESOURCE.equals(binding.datatype())) {
-                throw new NameTransformationException("Value of variable '" + variable + "' used in a label function is not a resource.");
-            }
-            final String label = ontologyHolder.getLabel(binding.value()).orElseGet(() -> Utils.createLabelFromIdentifier(binding.value()));
-            nameTransformationRule = nameTransformationRule.replace(instance, label);
+    Pattern getPattern() {
+        return PATTERN;
+    }
+
+    @Override
+    String applyInternal(PatternMatch match, String argument) {
+        final ResultBinding binding = match.getBinding(argument)
+                                           .orElseThrow(() -> new NameTransformationException("Variable '" + argument + "' not found in pattern instance."));
+        if (!Constants.RDFS_RESOURCE.equals(binding.datatype())) {
+            throw new NameTransformationException("Value of variable '" + argument + "' used in a label function is not a resource.");
         }
-        return nameTransformationRule;
+        return ontologyHolder.getLabel(binding.value())
+                             .orElseGet(() -> Utils.createLabelFromIdentifier(binding.value()));
     }
 }
