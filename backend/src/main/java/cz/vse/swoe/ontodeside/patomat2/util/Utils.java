@@ -56,11 +56,23 @@ public class Utils {
      * @return Extracted label
      */
     public static String createLabelFromIdentifier(String id) {
-        Objects.requireNonNull(id);
-        final String localPart = id.contains("#") ? id.substring(id.lastIndexOf('#') + 1) : id.substring(id.lastIndexOf('/') + 1);
+        final String localPart = extractLocalPart(id);
         final String[] parts = tokenize(localPart);
         capitalize(parts);
         return String.join(" ", parts);
+    }
+
+    /**
+     * Extracts local part of the specified URI/IRI identifier.
+     * <p>
+     * The local part is either part after the hash or the part after the last slash.
+     *
+     * @param id Identifier whose local part to extract
+     * @return Extracted local part
+     */
+    public static String extractLocalPart(String id) {
+        Objects.requireNonNull(id);
+        return id.contains("#") ? id.substring(id.lastIndexOf('#') + 1) : id.substring(id.lastIndexOf('/') + 1);
     }
 
     /**
