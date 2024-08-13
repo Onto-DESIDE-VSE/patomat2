@@ -19,8 +19,6 @@ import java.util.Set;
  */
 public record NameTransformation(String variableName, String rule) {
 
-    public static NameTransformation EMPTY = new NameTransformation("", "");
-
     /**
      * Generates a new entity name based on the transformation rule using the provided data.
      * <p>
