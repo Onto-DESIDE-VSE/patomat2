@@ -10,12 +10,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public record Pattern(@JsonIgnore String fileName, String name, List<String> sourceTriples, List<String> targetTriples,
+public record Pattern(@JsonIgnore String fileName, String name, List<String> sourceTriples, List<String> filters, List<String> targetTriples,
                       List<NameTransformation> nameTransformations) {
 
     @Override
     public List<String> sourceTriples() {
         return Collections.unmodifiableList(sourceTriples);
+    }
+
+    @Override
+    public List<String> filters() {
+        return Collections.unmodifiableList(filters);
     }
 
     @Override
