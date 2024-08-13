@@ -67,8 +67,9 @@ public class PatternParser {
             final String name = doc.read("$.tp.name", String.class);
             final List<String> sourceTriples = readTriples(name, doc, TripleSource.SOURCE);
             final List<String> targetTriples = readTriples(name, doc, TripleSource.TARGET);
+            final List<String> filters = readFilters(name, doc);
             LOG.info("Parsed pattern {} from file {}.", name, patternFile.getName());
-            return new Pattern(patternFile.getName(), name, sourceTriples, targetTriples, readNameTransformations(doc));
+            return new Pattern(patternFile.getName(), name, sourceTriples, filters, targetTriples, readNameTransformations(doc));
         } catch (IOException e) {
             throw new PatternParserException("Unable to read pattern from " + patternFile, e);
         }
@@ -83,6 +84,16 @@ public class PatternParser {
             return triples;
         } catch (PathNotFoundException e) {
             LOG.error("No triple patterns of type {} found in pattern {}.", source.name, patternName);
+            return List.of();
+        }
+    }
+
+    private List<String> readFilters(String patternName, DocumentContext doc) {
+        try {
+            return doc.read("$.." + TripleSource.SOURCE.name + ".filters.filter.*", new TypeRef<>() {});
+        } catch (PathNotFoundException e) {
+            // No big deal
+            LOG.trace("No filters found in pattern {}.", patternName);
             return List.of();
         }
     }

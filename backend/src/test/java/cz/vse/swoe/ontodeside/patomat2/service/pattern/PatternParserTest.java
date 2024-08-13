@@ -29,6 +29,12 @@ class PatternParserTest {
     }
 
     @Test
+    void readPatternParsesFilters() {
+        final Pattern p = sut.readPattern(new File("src/test/resources/pattern-example.json"));
+        assertEquals(List.of("FILTER(contains(str(?p), 'role'))"), p.filters());
+    }
+
+    @Test
     void readPatternParsesNameTransformations() {
         final Pattern p = sut.readPattern(new File("src/test/resources/pattern-example.json"));
         assertEquals(List.of(new NameTransformation("G", "?A that ?p a ?C")), p.nameTransformations());

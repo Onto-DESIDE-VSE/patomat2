@@ -4,6 +4,9 @@
         "op_source": {
             "triples": {
                 "triple": ["?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"]
+            },
+            "filters": {
+                "filter": ["FILTER(contains(str(?p), 'role'))"]
             }
         },
         "op_target": {
