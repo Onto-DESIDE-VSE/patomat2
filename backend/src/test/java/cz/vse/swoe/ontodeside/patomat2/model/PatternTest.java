@@ -26,6 +26,19 @@ class PatternTest {
     }
 
     @Test
+    void sourceSparqlGeneratesSparqlFromSourceTriplesAndFilters() {
+        final Pattern p = new Pattern("filename.json", "name", List.of("?p rdfs:domain ?A", "?p rdfs:range ?B", "?C rdfs:subClassOf ?B"),
+                List.of("FILTER (contains(str(?p), 'role'))"), List.of(), List.of());
+        assertEquals("""
+                SELECT DISTINCT * WHERE {
+                  ?p rdfs:domain ?A .
+                  ?p rdfs:range ?B .
+                  ?C rdfs:subClassOf ?B .
+                  FILTER (contains(str(?p), 'role'))
+                }""", p.sourceSparql());
+    }
+
+    @Test
     void createTargetInsertSparqlGeneratesSparqlFromTargetTriplesAndPatternMatch() {
         final Pattern sut = new Pattern("filename.json", "name", List.of(), List.of(), List.of("?p rdfs:domain ?A",
                 "?p rdfs:range ?B",
