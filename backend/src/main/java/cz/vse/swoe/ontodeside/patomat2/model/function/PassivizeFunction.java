@@ -1,24 +1,20 @@
 package cz.vse.swoe.ontodeside.patomat2.model.function;
 
 import cz.vse.swoe.ontodeside.patomat2.Constants;
-import cz.vse.swoe.ontodeside.patomat2.exception.PatOMat2Exception;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyHolder;
-import cz.vse.swoe.ontodeside.patomat2.util.NLPPipelineProvider;
+import cz.vse.swoe.ontodeside.patomat2.util.NLPUtils;
+import cz.vse.swoe.ontodeside.patomat2.util.Utils;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.util.CoreMap;
-import net.sf.extjwnl.JWNLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 /**
@@ -31,6 +27,7 @@ public class PassivizeFunction extends NameTransformationFunction {
     // Include the variable delimiter in the match group so that we can determine when we are dealing with a variable
     private static final Pattern PATTERN = Pattern.compile("passivize\\(\\s?(\\??[a-zA-Z0-9\\s]+)\\s?\\)");
 
+    // Dictionary of English irregular verbs together with their past participle form
     private static final Map<String, String> IRREGULAR_VERBS = loadIrregularVerbs();
 
     public PassivizeFunction(OntologyHolder ontologyHolder, NameTransformationFunction next) {
@@ -46,33 +43,22 @@ public class PassivizeFunction extends NameTransformationFunction {
     protected String applyInternal(PatternMatch match, String argument) {
         final String value = argument.startsWith(Constants.SPARQL_VARIABLE) ? getBindingValue(match, argument.substring(1)) : argument;
         CoreDocument document = new CoreDocument(value);
-        NLPPipelineProvider.getNLPPipeline().annotate(document);
+        NLPUtils.getNLPPipeline().annotate(document);
         final CoreMap coreMap = document.annotation();
-        CoreLabel verbLabel = null;
         for (CoreLabel token : coreMap.get(CoreAnnotations.TokensAnnotation.class)) {
             final String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
             if (pos.equals("VBN")) {
                 return token.word();
             }
             if (pos.startsWith("VB")) {
-                verbLabel = token;
-                break;
+                return passivizeVerb(token.get(CoreAnnotations.LemmaAnnotation.class));
             }
         }
-        if (verbLabel == null) {
-            LOG.trace("No verb to passivize found in value '{}'.", value);
-            return value;
-        }
-        try {
-            return passivizeVerb(verbLabel);
-        } catch (JWNLException e) {
-            LOG.warn("Unable to passivize verb in value '{}'.", value, e);
-            return value;
-        }
+        LOG.trace("No verb to passivize found in value '{}', trying to use a noun.", value);
+        return findNounAndMakeVerb(coreMap).map(this::passivizeVerb).orElse(value);
     }
 
-    private String passivizeVerb(CoreLabel verb) throws JWNLException {
-        final String lemma = verb.get(CoreAnnotations.LemmaAnnotation.class);
+    private String passivizeVerb(String lemma) {
         if (IRREGULAR_VERBS.containsKey(lemma)) {
             return IRREGULAR_VERBS.get(lemma);
         }
@@ -84,22 +70,33 @@ public class PassivizeFunction extends NameTransformationFunction {
         return lemma + "ed";
     }
 
+    private Optional<String> findNounAndMakeVerb(CoreMap coreMap) {
+        for (CoreLabel token : coreMap.get(CoreAnnotations.TokensAnnotation.class)) {
+            final String pos = token.get(CoreAnnotations.PartOfSpeechAnnotation.class);
+            if (pos.startsWith("NN")) {
+                return nounToVerb(token.get(CoreAnnotations.LemmaAnnotation.class));
+            }
+        }
+        LOG.trace("No suitable noun found for passivization.");
+        return Optional.empty();
+    }
+
+    private Optional<String> nounToVerb(String noun) {
+        if (NLPUtils.getNounsToVerbs().containsKey(noun)) {
+            return Optional.of(NLPUtils.getNounsToVerbs().get(noun).getFirst());
+        }
+        LOG.trace("No suitable verb found for noun '{}'.", noun);
+        return Optional.empty();
+    }
+
     private static Map<String, String> loadIrregularVerbs() {
         LOG.trace("Loading the dictionary of irregular verbs.");
         final Map<String, String> result = new HashMap<>();
-        final InputStream inputStream = PassivizeFunction.class.getClassLoader().getResourceAsStream("irregular-verbs.csv");
-        assert inputStream != null;
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                final String[] parts = line.split(",");
-                assert parts.length == 3;
-                result.put(parts[0], parts[2]);
-            }
-        } catch (IOException e) {
-            throw new PatOMat2Exception("Unable to load the dictionary of irregular verbs.", e);
-        }
+        Utils.readClasspathResource("irregular-verbs.csv", line -> {
+            final String[] parts = line.split(",");
+            assert parts.length == 3;
+            result.put(parts[0], parts[2]);
+        });
         return result;
     }
 }
