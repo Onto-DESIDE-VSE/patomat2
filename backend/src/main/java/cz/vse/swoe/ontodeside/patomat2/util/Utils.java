@@ -107,6 +107,12 @@ public class Utils {
         }
     }
 
+    /**
+     * Reads a resource from the classpath and applies the specified consumer to each line.
+     *
+     * @param name     Name (path) of the classpath resource
+     * @param consumer Consumer to apply to each line
+     */
     public static void readClasspathResource(String name, Consumer<String> consumer) {
         try (final BufferedReader in = new BufferedReader(new InputStreamReader(Utils.class.getClassLoader()
                                                                                            .getResourceAsStream(name)))) {
