@@ -19,6 +19,9 @@ import java.util.regex.Pattern;
 
 /**
  * Finds a verb in the specified argument and returns it in a passive form.
+ * <p>
+ * If the argument does not contain a verb, a noun is found and WordNet morphosemantic database is used to find a
+ * suitable verb (which has related underlying meaning) that is then passivized.
  */
 public class PassivizeFunction extends NameTransformationFunction {
 
