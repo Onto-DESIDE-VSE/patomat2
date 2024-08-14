@@ -20,7 +20,7 @@ class PassivizeFunctionTest {
     @ParameterizedTest
     @MethodSource("regularVerbsSource")
     void applyPassivizesRegularVerbSpecifiedAsArgument(String argument, String expected) {
-        String result = sut.apply(new PatternMatch(), "passivize(" + argument + ")");
+        final String result = sut.apply(new PatternMatch(), "passivize(" + argument + ")");
         assertEquals(expected, result);
     }
 
@@ -34,13 +34,13 @@ class PassivizeFunctionTest {
 
     @Test
     void applyReturnsArgumentIfItIsAlreadyPassiveVerb() {
-        String result = sut.apply(new PatternMatch(), "stolen");
+        final String result = sut.apply(new PatternMatch(), "passivize(stolen)");
         assertEquals("stolen", result);
     }
 
     @Test
     void applyPassivizesIrregularVerbSpecifiedAsArgument() {
-        String result = sut.apply(new PatternMatch(), "passivize(sees)");
+        final String result = sut.apply(new PatternMatch(), "passivize(sees)");
         assertEquals("seen", result);
     }
 
@@ -51,5 +51,11 @@ class PassivizeFunctionTest {
         ));
         String result = sut.apply(match, "passivize(?a)");
         assertEquals("taken", result);
+    }
+
+    @Test
+    void applyGetsVerbForNounAndPassivizesIt() {
+        final String result = sut.apply(new PatternMatch(), "passivize(acceptance)");
+        assertEquals("accepted", result);
     }
 }

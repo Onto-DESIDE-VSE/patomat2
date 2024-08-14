@@ -6,10 +6,14 @@ import org.eclipse.rdf4j.common.lang.FileFormat;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.stream.Stream;
 
@@ -100,6 +104,18 @@ public class Utils {
     public static void capitalize(String[] tokens) {
         for (int i = 0; i < tokens.length; i++) {
             tokens[i] = tokens[i].substring(0, 1).toUpperCase() + tokens[i].substring(1);
+        }
+    }
+
+    public static void readClasspathResource(String name, Consumer<String> consumer) {
+        try (final BufferedReader in = new BufferedReader(new InputStreamReader(Utils.class.getClassLoader()
+                                                                                           .getResourceAsStream(name)))) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                consumer.accept(line);
+            }
+        } catch (IOException e) {
+            throw new PatOMat2Exception("Unable to read classpath resource.", e);
         }
     }
 }

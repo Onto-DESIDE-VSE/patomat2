@@ -1,6 +1,6 @@
 arise,arose,arisen
 awake,awoke,awoken
-be,was/were,been
+be,was,been
 bear,bore,borne
 beat,beat,beaten
 become,became,become
@@ -16,7 +16,6 @@ breed,bred,bred
 bring,brought,brought
 broadcast,broadcast,broadcast
 build,built,built
-burn,burnt/burned,burnt/burned
 burst,burst,burst
 buy,bought,bought
 catch,caught,caught
@@ -29,7 +28,6 @@ deal,dealt,dealt
 dig,dug,dug
 do,did,done
 draw,drew,drawn
-dream,dreamt/dreamed,dreamt/dreamed
 drink,drank,drunk
 drive,drove,driven
 eat,ate,eaten
@@ -61,9 +59,6 @@ kneel,knelt,knelt
 know,knew,known
 lay,laid,laid
 lead,led,led
-lean,leant/leaned,leant/leaned
-leap,leapt/leaped,leapt/leaped
-learn,learnt/learned,learnt/learned
 leave,left,left
 lend,lent,lent
 let,let,let
@@ -87,7 +82,7 @@ seek,sought,sought
 sell,sold,sold
 send,sent,sent
 set,set,set
-sew,sewed,sewn/sewed
+sew,sewed,sewn
 shake,shook,shaken
 shine,shone,shone
 shoot,shot,shot
@@ -101,7 +96,7 @@ slide,slid,slid
 speak,spoke,spoken
 spend,spent,spent
 spin,spun,spun
-spit,spat/spit,spat/spit
+spit,spat,spat
 split,split,split
 spread,spread,spread
 spring,sprang,sprung
@@ -109,7 +104,7 @@ stand,stood,stood
 steal,stole,stolen
 stick,stuck,stuck
 sting,stung,stung
-strike,struck,struck/stricken
+strike,struck,stricken
 strive,strove,striven
 swear,swore,sworn
 sweep,swept,swept

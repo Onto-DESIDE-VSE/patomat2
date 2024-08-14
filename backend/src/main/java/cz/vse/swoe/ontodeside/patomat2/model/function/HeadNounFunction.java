@@ -3,7 +3,7 @@ package cz.vse.swoe.ontodeside.patomat2.model.function;
 import cz.vse.swoe.ontodeside.patomat2.Constants;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyHolder;
-import cz.vse.swoe.ontodeside.patomat2.util.NLPPipelineProvider;
+import cz.vse.swoe.ontodeside.patomat2.util.NLPUtils;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.PennTreebankLanguagePack;
@@ -39,7 +39,7 @@ public class HeadNounFunction extends NameTransformationFunction {
     protected String applyInternal(PatternMatch match, String argument) {
         final String value = argument.startsWith(Constants.SPARQL_VARIABLE) ? getBindingValue(match, argument.substring(1)) : argument;
         CoreDocument document = new CoreDocument(value);
-        NLPPipelineProvider.getNLPPipeline().annotate(document);
+        NLPUtils.getNLPPipeline().annotate(document);
         HeadFinder hf = new PennTreebankLanguagePack().headFinder();
 
         final Tree myTree = document.sentences().getFirst().constituencyParse();
