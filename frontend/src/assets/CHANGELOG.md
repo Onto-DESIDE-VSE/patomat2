@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2024-08-14
+
+- Implemented name transformation functions `head_noun`, `passivize` and `nominalize`.
+
 ### 2024-08-13
 
 - Support filters in transformation patterns.
