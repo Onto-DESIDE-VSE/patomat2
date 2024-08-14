@@ -1,9 +1,11 @@
 package cz.vse.swoe.ontodeside.patomat2.model.function;
 
+import cz.vse.swoe.ontodeside.patomat2.Constants;
 import cz.vse.swoe.ontodeside.patomat2.exception.NameTransformationException;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
 import cz.vse.swoe.ontodeside.patomat2.model.ResultBinding;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyHolder;
+import cz.vse.swoe.ontodeside.patomat2.util.Utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +19,15 @@ public abstract class NameTransformationFunction {
     protected NameTransformationFunction(OntologyHolder ontologyHolder, NameTransformationFunction next) {
         this.ontologyHolder = ontologyHolder;
         this.next = next;
+    }
+
+    static String getBindingValue(PatternMatch match, String argument) {
+        final ResultBinding binding = getBinding(match, argument);
+        if (binding.datatype().equals(Constants.RDFS_RESOURCE)) {
+            return String.join(" ", Utils.tokenize(Utils.extractLocalPart(binding.value())));
+        } else {
+            return binding.value();
+        }
     }
 
     /**
@@ -41,7 +52,7 @@ public abstract class NameTransformationFunction {
         return next != null ? next.apply(match, result) : result;
     }
 
-    protected ResultBinding getBinding(PatternMatch match, String name) {
+    protected static ResultBinding getBinding(PatternMatch match, String name) {
         return match.getBinding(name)
                     .orElseThrow(() -> new NameTransformationException("Variable '" + name + "' not found in pattern instance."));
     }

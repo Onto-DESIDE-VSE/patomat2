@@ -2,10 +2,8 @@ package cz.vse.swoe.ontodeside.patomat2.model.function;
 
 import cz.vse.swoe.ontodeside.patomat2.Constants;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
-import cz.vse.swoe.ontodeside.patomat2.model.ResultBinding;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyHolder;
 import cz.vse.swoe.ontodeside.patomat2.util.NLPPipelineProvider;
-import cz.vse.swoe.ontodeside.patomat2.util.Utils;
 import edu.stanford.nlp.pipeline.CoreDocument;
 import edu.stanford.nlp.trees.HeadFinder;
 import edu.stanford.nlp.trees.PennTreebankLanguagePack;
@@ -39,7 +37,7 @@ public class HeadNounFunction extends NameTransformationFunction {
 
     @Override
     protected String applyInternal(PatternMatch match, String argument) {
-        final String value = argument.startsWith("?") ? getBindingValue(match, argument.substring(1)) : argument;
+        final String value = argument.startsWith(Constants.SPARQL_VARIABLE) ? getBindingValue(match, argument.substring(1)) : argument;
         CoreDocument document = new CoreDocument(value);
         NLPPipelineProvider.getNLPPipeline().annotate(document);
         HeadFinder hf = new PennTreebankLanguagePack().headFinder();
@@ -61,14 +59,5 @@ public class HeadNounFunction extends NameTransformationFunction {
         }
         LOG.warn("Unable to determine head noun of value '{}'.", value);
         return value;
-    }
-
-    private String getBindingValue(PatternMatch match, String argument) {
-        final ResultBinding binding = getBinding(match, argument);
-        if (binding.datatype().equals(Constants.RDFS_RESOURCE)) {
-            return String.join(" ", Utils.tokenize(Utils.extractLocalPart(binding.value())));
-        } else {
-            return binding.value();
-        }
     }
 }
