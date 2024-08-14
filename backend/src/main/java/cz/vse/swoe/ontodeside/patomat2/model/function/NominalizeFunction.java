@@ -14,6 +14,13 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+/**
+ * Nominalizes a verb in the specified argument.
+ * <p>
+ * That is, it tries to find a noun that has a meaning matching the specified verb. If there is no verb in the argument
+ * value, or if unable to find a suitable noun for it, this function tries to find a noun in the argument and returns
+ * it. If this fails too, the argument value is returned.
+ */
 public class NominalizeFunction extends NameTransformationFunction {
 
     private static final Logger LOG = LoggerFactory.getLogger(NominalizeFunction.class);
