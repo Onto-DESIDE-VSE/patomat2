@@ -5,6 +5,7 @@ import cz.vse.swoe.ontodeside.patomat2.exception.NameTransformationException;
 import cz.vse.swoe.ontodeside.patomat2.model.function.HeadNounFunction;
 import cz.vse.swoe.ontodeside.patomat2.model.function.LabelFunction;
 import cz.vse.swoe.ontodeside.patomat2.model.function.NameTransformationFunction;
+import cz.vse.swoe.ontodeside.patomat2.model.function.PassivizeFunction;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyHolder;
 import cz.vse.swoe.ontodeside.patomat2.util.Utils;
 
@@ -55,6 +56,7 @@ public record NameTransformation(String variableName, String rule) {
 
     private static NameTransformationFunction transformationFunctions(OntologyHolder ontologyHolder) {
         return new LabelFunction(ontologyHolder,
-                new HeadNounFunction(ontologyHolder, null));
+                new HeadNounFunction(ontologyHolder,
+                        new PassivizeFunction(ontologyHolder, null)));
     }
 }
