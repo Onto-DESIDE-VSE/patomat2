@@ -16,6 +16,7 @@ public class NLPUtils {
 
     private static StanfordCoreNLP nlpPipeline;
 
+    // Based on the WordNet morphosemantic links database
     private static Map<String, List<String>> verbsToNouns;
     private static Map<String, List<String>> nounsToVerbs;
 
@@ -42,6 +43,7 @@ public class NLPUtils {
         verbsToNouns = new LinkedHashMap<>();
         nounsToVerbs = new LinkedHashMap<>();
         Utils.readClasspathResource("morphosemantic-links.csv", line -> {
+            // We disregard most of the data here, just extract the verb and noun
             final String[] parts = line.split(",");
             final String verb = parts[0].substring(0, parts[0].indexOf('%'));
             final String noun = parts[3].substring(0, parts[3].indexOf('%'));
