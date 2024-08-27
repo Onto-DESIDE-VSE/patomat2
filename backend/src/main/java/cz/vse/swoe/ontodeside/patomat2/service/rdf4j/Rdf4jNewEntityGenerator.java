@@ -1,9 +1,11 @@
 package cz.vse.swoe.ontodeside.patomat2.service.rdf4j;
 
+import cz.vse.swoe.ontodeside.patomat2.Constants;
 import cz.vse.swoe.ontodeside.patomat2.config.ApplicationConfig;
 import cz.vse.swoe.ontodeside.patomat2.model.NameTransformation;
 import cz.vse.swoe.ontodeside.patomat2.model.NewEntity;
 import cz.vse.swoe.ontodeside.patomat2.model.NewEntityGenerator;
+import cz.vse.swoe.ontodeside.patomat2.model.EntityLabel;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyHolder;
 import org.springframework.lang.NonNull;
@@ -46,7 +48,7 @@ public class Rdf4jNewEntityGenerator implements NewEntityGenerator {
                                        @NonNull PatternMatch match) {
         final String id = generateIdentifier();
         return new NewEntity(variableName, id, nameTransformations.stream()
-                                                                  .map(n -> n.generateName(match, ontologyHolder))
+                                                                  .map(n -> new EntityLabel(n.generateName(match, ontologyHolder), Constants.DEFAULT_LABEL_PROPERTY))
                                                                   .toList());
     }
 }

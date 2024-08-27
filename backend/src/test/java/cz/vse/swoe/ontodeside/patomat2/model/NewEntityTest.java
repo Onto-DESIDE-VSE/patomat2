@@ -1,22 +1,20 @@
 package cz.vse.swoe.ontodeside.patomat2.model;
 
+import cz.vse.swoe.ontodeside.patomat2.Constants;
 import cz.vse.swoe.ontodeside.patomat2.environment.Generator;
 import org.junit.jupiter.api.Test;
 
-import java.awt.geom.GeneralPath;
-import java.net.URI;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NewEntityTest {
 
     @Test
     void createSparqlInsertCreatesInsertWithAllSpecifiedLabels() {
         final String id = Generator.generateUri().toString();
-        NewEntity newEntity = new NewEntity("variable", id, List.of("label1", "label2"));
-        String expected = "INSERT DATA { <" + id + "> rdfs:label \"label1\" . <" + id + "> rdfs:label \"label2\" . }";
+        NewEntity newEntity = new NewEntity("variable", id, List.of(new EntityLabel("label1", Constants.DEFAULT_LABEL_PROPERTY), new EntityLabel("label2", Constants.DEFAULT_LABEL_PROPERTY)));
+        String expected = "INSERT DATA { <" + id + "> <" + Constants.DEFAULT_LABEL_PROPERTY + "> \"label1\" . <" + id + "> <" + Constants.DEFAULT_LABEL_PROPERTY + "> \"label2\" . }";
         assertEquals(expected, newEntity.createInsertLabelSparql());
     }
-
 }

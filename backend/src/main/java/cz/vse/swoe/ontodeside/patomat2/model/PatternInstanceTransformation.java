@@ -25,7 +25,7 @@ public class PatternInstanceTransformation {
      * The map maps variable names to entity labels.
      */
     @Schema(description = "Labels of new entities to override the generated ones. It is a map of variable names to lists of entity labels")
-    private Map<String, List<String>> newEntityLabels;
+    private Map<String, List<EntityLabel>> newEntityLabels;
 
     public Integer getId() {
         return id;
@@ -35,11 +35,11 @@ public class PatternInstanceTransformation {
         this.id = id;
     }
 
-    public Map<String, List<String>> getNewEntityLabels() {
+    public Map<String, List<EntityLabel>> getNewEntityLabels() {
         return newEntityLabels;
     }
 
-    public void setNewEntityLabels(Map<String, List<String>> newEntityLabels) {
+    public void setNewEntityLabels(Map<String, List<EntityLabel>> newEntityLabels) {
         this.newEntityLabels = newEntityLabels;
     }
 }

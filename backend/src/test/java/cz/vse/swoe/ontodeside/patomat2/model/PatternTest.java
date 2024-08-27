@@ -73,7 +73,8 @@ class PatternTest {
         final String a = Generator.generateUri().toString();
         final String b = Generator.generateUri().toString();
         final String c = Generator.generateUri().toString();
-        final NewEntity g = new NewEntity("G", Generator.generateUri().toString(), List.of("New entity"));
+        final NewEntity g = new NewEntity("G", Generator.generateUri().toString(),
+                List.of(new EntityLabel("New entity", Constants.DEFAULT_LABEL_PROPERTY)));
         assertEquals("INSERT DATA {\n" +
                 "  <" + p + "> rdfs:domain <" + a + "> .\n" +
                 "  <" + p + "> rdfs:range <" + b + "> .\n" +

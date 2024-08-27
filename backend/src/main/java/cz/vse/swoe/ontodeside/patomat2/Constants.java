@@ -25,6 +25,11 @@ public class Constants {
     public static final String RDFS_RESOURCE = "http://www.w3.org/2000/01/rdf-schema#Resource";
 
     /**
+     * Default property for new entity labels
+     */
+    public static final String DEFAULT_LABEL_PROPERTY = "http://www.w3.org/2000/01/rdf-schema#label";
+
+    /**
      * Prefix of a SPARQL variable
      */
     public static final String SPARQL_VARIABLE = "?";

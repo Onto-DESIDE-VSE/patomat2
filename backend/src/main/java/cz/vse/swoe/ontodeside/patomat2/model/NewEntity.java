@@ -2,7 +2,7 @@ package cz.vse.swoe.ontodeside.patomat2.model;
 
 import java.util.List;
 
-public record NewEntity(String variableName, String identifier, List<String> labels) {
+public record NewEntity(String variableName, String identifier, List<EntityLabel> labels) {
 
     /**
      * Creates a SPARQL INSERT query that asserts labels of this new entity.
@@ -10,9 +10,9 @@ public record NewEntity(String variableName, String identifier, List<String> lab
      * @return SPARQL INSERT query
      */
     public String createInsertLabelSparql() {
-        String labelPattern = "<%s> rdfs:label \"%s\" .";
+        String labelPattern = "<%s> <%s> \"%s\" .";
         final StringBuilder sb = new StringBuilder("INSERT DATA { ");
-        labels.forEach(l -> sb.append(String.format(labelPattern, identifier, l)).append(" "));
+        labels.forEach(l -> sb.append(String.format(labelPattern, identifier, l.property(), l.value())).append(" "));
         sb.append('}');
         return sb.toString();
     }
