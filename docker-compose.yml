@@ -11,7 +11,7 @@ services:
             NGINX_ENVSUBST_OUTPUT_DIR: /etc/nginx
             ROOT: ${ROOT:-/patomat2}
             ORIGIN: ${PUBLIC_URL:-http://localhost:${HOST_PORT:-1234}}
-            PORT: ${HOST_PORT:-1234}
+            PORT: ${PUBLIC_PORT:-''}
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template
     patomat2-server:
