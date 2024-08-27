@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2024-08-27
+
+- Implemented pattern match statistics and filtering of matches by pattern.
+
 ### 2024-08-14
 
 - Implemented name transformation functions `head_noun`, `passivize` and `nominalize`.
