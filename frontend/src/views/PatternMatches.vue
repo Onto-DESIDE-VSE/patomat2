@@ -9,6 +9,7 @@ import useMessageStore from "@/store/messageStore";
 import { useRouter } from "vue-router";
 import type { TransformationSummary } from "@/types/TransformationSummary";
 import TransformationSummaryView from "@/components/TransformationSummaryView.vue";
+import MatchesStatistics from "@/components/MatchesStatistics.vue";
 
 const router = useRouter();
 const messageStore = useMessageStore();
@@ -84,6 +85,7 @@ const downloadTransformedOntology = async () => {
   <v-overlay :model-value="showProgress" class="align-center justify-center">
     <v-progress-circular color="primary" size="64" indeterminate></v-progress-circular>
   </v-overlay>
+  <MatchesStatistics :matches="matches" />
   <MatchesTable :matches="matches" :on-instance-change="onInstanceChange" :on-transform="applyTransformation" />
   <TransformationSummaryView :summary="transformationSummary" />
 </template>
