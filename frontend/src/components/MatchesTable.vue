@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import _ from "lodash";
 import type { NewEntity, PatternInstance, ResultBinding } from "@/types/PatternInstance";
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
@@ -16,15 +16,24 @@ const selected = ref<PatternInstance[]>([]);
 // keys are pattern instance ids, value are mapping of variable names to new labels
 const newEntityLabels = ref<Map<number, { [key: string]: string }>>(new Map());
 
+const patternNames = computed(() => ["All", ...new Set(props.matches.map((m: PatternInstance) => m.patternName))]);
+const search = ref<string[]>(["All"]);
+
+function filterByPatternName(value: string) {
+  return search.value.includes("All") || search.value.includes(value);
+}
+
 const headers = [
   {
     title: "Pattern Name",
-    value: "patternName"
+    value: "patternName",
+    filter: filterByPatternName
   },
   {
     title: "Matching Bindings",
     key: "bindings",
-    value: "match.bindings"
+    value: "match.bindings",
+    filterable: false
   },
   {
     title: "Transformation SPARQL",
@@ -33,7 +42,8 @@ const headers = [
       insert: item.sparqlInsert,
       del: item.sparqlDelete,
       newEntities: item.newEntities
-    })
+    }),
+    filterable: false
   },
   {
     title: "New entities",
@@ -41,7 +51,8 @@ const headers = [
     value: (item: PatternInstance) => ({
       id: item.id,
       newEntities: item.newEntities
-    })
+    }),
+    filterable: false
   }
 ];
 
@@ -90,24 +101,37 @@ function highlightNewVariables(insert: string, newEntities: NewEntity[]) {
 </script>
 
 <template>
-  <div class="mb-3">
-    <v-menu :location="'bottom'">
-      <template v-slot:activator="{ props }">
-        <v-btn id="apply-transformation-top" color="primary" v-bind="props" :disabled="selected.length === 0">
-          Apply transformation
-          <v-icon dark end size="medium">{{ mdiMenuDown }}</v-icon>
-        </v-btn>
-      </template>
-      <v-list>
-        <v-list-item @click="() => applyTransformation(false)">
-          <v-list-item-title>Apply only inserts</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click="() => applyTransformation(true)">
-          <v-list-item-title>Apply deletes and inserts</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
-  </div>
+  <v-row class="align-center">
+    <v-col cols="2">
+      <v-menu :location="'bottom'">
+        <template v-slot:activator="{ props }">
+          <v-btn
+            id="apply-transformation-top"
+            color="primary"
+            v-bind="props"
+            :disabled="selected.length === 0"
+            class="w-100"
+          >
+            Apply transformation
+            <v-icon dark end size="medium">{{ mdiMenuDown }}</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="() => applyTransformation(false)">
+            <v-list-item-title>Apply only inserts</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="() => applyTransformation(true)">
+            <v-list-item-title>Apply deletes and inserts</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-col>
+  </v-row>
+  <v-row class="align-center">
+    <v-col cols="2">
+      <v-select clearable label="Select pattern" :items="patternNames" v-model="search" multiple></v-select>
+    </v-col>
+  </v-row>
   <v-data-table :headers="headers" :items="props.matches" show-select v-model="selected" return-object>
     <template v-slot:item.bindings="{ value }">
       <ul class="mt-1 mb-1">
