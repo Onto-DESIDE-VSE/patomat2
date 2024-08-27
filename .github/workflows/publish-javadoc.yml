@@ -1,0 +1,33 @@
+name: Deploy Javadoc
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write # if you have a protection rule on your repository, you'll need to give write permission to the workflow.
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up JDK
+              uses: actions/setup-java@v4
+              with:
+                  distribution: "temurin"
+                  java-version: 21
+            - name: Build Javadoc
+              working-directory: backend
+              run: mvn -B javadoc:aggregate --file pom.xml
+            - name: Deploy to GitHub Page Branch
+              uses: JamesIves/github-pages-deploy-action@v4.6.0
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  branch: javadoc
+                  clean: true
+                  folder: backend/target/site/apidocs
+                  target-folder: docs
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
