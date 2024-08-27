@@ -10,6 +10,8 @@ jobs:
         runs-on: ubuntu-latest
         permissions:
             contents: write # if you have a protection rule on your repository, you'll need to give write permission to the workflow.
+            pages: write # to deploy to Pages
+            id-token: write # to verify the deployment originates from an appropriate source
         steps:
             - uses: actions/checkout@v4
             - name: Set up JDK
