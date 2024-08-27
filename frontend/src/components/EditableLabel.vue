@@ -1,7 +1,25 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { mdiPencil, mdiCancel, mdiContentSave, mdiLabel } from "@mdi/js";
+import { mdiPencil, mdiCancel, mdiContentSave, mdiLabelOutline, mdiLabel, mdiLabelMultiple } from "@mdi/js";
 import type { NewEntity } from "@/types/PatternInstance";
+
+const LABEL_TYPES = {
+  "http://www.w3.org/2000/01/rdf-schema#label": {
+    property: "http://www.w3.org/2000/01/rdf-schema#label",
+    propertyPrefixed: "rdfs:label",
+    icon: mdiLabelOutline
+  },
+  "http://www.w3.org/2004/02/skos/core#prefLabel": {
+    property: "http://www.w3.org/2004/02/skos/core#prefLabel",
+    propertyPrefixed: "skos:prefLabel",
+    icon: mdiLabel
+  },
+  "http://www.w3.org/2004/02/skos/core#altLabel": {
+    property: "http://www.w3.org/2004/02/skos/core#altLabel",
+    propertyPrefixed: "skos:altLabel",
+    icon: mdiLabelMultiple
+  }
+};
 
 const props = defineProps<{
   patternInstanceId: number;
@@ -19,20 +37,20 @@ function cancelEdit() {
 
 function save() {
   const labels = props.entity.labels.slice();
-  labels[editing.value] = editedLabel.value;
+  labels[editing.value].value = editedLabel.value;
   const update = Object.assign({}, props.entity, { labels });
   props.onSave(props.patternInstanceId, update);
   editing.value = -1;
 }
 
 function onEdit(index: number) {
-  editedLabel.value = props.entity.labels[index];
+  editedLabel.value = props.entity.labels[index].value;
   editing.value = index;
 }
 </script>
 
 <template>
-  <div v-for="(label, index) in props.entity.labels" :key="label">
+  <div v-for="(label, index) in props.entity.labels" :key="label.value">
     <template v-if="editing === index">
       <v-text-field
         label="Label"
@@ -45,7 +63,7 @@ function onEdit(index: number) {
         @keydown.esc="editing = -1"
       >
         <template v-slot:append>
-          <v-btn variant="tonal" size="x-small" icon="true" @click="save" :disabled="label.trim().length === 0">
+          <v-btn variant="tonal" size="x-small" icon="true" @click="save" :disabled="label.value.trim().length === 0">
             <v-icon>{{ mdiContentSave }}</v-icon>
           </v-btn>
           <v-btn class="ml-1" variant="tonal" size="x-small" icon="true" @click="cancelEdit">
@@ -56,8 +74,12 @@ function onEdit(index: number) {
     </template>
     <template v-else>
       <span class="editable-label">
-        <v-icon>{{ mdiLabel }}</v-icon>
-        {{ label }}
+        <v-tooltip :text="LABEL_TYPES[label.property as keyof typeof LABEL_TYPES].propertyPrefixed">
+          <template v-slot:activator="{ props }">
+            <v-icon v-bind="props">{{ LABEL_TYPES[label.property as keyof typeof LABEL_TYPES].icon }}</v-icon>
+          </template>
+        </v-tooltip>
+        {{ label.value }}
         <v-btn variant="tonal" size="x-small" icon="true" @click="onEdit(index)">
           <v-icon>{{ mdiPencil }}</v-icon>
         </v-btn>
