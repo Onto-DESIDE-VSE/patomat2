@@ -1,5 +1,9 @@
 # PatOMat2
 
+![Publish Backend Docker image](https://github.com/Onto-DESIDE-VSE/patomat2/actions/workflows/publish-backend.yml/badge.svg)
+![Publish Frontend Docker image](https://github.com/Onto-DESIDE-VSE/patomat2/actions/workflows/publish-frontend.yml/badge.svg)
+[![Javadoc](https://img.shields.io/badge/JavaDoc-Online-green)](https://Onto-DESIDE-VSE.github.io/patomat2/)
+
 PatOMat2 is a tool for automatic searching for and processing of patterns in ontologies. It is an evolution of the
 original [PatOMat](https://patomat.vse.cz/).
 
