@@ -23,6 +23,9 @@ function cancelEdit() {
 
 function save(newValue: EntityLabel) {
   const labels = props.entity.labels.slice();
+  if (newValue.property === Constants.SKOS_PREF_LABEL) {
+    labels.forEach((l) => (l.property = Constants.SKOS_ALT_LABEL));
+  }
   labels[editing.value].value = newValue.value;
   labels[editing.value].property = newValue.property;
   const update = Object.assign({}, props.entity, { labels });
