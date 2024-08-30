@@ -39,6 +39,13 @@ function onEdit(index: number) {
   editedLabel.value = props.entity.labels[index];
   editing.value = index;
 }
+
+function onToggleApply(index: number) {
+  const labels = props.entity.labels.slice();
+  labels[index].apply = !props.entity.labels[index].apply;
+  const update = Object.assign({}, props.entity, { labels });
+  props.onSave(props.patternInstanceId, update);
+}
 </script>
 
 <template>
@@ -47,7 +54,9 @@ function onEdit(index: number) {
     <span class="editable-label">
       <v-tooltip :text="label.apply ? 'This label will be applied' : 'This label will not be applied'">
         <template v-slot:activator="{ props }">
-          <v-icon v-bind="props">{{ label.apply ? mdiCheckboxOutline : mdiCheckboxBlankOutline }}</v-icon>
+          <v-btn variant="text" size="x-small" icon="true" v-bind="props" @click="onToggleApply(index)">
+            <v-icon>{{ label.apply ? mdiCheckboxOutline : mdiCheckboxBlankOutline }}</v-icon>
+          </v-btn>
         </template>
       </v-tooltip>
       <v-tooltip :text="Constants.LABEL_TYPES[label.property as LabelProperties].propertyPrefixed">
