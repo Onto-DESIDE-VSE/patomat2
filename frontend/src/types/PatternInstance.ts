@@ -28,4 +28,5 @@ export type NewEntity = {
 export type EntityLabel = {
   value: string;
   property: string;
+  apply: boolean;
 };

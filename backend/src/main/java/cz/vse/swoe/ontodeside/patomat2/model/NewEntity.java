@@ -12,7 +12,7 @@ public record NewEntity(String variableName, String identifier, List<EntityLabel
     public String createInsertLabelSparql() {
         String labelPattern = "<%s> <%s> \"%s\" .";
         final StringBuilder sb = new StringBuilder("INSERT DATA { ");
-        labels.forEach(l -> sb.append(String.format(labelPattern, identifier, l.property(), l.value())).append(" "));
+        labels.stream().filter(EntityLabel::apply).forEach(l -> sb.append(String.format(labelPattern, identifier, l.property(), l.value())).append(" "));
         sb.append('}');
         return sb.toString();
     }

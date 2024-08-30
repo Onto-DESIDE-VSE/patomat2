@@ -17,4 +17,12 @@ class NewEntityTest {
         String expected = "INSERT DATA { <" + id + "> <" + Constants.DEFAULT_LABEL_PROPERTY + "> \"label1\" . <" + id + "> <" + Constants.DEFAULT_LABEL_PROPERTY + "> \"label2\" . }";
         assertEquals(expected, newEntity.createInsertLabelSparql());
     }
+
+    @Test
+    void createSparqlInsertCreatesInsertWithLabelsThatAreToBeApplied() {
+        final String id = Generator.generateUri().toString();
+        NewEntity newEntity = new NewEntity("variable", id, List.of(new EntityLabel("label1", Constants.DEFAULT_LABEL_PROPERTY, true), new EntityLabel("label2", Constants.DEFAULT_LABEL_PROPERTY, false)));
+        String expected = "INSERT DATA { <" + id + "> <" + Constants.DEFAULT_LABEL_PROPERTY + "> \"label1\" . }";
+        assertEquals(expected, newEntity.createInsertLabelSparql());
+    }
 }
