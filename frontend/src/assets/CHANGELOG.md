@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2024-08-30
+
+- Allow selecting the label property and choosing whether a label is applied or not.
+
 ### 2024-08-27
 
 - Implemented pattern match statistics and filtering of matches by pattern.
