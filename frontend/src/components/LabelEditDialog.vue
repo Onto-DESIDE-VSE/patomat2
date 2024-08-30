@@ -12,6 +12,7 @@ const props = defineProps<{
 const internalOpen = ref(props.label !== null);
 const label = ref<string | null>(props.label != null ? props.label.value : null);
 const property = ref<string | null>(props.label != null ? props.label.property : null);
+const apply = ref<boolean | null>(props.label != null ? props.label.apply : null);
 
 watch(
   () => props.label,
@@ -20,6 +21,7 @@ watch(
       internalOpen.value = true;
       label.value = entityLabel.value;
       property.value = entityLabel.property;
+      apply.value = entityLabel.apply;
     }
   }
 );
@@ -29,7 +31,7 @@ function onClose() {
   internalOpen.value = false;
 }
 function onSave() {
-  props.onSubmit({ value: label.value!, property: property.value! });
+  props.onSubmit({ value: label.value!, property: property.value!, apply: apply.value! });
   internalOpen.value = false;
 }
 </script>
@@ -39,7 +41,7 @@ function onSave() {
     <v-card title="Edit New Entity Label">
       <v-card-text>
         <v-form>
-          <v-text-field v-model="label" label="Label"></v-text-field>
+          <v-text-field v-model="label" label="Label" :disabled="!apply"></v-text-field>
 
           <v-select
             label="Property"
@@ -47,7 +49,10 @@ function onSave() {
             :items="Object.values(Constants.LABEL_TYPES)"
             item-title="propertyPrefixed"
             item-value="property"
+            :disabled="!apply"
           ></v-select>
+
+          <v-checkbox v-model="apply" label="Apply this label"></v-checkbox>
         </v-form>
       </v-card-text>
       <v-card-actions>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { mdiPencil } from "@mdi/js";
+import { mdiCheckboxBlankOutline, mdiCheckboxOutline, mdiPencil } from "@mdi/js";
 import type { EntityLabel, NewEntity } from "@/types/PatternInstance";
 import LabelEditDialog from "@/components/LabelEditDialog.vue";
 import Constants from "@/constants/Constants";
@@ -28,6 +28,7 @@ function save(newValue: EntityLabel) {
   }
   labels[editing.value].value = newValue.value;
   labels[editing.value].property = newValue.property;
+  labels[editing.value].apply = newValue.apply;
   const update = Object.assign({}, props.entity, { labels });
   props.onSave(props.patternInstanceId, update);
   editing.value = -1;
@@ -44,6 +45,11 @@ function onEdit(index: number) {
   <LabelEditDialog :label="editedLabel" :on-cancel="cancelEdit" :on-submit="save"></LabelEditDialog>
   <div v-for="(label, index) in props.entity.labels" :key="label.value">
     <span class="editable-label">
+      <v-tooltip :text="label.apply ? 'This label will be applied' : 'This label will not be applied'">
+        <template v-slot:activator="{ props }">
+          <v-icon v-bind="props">{{ label.apply ? mdiCheckboxOutline : mdiCheckboxBlankOutline }}</v-icon>
+        </template>
+      </v-tooltip>
       <v-tooltip :text="Constants.LABEL_TYPES[label.property as LabelProperties].propertyPrefixed">
         <template v-slot:activator="{ props }">
           <v-icon v-bind="props">{{ Constants.LABEL_TYPES[label.property as LabelProperties].icon }}</v-icon>
