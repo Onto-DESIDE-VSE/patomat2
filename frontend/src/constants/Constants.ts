@@ -1,3 +1,5 @@
+import { mdiLabel, mdiLabelMultiple, mdiLabelOutline } from "@mdi/js";
+
 /**
  * Aggregated object of process.env and window.__config__ to allow dynamic configuration
  */
@@ -27,7 +29,25 @@ const Constants = {
   APP_NAME: "PatOMat2",
   SERVER_URL: getEnv("SERVER_URL", ""),
   CONTEXT_PATH: getEnv("CONTEXT_PATH", ""),
-  MESSAGE_TIMEOUT: 3000
+  MESSAGE_TIMEOUT: 3000,
+
+  LABEL_TYPES: {
+    "http://www.w3.org/2000/01/rdf-schema#label": {
+      property: "http://www.w3.org/2000/01/rdf-schema#label",
+      propertyPrefixed: "rdfs:label",
+      icon: mdiLabelOutline
+    },
+    "http://www.w3.org/2004/02/skos/core#prefLabel": {
+      property: "http://www.w3.org/2004/02/skos/core#prefLabel",
+      propertyPrefixed: "skos:prefLabel",
+      icon: mdiLabel
+    },
+    "http://www.w3.org/2004/02/skos/core#altLabel": {
+      property: "http://www.w3.org/2004/02/skos/core#altLabel",
+      propertyPrefixed: "skos:altLabel",
+      icon: mdiLabelMultiple
+    }
+  }
 };
 
 export default Constants;
