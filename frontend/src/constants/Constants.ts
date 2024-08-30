@@ -25,29 +25,37 @@ export function getEnv(name: string, defaultValue?: string): string {
   throw new Error(`Missing environment variable: ${name}`);
 }
 
+const SKOS_PREF_LABEL = "http://www.w3.org/2004/02/skos/core#prefLabel";
+const SKOS_ALT_LABEL = "http://www.w3.org/2004/02/skos/core#altLabel";
+const RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
+
+const LABEL_TYPES: { [key: string]: { property: string; propertyPrefixed: string; icon: string } } = {};
+LABEL_TYPES[RDFS_LABEL] = {
+  property: RDFS_LABEL,
+  propertyPrefixed: "rdfs:label",
+  icon: mdiLabelOutline
+};
+LABEL_TYPES[SKOS_PREF_LABEL] = {
+  property: SKOS_PREF_LABEL,
+  propertyPrefixed: "skos:prefLabel",
+  icon: mdiLabel
+};
+LABEL_TYPES[SKOS_ALT_LABEL] = {
+  property: SKOS_ALT_LABEL,
+  propertyPrefixed: "skos:altLabel",
+  icon: mdiLabelMultiple
+};
+
 const Constants = {
   APP_NAME: "PatOMat2",
   SERVER_URL: getEnv("SERVER_URL", ""),
   CONTEXT_PATH: getEnv("CONTEXT_PATH", ""),
   MESSAGE_TIMEOUT: 3000,
+  SKOS_PREF_LABEL,
+  SKOS_ALT_LABEL,
+  RDFS_LABEL,
 
-  LABEL_TYPES: {
-    "http://www.w3.org/2000/01/rdf-schema#label": {
-      property: "http://www.w3.org/2000/01/rdf-schema#label",
-      propertyPrefixed: "rdfs:label",
-      icon: mdiLabelOutline
-    },
-    "http://www.w3.org/2004/02/skos/core#prefLabel": {
-      property: "http://www.w3.org/2004/02/skos/core#prefLabel",
-      propertyPrefixed: "skos:prefLabel",
-      icon: mdiLabel
-    },
-    "http://www.w3.org/2004/02/skos/core#altLabel": {
-      property: "http://www.w3.org/2004/02/skos/core#altLabel",
-      propertyPrefixed: "skos:altLabel",
-      icon: mdiLabelMultiple
-    }
-  }
+  LABEL_TYPES
 };
 
 export default Constants;
