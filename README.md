@@ -71,6 +71,11 @@ at
 any given moment. If this limit is reached, any new sessions (i.e., requests from new clients) are rejected until enough
 existing sessions time out due to inactivity.
 
+## Documentation
+
+- Documentation for the backend REST API is accessible from each instance in the `About` section, or at `${BACKEND_URL}/v3/api-docs`.
+- Javadoc for the backend is published via GitHub Pages and is available at https://onto-deside-vse.github.io/patomat2/.
+
 ## License
 
 MIT
