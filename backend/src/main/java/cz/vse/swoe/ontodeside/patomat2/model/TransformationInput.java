@@ -18,9 +18,6 @@ public class TransformationInput {
     @Schema(description = "List of patterns. If the patterns were uploaded, they are the names of the pattern files. If the patterns were provided by URL, they are the URLs.")
     private List<String> patterns = new ArrayList<>();
 
-    @Schema(description = "Whether the input was provided by URL or uploaded.")
-    private boolean fromUrl = false;
-
     public String getOntology() {
         return ontology;
     }
@@ -37,14 +34,6 @@ public class TransformationInput {
         this.patterns = patterns;
     }
 
-    public boolean isFromUrl() {
-        return fromUrl;
-    }
-
-    public void setFromUrl(boolean fromUrl) {
-        this.fromUrl = fromUrl;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -53,13 +42,11 @@ public class TransformationInput {
         if (!(o instanceof TransformationInput that)) {
             return false;
         }
-        return isFromUrl() == that.isFromUrl() && Objects.equals(getOntology(),
-                that.getOntology()) && Objects.equals(
-                getPatterns(), that.getPatterns());
+        return Objects.equals(getOntology(), that.getOntology()) && Objects.equals(getPatterns(), that.getPatterns());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getOntology(), getPatterns(), isFromUrl());
+        return Objects.hash(getOntology(), getPatterns());
     }
 }
