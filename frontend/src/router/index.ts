@@ -13,7 +13,7 @@ const router = createRouter({
     {
       path: "/load",
       name: "load",
-      component: () => import("../views/ImportView.vue")
+      component: () => import("../views/TransformationInputView.vue")
     },
     {
       path: "/matches",

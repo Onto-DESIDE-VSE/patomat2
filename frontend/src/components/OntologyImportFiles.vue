@@ -18,7 +18,7 @@ const upload = async () => {
   const formData = new FormData();
   formData.append("ontology", ontologyFile.value!);
   patternFiles.value.forEach((file) => formData.append("pattern", file));
-  const resp = await fetch(`${Constants.SERVER_URL}/ontology`, {
+  const resp = await fetch(`${Constants.SERVER_URL}/ontology/files`, {
     credentials: Constants.SERVER_URL.length > 0 ? "include" : "same-origin",
     method: "POST",
     body: formData
@@ -26,7 +26,7 @@ const upload = async () => {
   showProgress.value = false;
   if (resp.ok) {
     messageStore.publishMessage("Ontology and patterns uploaded.");
-    router.push("/matches");
+    await router.push("/matches");
   } else if (resp.status === 401) {
     messageStore.publishMessage("PatOMat2 is currently fully utilized. Please try again later.");
   } else {
