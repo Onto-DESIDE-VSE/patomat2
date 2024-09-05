@@ -1,7 +1,7 @@
 package cz.vse.swoe.ontodeside.patomat2.service;
 
 import cz.vse.swoe.ontodeside.patomat2.event.OntologyFileUploadedEvent;
-import cz.vse.swoe.ontodeside.patomat2.exception.OntologyNotUploadedException;
+import cz.vse.swoe.ontodeside.patomat2.exception.IncompleteTransformationInputException;
 import cz.vse.swoe.ontodeside.patomat2.exception.PatOMat2Exception;
 import cz.vse.swoe.ontodeside.patomat2.model.NewEntity;
 import cz.vse.swoe.ontodeside.patomat2.model.NewEntityGenerator;
@@ -47,7 +47,7 @@ public class MatchService {
 
     public List<PatternInstance> findMatches() {
         if (patterns == null) {
-            throw new OntologyNotUploadedException("Ontology not uploaded, yet.");
+            throw new IncompleteTransformationInputException("Ontology not uploaded, yet.");
         }
         if (matches != null) {
             return new ArrayList<>(matches.values());

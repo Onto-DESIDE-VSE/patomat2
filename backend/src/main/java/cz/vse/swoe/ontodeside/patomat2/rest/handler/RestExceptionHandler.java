@@ -3,7 +3,7 @@ package cz.vse.swoe.ontodeside.patomat2.rest.handler;
 import cz.vse.swoe.ontodeside.patomat2.exception.AmbiguousOntologyException;
 import cz.vse.swoe.ontodeside.patomat2.exception.InvalidFileException;
 import cz.vse.swoe.ontodeside.patomat2.exception.NotFoundException;
-import cz.vse.swoe.ontodeside.patomat2.exception.OntologyNotUploadedException;
+import cz.vse.swoe.ontodeside.patomat2.exception.IncompleteTransformationInputException;
 import cz.vse.swoe.ontodeside.patomat2.exception.OntologyReadException;
 import cz.vse.swoe.ontodeside.patomat2.exception.PatOMat2Exception;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,9 +39,9 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(OntologyNotUploadedException.class)
-    public ResponseEntity<ErrorInfo> ontologyNotUploadedException(OntologyNotUploadedException ex,
-                                                                  HttpServletRequest request) {
+    @ExceptionHandler(IncompleteTransformationInputException.class)
+    public ResponseEntity<ErrorInfo> incompleteTransformationInputException(IncompleteTransformationInputException ex,
+                                                                            HttpServletRequest request) {
         logException(ex, request);
         return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.CONFLICT);
     }

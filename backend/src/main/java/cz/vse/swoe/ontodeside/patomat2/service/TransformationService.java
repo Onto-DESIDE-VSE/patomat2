@@ -1,6 +1,6 @@
 package cz.vse.swoe.ontodeside.patomat2.service;
 
-import cz.vse.swoe.ontodeside.patomat2.exception.OntologyNotUploadedException;
+import cz.vse.swoe.ontodeside.patomat2.exception.IncompleteTransformationInputException;
 import cz.vse.swoe.ontodeside.patomat2.model.NewEntity;
 import cz.vse.swoe.ontodeside.patomat2.model.OntologyDiff;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
@@ -47,7 +47,7 @@ public class TransformationService {
     public TransformationSummary transform(@NonNull TransformationSpecification transformation) {
         Objects.requireNonNull(transformation);
         if (!ontologyHolder.isLoaded()) {
-            throw new OntologyNotUploadedException("Ontology has not been uploaded yet.");
+            throw new IncompleteTransformationInputException("Ontology has not been uploaded yet.");
         }
         try {
             final Map<Integer, PatternInstance> matches = matchService.getMatches();
