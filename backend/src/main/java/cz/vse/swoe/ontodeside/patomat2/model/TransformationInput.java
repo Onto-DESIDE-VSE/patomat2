@@ -3,6 +3,7 @@ package cz.vse.swoe.ontodeside.patomat2.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Describes the transformation input provided by the user.
@@ -41,5 +42,23 @@ public class TransformationInput {
 
     public void setFromUrl(boolean fromUrl) {
         this.fromUrl = fromUrl;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TransformationInput that)) {
+            return false;
+        }
+        return isFromUrl() == that.isFromUrl() && Objects.equals(getOntology(),
+                that.getOntology()) && Objects.equals(
+                getPatterns(), that.getPatterns());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getOntology(), getPatterns(), isFromUrl());
     }
 }
