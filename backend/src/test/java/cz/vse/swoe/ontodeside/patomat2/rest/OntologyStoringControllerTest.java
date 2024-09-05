@@ -63,7 +63,7 @@ class OntologyStoringControllerTest {
         input.setOntology("https://www.w3.org/TR/skos-reference/skos.rdf");
         input.setPatterns(List.of("https://raw.githubusercontent.com/Onto-DESIDE-VSE/patomat2/main/backend/src/test/resources/pattern-example.json"));
 
-        mockMvc.perform(post("/ontology/url").content(new ObjectMapper().writeValueAsString(input))
+        mockMvc.perform(post("/ontology/urls").content(new ObjectMapper().writeValueAsString(input))
                                              .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk());
         verify(ontologyStoringService).saveOntologyAndPatterns(input);

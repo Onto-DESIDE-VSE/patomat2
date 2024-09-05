@@ -2,6 +2,7 @@ package cz.vse.swoe.ontodeside.patomat2.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -15,7 +16,7 @@ public class TransformationInput {
     private String ontology;
 
     @Schema(description = "List of patterns. If the patterns were uploaded, they are the names of the pattern files. If the patterns were provided by URL, they are the URLs.")
-    private List<String> patterns;
+    private List<String> patterns = new ArrayList<>();
 
     @Schema(description = "Whether the input was provided by URL or uploaded.")
     private boolean fromUrl = false;

@@ -46,15 +46,16 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
      * <p>
      * It saves the stored file paths in the session.
      *
-     * @param ontology      Ontology file
+     * @param ontologyFile  Ontology file
      * @param patternsFiles List of pattern files
      */
-    public void saveOntologyAndPatterns(@NonNull MultipartFile ontology, @NonNull List<MultipartFile> patternsFiles) {
+    public void saveOntologyAndPatterns(@NonNull MultipartFile ontologyFile,
+                                        @NonNull List<MultipartFile> patternsFiles) {
         if (patternsFiles.isEmpty()) {
             throw new IncompleteTransformationInputException("No transformation pattern files provided.");
         }
-        LOG.info("Storing ontology file '{}' and {} patterns for session {}.", ontology.getOriginalFilename(), patternsFiles.size(), session.getId());
-        final File storedFile = storageService.saveFile(ontology);
+        LOG.info("Storing ontology file '{}' and {} patterns for session {}.", ontologyFile.getOriginalFilename(), patternsFiles.size(), session.getId());
+        final File storedFile = storageService.saveFile(ontologyFile);
         session.setAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE, storedFile.getName());
         final List<Pattern> patterns = patternsFiles
                 .stream()
@@ -72,7 +73,20 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
      * @param input Transformation input specifying ontology and pattern urls
      */
     public void saveOntologyAndPatterns(@NonNull TransformationInput input) {
-        // TODO
+        if (input.getOntology() == null || input.getPatterns().isEmpty()) {
+            throw new IncompleteTransformationInputException("No ontology or transformation pattern file URLs provided.");
+        }
+        LOG.info("Storing ontology from '{}' and {} patterns for session {}.", input.getOntology(), input.getPatterns()
+                                                                                                         .size(), session.getId());
+        final File storedFile = storageService.downloadAndSaveFile(input.getOntology());
+        session.setAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE, storedFile.getName());
+        final List<Pattern> patterns = input.getPatterns().stream()
+                                            .map(storageService::downloadAndSaveFile)
+                                            .map(patternParser::readPattern)
+                                            .toList();
+        session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream().map(Pattern::fileName)
+                                                                                .toList());
+        eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns));
     }
 
     /**
