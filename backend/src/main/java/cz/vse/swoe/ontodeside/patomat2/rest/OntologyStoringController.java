@@ -47,7 +47,7 @@ public class OntologyStoringController {
 
     @Operation(summary = "Load transformation input from URL")
     @ApiResponse(responseCode = "200")
-    @PostMapping("/url")
+    @PostMapping("/urls")
     public void storeTransformationInput(
             @Parameter(description = "Transformation input containing URLs of ontology and patterns to load")
             @RequestBody TransformationInput transformationInput) {

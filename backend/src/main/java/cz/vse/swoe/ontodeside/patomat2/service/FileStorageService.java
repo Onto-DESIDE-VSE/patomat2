@@ -7,8 +7,15 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.netty.http.client.HttpClient;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,11 +70,9 @@ public class FileStorageService {
      * @param file File to messageStore
      * @return The newly created file on the host system
      */
-    public File saveFile(MultipartFile file) {
-        final File targetDir = new File(config.getStorage() + File.separator + session.getId());
-        if (!targetDir.exists()) {
-            targetDir.mkdirs();
-        }
+    @NonNull
+    public File saveFile(@NonNull MultipartFile file) {
+        final File targetDir = createStorageDirectory();
         File newFile = new File(targetDir + File.separator + sanitizeFilename(file.getOriginalFilename()));
         try {
             LOG.debug("Storing file '{}' at '{}'.", file.getOriginalFilename(), newFile.getAbsolutePath());
@@ -77,6 +82,14 @@ public class FileStorageService {
             throw new PatOMat2Exception("Unable to messageStore file " + file.getOriginalFilename());
         }
         return newFile;
+    }
+
+    private @NonNull File createStorageDirectory() {
+        final File targetDir = new File(config.getStorage() + File.separator + session.getId());
+        if (!targetDir.exists()) {
+            targetDir.mkdirs();
+        }
+        return targetDir;
     }
 
     private static String sanitizeFilename(String fileName) {
@@ -102,6 +115,30 @@ public class FileStorageService {
 
         // Remove any leading or trailing hyphens
         return fileName.replaceAll("(^-|-$)+", "");
+    }
+
+    /**
+     * Downloads file from the specified URL and stores it in the configured storage directory.
+     *
+     * @param url URL to download from
+     * @return The newly created file on the host system
+     */
+    public File downloadAndSaveFile(@NonNull String url) {
+        final String targetFileName = sanitizeFilename(url.substring(url.lastIndexOf('/') + 1));
+        final File targetDir = createStorageDirectory();
+        final File targetFile = new File(targetDir + File.separator + targetFileName);
+        LOG.debug("Downloading file from '{}' and storing it in '{}'.", url, targetFile.getAbsolutePath());
+        final WebClient webClient = WebClient.builder()
+                                             .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
+                                                                                                       .compress(true)
+                                                                                                       .followRedirect(true)))
+                                             .baseUrl(url).build();
+        final Flux<DataBuffer> flux = webClient.get()
+                                               .retrieve()
+                                               .bodyToFlux(DataBuffer.class);
+
+        DataBufferUtils.write(flux, targetFile.toPath()).block();
+        return targetFile;
     }
 
     /**
@@ -133,6 +170,7 @@ public class FileStorageService {
         }
         result.delete();
         assert result.getParentFile().isDirectory();
+        assert result.getParentFile().listFiles() != null;
         if (result.getParentFile().listFiles().length == 0) {
             result.getParentFile().delete();
         }
