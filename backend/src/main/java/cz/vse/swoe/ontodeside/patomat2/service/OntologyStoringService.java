@@ -4,7 +4,7 @@ import cz.vse.swoe.ontodeside.patomat2.Constants;
 import cz.vse.swoe.ontodeside.patomat2.event.OntologyFileUploadedEvent;
 import cz.vse.swoe.ontodeside.patomat2.exception.NotFoundException;
 import cz.vse.swoe.ontodeside.patomat2.exception.OntologyNotUploadedException;
-import cz.vse.swoe.ontodeside.patomat2.model.LoadedTransformationInput;
+import cz.vse.swoe.ontodeside.patomat2.model.TransformationInput;
 import cz.vse.swoe.ontodeside.patomat2.model.Pattern;
 import cz.vse.swoe.ontodeside.patomat2.service.pattern.PatternParser;
 import jakarta.servlet.http.HttpSession;
@@ -63,11 +63,11 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
         eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns));
     }
 
-    public LoadedTransformationInput getTransformationInput() {
+    public TransformationInput getTransformationInput() {
         try {
-            final LoadedTransformationInput result = new LoadedTransformationInput();
-            result.setOntologyFile(getRequiredUploadedOntologyFileName());
-            result.setPatternFiles((List<String>) session.getAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE));
+            final TransformationInput result = new TransformationInput();
+            result.setOntology(getRequiredUploadedOntologyFileName());
+            result.setPatterns((List<String>) session.getAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE));
             return result;
         } catch (OntologyNotUploadedException e) {
             throw new NotFoundException("Ontology not uploaded, yet.");
