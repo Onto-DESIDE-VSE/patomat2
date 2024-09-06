@@ -37,11 +37,11 @@ public class TransformationController {
         return transformationService.transform(transformation);
     }
 
-    @Operation(summary = "Get the transformed ontology")
+    @Operation(summary = "Download the transformed ontology")
     @ApiResponse(responseCode = "200", description = "Transformed ontology")
     @ApiResponse(responseCode = "409",
                  description = "Ontology has not been uploaded or transformation has not been performed")
-    @GetMapping(value = "/ontology")
+    @GetMapping(value = "/ontology/content")
     public ResponseEntity<Resource> getTransformedOntology() {
         return OntologyStoringController.buildResponseWithAttachment(transformationService.getTransformedOntology());
     }

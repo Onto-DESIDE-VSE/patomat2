@@ -10,7 +10,7 @@ import { useRouter } from "vue-router";
 import type { TransformationSummary } from "@/types/TransformationSummary";
 import TransformationSummaryView from "@/components/TransformationSummaryView.vue";
 import MatchesStatistics from "@/components/MatchesStatistics.vue";
-import { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
+import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
 import { getLoadedInput } from "@/api/OntologyStorageApi";
 
 const router = useRouter();
@@ -74,7 +74,7 @@ const applyTransformation = async (applyDeletes: boolean, instances: PatternInst
 };
 
 const downloadTransformedOntology = async () => {
-  const resp = await fetch(`${Constants.SERVER_URL}/transformation/ontology`, {
+  const resp = await fetch(`${Constants.SERVER_URL}/transformation/ontology/content`, {
     method: "GET",
     credentials: "include"
   });
