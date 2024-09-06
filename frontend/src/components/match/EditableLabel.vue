@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { mdiCheckboxBlankOutline, mdiCheckboxOutline, mdiPencil } from "@mdi/js";
 import type { EntityLabel, NewEntity } from "@/types/PatternInstance";
-import LabelEditDialog from "@/components/LabelEditDialog.vue";
+import LabelEditDialog from "@/components/match/LabelEditDialog.vue";
 import Constants from "@/constants/Constants";
 
 declare type LabelProperties = keyof typeof Constants.LABEL_TYPES;

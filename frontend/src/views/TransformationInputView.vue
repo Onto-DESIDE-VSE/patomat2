@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import LoadedTransformationInputInfo from "@/components/LoadedTransformationInputInfo.vue";
-import TransformationInput from "@/components/TransformationInput.vue";
+import LoadedTransformationInputInfo from "@/components/importing/LoadedTransformationInputInfo.vue";
+import TransformationInput from "@/components/importing/TransformationInput.vue";
 </script>
 
 <template>
