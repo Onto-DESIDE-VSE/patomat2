@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2024-09-06
+
+- Allow loading ontology and patterns from URL.
+
 ### 2024-08-30
 
 - Allow selecting the label property and choosing whether a label is applied or not.
