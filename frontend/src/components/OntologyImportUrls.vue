@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import useMessageStore from "@/store/messageStore";
-import { computed, ref } from "vue";
+import { computed, ref, useTemplateRef } from "vue";
 import { mdiMinus, mdiPlus } from "@mdi/js";
 import Constants from "@/constants/Constants";
 
@@ -12,6 +12,8 @@ const ontologyUrl = ref<string>();
 const patternUrls = ref<string[]>([]);
 const showProgress = ref<boolean>(false);
 const patternCount = ref<number>(1);
+
+const inputRefs = useTemplateRef<HTMLInputElement[]>("inputs");
 
 const valid = computed(
   () => ontologyUrl.value !== undefined && ontologyUrl.value.trim().length > 0 && patternUrls.value.length > 0
@@ -45,6 +47,9 @@ function addPatternInput() {
   patternCount.value++;
   patternUrls.value.push(patternUrls.value[0]);
   patternUrls.value[0] = "";
+  if (inputRefs.value) {
+    inputRefs.value[0].focus();
+  }
 }
 
 function removePattern(index: number) {
@@ -61,6 +66,7 @@ function removePattern(index: number) {
     <v-text-field v-model="ontologyUrl" label="Ontology URL"></v-text-field>
     <v-text-field
       v-for="i in patternCount"
+      ref="inputs"
       :key="i"
       :append-icon="i > 1 ? mdiMinus : mdiPlus"
       label="Transformation pattern URL"
