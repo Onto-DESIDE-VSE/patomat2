@@ -2,9 +2,11 @@
 import type { PatternInstance } from "@/types/PatternInstance";
 import { computed } from "vue";
 import type { PatternMatchStatistics } from "@/types/PatternMatchStatistics";
+import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
 
 const props = defineProps<{
   matches: PatternInstance[];
+  transformationInput: LoadedTransformationInput;
 }>();
 
 const stats = computed(() => {
@@ -12,13 +14,13 @@ const stats = computed(() => {
     totalMatchCount: 0,
     matchCount: new Map<string, number>()
   };
+  props.transformationInput.patterns.forEach((pattern) => {
+    result.matchCount.set(pattern.name, 0);
+  });
 
   for (const match of props.matches) {
     result.totalMatchCount++;
-    result.matchCount.set(
-      match.patternName,
-      result.matchCount.has(match.patternName) ? result.matchCount.get(match.patternName)! + 1 : 1
-    );
+    result.matchCount.set(match.patternName, result.matchCount.get(match.patternName)! + 1);
   }
   return result;
 });

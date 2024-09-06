@@ -1,21 +1,16 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { mdiDownload } from "@mdi/js";
 import Constants from "../constants/Constants";
-import type { LoadedTransformationInput } from "../types/LoadedTransformationInput";
-import { downloadAttachment } from "../util/Utils";
+import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
+import { downloadAttachment } from "@/util/Utils";
+import { getLoadedInput } from "@/api/OntologyStorageApi";
 
 const loadedData = ref<LoadedTransformationInput | null>(null);
-const getLoadedInput = async () => {
-  const resp = await fetch(`${Constants.SERVER_URL}/ontology`, {
-    method: "GET",
-    credentials: "include"
-  });
-  if (resp.ok) {
-    loadedData.value = await resp.json();
-  }
-};
-getLoadedInput();
+
+onMounted(async () => {
+  loadedData.value = await getLoadedInput();
+});
 
 const downloadOntologyFile = async () => {
   const resp = await fetch(`${Constants.SERVER_URL}/ontology/content`, {
@@ -38,12 +33,10 @@ const downloadOntologyFile = async () => {
       {{ loadedData.ontology }}
     </v-btn>
     |
-    <span class="font-weight-bold"> Transformation pattern files: </span>
-    <span v-for="(file, index) in loadedData.patterns" :key="file">
+    <span class="font-weight-bold"> Transformation patterns: </span>
+    <span v-for="(pi, index) in loadedData.patterns" :key="pi.fileName">
       <template v-if="index > 0">, </template>
-      {{ file }}
+      {{ pi.name }} ({{ pi.fileName }})
     </span>
   </div>
 </template>
-
-<style scoped></style>
