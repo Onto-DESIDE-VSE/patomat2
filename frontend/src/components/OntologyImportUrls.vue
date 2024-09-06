@@ -39,7 +39,10 @@ async function submit() {
   } else if (resp.status === 401) {
     messageStore.publishMessage("PatOMat2 is currently fully utilized. Please try again later.");
   } else {
-    messageStore.publishMessage("Failed to load and process ontology and patterns. Got message: " + resp.body);
+    const error = await resp.json();
+    messageStore.publishMessage(
+      "Failed to load and process ontology and patterns. Server responded with error: " + error.message
+    );
   }
 }
 

@@ -1,8 +1,8 @@
 package cz.vse.swoe.ontodeside.patomat2.service;
 
 import cz.vse.swoe.ontodeside.patomat2.config.ApplicationConfig;
-import cz.vse.swoe.ontodeside.patomat2.exception.InvalidFileException;
 import cz.vse.swoe.ontodeside.patomat2.exception.PatOMat2Exception;
+import cz.vse.swoe.ontodeside.patomat2.exception.ResourceFetchException;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -14,11 +14,15 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.netty.http.client.HttpClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Normalizer;
@@ -98,16 +102,14 @@ public class FileStorageService {
         // Remove special characters
         fileName = fileName.replaceAll("[^a-zA-Z0-9.\\-_]", "");
 
-        if (fileName.indexOf('.') == -1) {
-            throw new InvalidFileException("File name '" + fileName + "' does not contain an extension.");
-        }
-
-        // Truncate the file name if it exceeds a maximum allowed length
-        final int dotIndex = fileName.lastIndexOf('.');
-        assert dotIndex > 0;
-        if (dotIndex > 100) {
-            String extension = fileName.substring(fileName.lastIndexOf('.'));
-            fileName = fileName.substring(0, 100) + extension;
+        if (fileName.indexOf('.') != -1) {
+            // Truncate the file name if it exceeds a maximum allowed length
+            final int dotIndex = fileName.lastIndexOf('.');
+            assert dotIndex > 0;
+            if (dotIndex > 100) {
+                String extension = fileName.substring(fileName.lastIndexOf('.'));
+                fileName = fileName.substring(0, 100) + extension;
+            }
         }
 
         // Replace spaces with hyphens
@@ -124,21 +126,35 @@ public class FileStorageService {
      * @return The newly created file on the host system
      */
     public File downloadAndSaveFile(@NonNull String url) {
+        validateUrl(url);
         final String targetFileName = sanitizeFilename(url.substring(url.lastIndexOf('/') + 1));
         final File targetDir = createStorageDirectory();
         final File targetFile = new File(targetDir + File.separator + targetFileName);
         LOG.debug("Downloading file from '{}' and storing it in '{}'.", url, targetFile.getAbsolutePath());
-        final WebClient webClient = WebClient.builder()
-                                             .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
-                                                                                                       .compress(true)
-                                                                                                       .followRedirect(true)))
-                                             .baseUrl(url).build();
-        final Flux<DataBuffer> flux = webClient.get()
-                                               .retrieve()
-                                               .bodyToFlux(DataBuffer.class);
+        try {
+            final WebClient webClient = WebClient.builder()
+                                                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create()
+                                                                                                           .compress(true)
+                                                                                                           .followRedirect(true)))
+                                                 .baseUrl(url).build();
+            final Flux<DataBuffer> flux = webClient.get()
+                                                   .retrieve()
+                                                   .bodyToFlux(DataBuffer.class);
 
-        DataBufferUtils.write(flux, targetFile.toPath()).block();
+            DataBufferUtils.write(flux, targetFile.toPath()).block();
+        } catch (WebClientResponseException e) {
+            LOG.error("Failed to download file from {}.", url, e);
+            throw new ResourceFetchException("Unable to fetch file from '" + url + "'. Got status " + e.getStatusCode());
+        }
         return targetFile;
+    }
+
+    private void validateUrl(String url) {
+        try {
+            new URI(url).toURL();
+        } catch (URISyntaxException | MalformedURLException | IllegalArgumentException e) {
+            throw new ResourceFetchException("Invalid URL: " + url);
+        }
     }
 
     /**
