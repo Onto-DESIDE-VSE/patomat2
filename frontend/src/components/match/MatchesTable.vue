@@ -3,8 +3,8 @@ import { computed, ref } from "vue";
 import _ from "lodash";
 import type { NewEntity, PatternInstance, ResultBinding } from "@/types/PatternInstance";
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
-import EditableLabel from "@/components/EditableLabel.vue";
-import { mdiMenuDown } from "@mdi/js";
+import EditableLabel from "@/components/match/EditableLabel.vue";
+import TransformationExecutionDropdown from "@/components/match/TransformationExecutionDropdown.vue";
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -101,32 +101,12 @@ function highlightNewVariables(insert: string, newEntities: NewEntity[]) {
 </script>
 
 <template>
-  <v-row class="align-center">
-    <v-col cols="2">
-      <v-menu :location="'bottom'">
-        <template v-slot:activator="{ props }">
-          <v-btn
-            id="apply-transformation-top"
-            color="primary"
-            v-bind="props"
-            :disabled="selected.length === 0"
-            class="w-100"
-          >
-            Apply transformation
-            <v-icon dark end size="medium">{{ mdiMenuDown }}</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item @click="() => applyTransformation(false)">
-            <v-list-item-title>Apply only inserts</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="() => applyTransformation(true)">
-            <v-list-item-title>Apply deletes and inserts</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </v-col>
-  </v-row>
+  <TransformationExecutionDropdown
+    menu-position="bottom"
+    :execute-inserts="() => applyTransformation(false)"
+    :execute-inserts-and-deletes="() => applyTransformation(true)"
+    :disabled="selected.length === 0"
+  ></TransformationExecutionDropdown>
   <v-row class="align-center">
     <v-col cols="2">
       <v-select clearable label="Select pattern" :items="patternNames" v-model="search" multiple></v-select>
@@ -162,22 +142,10 @@ function highlightNewVariables(insert: string, newEntities: NewEntity[]) {
       </ul>
     </template>
   </v-data-table>
-  <div class="mt-3">
-    <v-menu :location="'top'">
-      <template v-slot:activator="{ props }">
-        <v-btn id="apply-transformation-bottom" color="primary" v-bind="props" :disabled="selected.length === 0">
-          Apply transformation
-          <v-icon dark end size="medium">{{ mdiMenuDown }}</v-icon>
-        </v-btn>
-      </template>
-      <v-list>
-        <v-list-item @click="() => applyTransformation(false)">
-          <v-list-item-title>Apply only inserts</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click="() => applyTransformation(true)">
-          <v-list-item-title>Apply deletes and inserts</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
-  </div>
+  <TransformationExecutionDropdown
+    menu-position="top"
+    :execute-inserts="() => applyTransformation(false)"
+    :execute-inserts-and-deletes="() => applyTransformation(true)"
+    :disabled="selected.length === 0"
+  ></TransformationExecutionDropdown>
 </template>

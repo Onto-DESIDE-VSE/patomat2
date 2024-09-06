@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import Constants from "@/constants/Constants";
 import { onMounted, ref } from "vue";
-import MatchesTable from "@/components/MatchesTable.vue";
+import MatchesTable from "@/components/match/MatchesTable.vue";
 import type { PatternInstance } from "@/types/PatternInstance";
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
 import { downloadAttachment } from "@/util/Utils";
 import useMessageStore from "@/store/messageStore";
 import { useRouter } from "vue-router";
 import type { TransformationSummary } from "@/types/TransformationSummary";
-import TransformationSummaryView from "@/components/TransformationSummaryView.vue";
-import MatchesStatistics from "@/components/MatchesStatistics.vue";
+import TransformationSummaryView from "@/components/match/TransformationSummaryView.vue";
+import MatchesStatistics from "@/components/match/MatchesStatistics.vue";
 import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
 import { getLoadedInput } from "@/api/OntologyStorageApi";
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { mdiDownload } from "@mdi/js";
-import Constants from "../constants/Constants";
+import Constants from "../../constants/Constants";
 import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
 import { downloadAttachment } from "@/util/Utils";
 import { getLoadedInput } from "@/api/OntologyStorageApi";

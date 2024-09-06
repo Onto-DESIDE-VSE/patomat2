@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import OntologyImportFiles from "@/components/OntologyImportFiles.vue";
-import OntologyImportUrls from "@/components/OntologyImportUrls.vue";
+import OntologyImportFiles from "@/components/importing/OntologyImportFiles.vue";
+import OntologyImportUrls from "@/components/importing/OntologyImportUrls.vue";
 
 const activeTab = ref<"files" | "urls">("files");
 </script>
