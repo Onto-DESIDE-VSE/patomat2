@@ -12,10 +12,10 @@ import java.util.Objects;
 @Schema(description = "Describes the transformation input provided by the user.")
 public class TransformationInput {
 
-    @Schema(description = "Ontology to be transformed. If the ontology was uploaded, it is the name of the ontology file. If the ontology was provided by URL, it is the URL.")
+    @Schema(description = "Ontology to be transformed (name of the ontology file).")
     private String ontology;
 
-    @Schema(description = "List of patterns. If the patterns were uploaded, they are the names of the pattern files. If the patterns were provided by URL, they are the URLs.")
+    @Schema(description = "List of pattern files.")
     private List<String> patterns = new ArrayList<>();
 
     public String getOntology() {

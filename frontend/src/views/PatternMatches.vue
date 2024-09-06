@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Constants from "@/constants/Constants";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import MatchesTable from "@/components/MatchesTable.vue";
 import type { PatternInstance } from "@/types/PatternInstance";
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
@@ -10,10 +10,13 @@ import { useRouter } from "vue-router";
 import type { TransformationSummary } from "@/types/TransformationSummary";
 import TransformationSummaryView from "@/components/TransformationSummaryView.vue";
 import MatchesStatistics from "@/components/MatchesStatistics.vue";
+import { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
+import { getLoadedInput } from "@/api/OntologyStorageApi";
 
 const router = useRouter();
 const messageStore = useMessageStore();
 
+const transformationInput = ref<LoadedTransformationInput>({ ontology: "", patterns: [] });
 const matches = ref<PatternInstance[]>([]);
 const transformationSummary = ref<TransformationSummary | null>(null);
 const showProgress = ref(false);
@@ -28,7 +31,7 @@ const fetchMatches = async () => {
     matches.value = await resp.json();
   } else if (resp.status === 409) {
     messageStore.publishMessage("Ontology not uploaded, yet.");
-    router.push("/load");
+    await router.push("/load");
   } else if (resp.status === 401) {
     messageStore.publishMessage("PatOMat2 is currently fully utilized. Please try again later.");
   } else {
@@ -36,7 +39,11 @@ const fetchMatches = async () => {
     messageStore.publishMessage("Unable to get pattern matches. Got message: " + error.message);
   }
 };
-fetchMatches();
+
+onMounted(async () => {
+  transformationInput.value = await getLoadedInput();
+  await fetchMatches();
+});
 
 function onInstanceChange(change: PatternInstance) {
   const index = matches.value.findIndex((match) => match.id === change.id);
@@ -58,7 +65,7 @@ const applyTransformation = async (applyDeletes: boolean, instances: PatternInst
   });
   showProgress.value = false;
   if (resp.ok) {
-    downloadTransformedOntology();
+    await downloadTransformedOntology();
     transformationSummary.value = await resp.json();
   } else {
     const error = await resp.json();
@@ -85,7 +92,7 @@ const downloadTransformedOntology = async () => {
   <v-overlay :model-value="showProgress" class="align-center justify-center">
     <v-progress-circular color="primary" size="64" indeterminate></v-progress-circular>
   </v-overlay>
-  <MatchesStatistics :matches="matches" />
+  <MatchesStatistics :matches="matches" :transformation-input="transformationInput" />
   <MatchesTable :matches="matches" :on-instance-change="onInstanceChange" :on-transform="applyTransformation" />
   <TransformationSummaryView :summary="transformationSummary" />
 </template>

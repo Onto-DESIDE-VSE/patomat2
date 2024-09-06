@@ -1,6 +1,7 @@
 package cz.vse.swoe.ontodeside.patomat2.rest;
 
 import cz.vse.swoe.ontodeside.patomat2.exception.PatOMat2Exception;
+import cz.vse.swoe.ontodeside.patomat2.model.LoadedTransformationInput;
 import cz.vse.swoe.ontodeside.patomat2.model.TransformationInput;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyStoringService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -71,7 +72,7 @@ public class OntologyStoringController {
     @ApiResponse(responseCode = "200")
     @ApiResponse(responseCode = "409", description = "Ontology has not been uploaded")
     @GetMapping
-    public TransformationInput getTransformationInput() {
+    public LoadedTransformationInput getTransformationInput() {
         return ontologyStoringService.getTransformationInput();
     }
 
