@@ -35,11 +35,11 @@ const downloadOntologyFile = async () => {
     |
     <v-btn @click="downloadOntologyFile" color="primary" variant="tonal" title="Download the ontology file">
       <v-icon left>{{ mdiDownload }}</v-icon>
-      {{ loadedData.ontologyFile }}
+      {{ loadedData.ontology }}
     </v-btn>
     |
     <span class="font-weight-bold"> Transformation pattern files: </span>
-    <span v-for="(file, index) in loadedData.patternFiles" :key="file">
+    <span v-for="(file, index) in loadedData.patterns" :key="file">
       <template v-if="index > 0">, </template>
       {{ file }}
     </span>

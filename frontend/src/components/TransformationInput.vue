@@ -8,8 +8,8 @@ const activeTab = ref<"files" | "urls">("files");
 
 <template>
   <v-tabs v-model="activeTab" grow>
-    <v-tab value="files">Import from files</v-tab>
-    <v-tab value="urls">Import from URLs</v-tab>
+    <v-tab value="files">Load from files</v-tab>
+    <v-tab value="urls">Load from URLs</v-tab>
   </v-tabs>
   <v-tabs-window v-model="activeTab">
     <v-tabs-window-item value="files">
