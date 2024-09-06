@@ -51,6 +51,7 @@ const Constants = {
   SERVER_URL: getEnv("SERVER_URL", ""),
   CONTEXT_PATH: getEnv("CONTEXT_PATH", ""),
   MESSAGE_TIMEOUT: 3000,
+  MEDIA_TYPE_JSON: "application/json",
   SKOS_PREF_LABEL,
   SKOS_ALT_LABEL,
   RDFS_LABEL,

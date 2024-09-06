@@ -1,4 +1,4 @@
 export type LoadedTransformationInput = {
-  ontologyFile: string;
-  patternFiles: string[];
+  ontology: string;
+  patterns: string[];
 };
