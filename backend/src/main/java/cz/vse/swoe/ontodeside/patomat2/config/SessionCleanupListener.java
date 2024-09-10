@@ -2,6 +2,7 @@ package cz.vse.swoe.ontodeside.patomat2.config;
 
 
 import cz.vse.swoe.ontodeside.patomat2.Constants;
+import cz.vse.swoe.ontodeside.patomat2.model.PatternInfo;
 import cz.vse.swoe.ontodeside.patomat2.service.FileStorageService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionEvent;
@@ -57,12 +58,12 @@ public class SessionCleanupListener implements HttpSessionListener {
         }
         LOG.debug("Cleaning up destroyed session {}. Current session count: {}", session.getId(), sessionCounter.decrementAndGet());
         final String ontologyFile = (String) session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE);
-        final List<String> patternFiles = (List<String>) session.getAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE);
+        final List<PatternInfo> patterns = (List<PatternInfo>) session.getAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE);
         if (ontologyFile != null) {
             fileStorageService.deleteFile(ontologyFile, session.getId());
         }
-        if (patternFiles != null) {
-            patternFiles.forEach(pf -> fileStorageService.deleteFile(pf, session.getId()));
+        if (patterns != null) {
+            patterns.forEach(pi -> fileStorageService.deleteFile(pi.fileName(), session.getId()));
         }
     }
 }

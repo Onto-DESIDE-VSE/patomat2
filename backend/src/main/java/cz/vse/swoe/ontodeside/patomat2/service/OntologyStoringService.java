@@ -64,7 +64,8 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
                 .map(storageService::saveFile)
                 .map(patternParser::readPattern)
                 .toList();
-        session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream().map(Pattern::fileName)
+        session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream()
+                                                                                .map(p -> new PatternInfo(p.name(), p.fileName()))
                                                                                 .toList());
         eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns));
     }
