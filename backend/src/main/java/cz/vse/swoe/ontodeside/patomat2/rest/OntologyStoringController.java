@@ -47,7 +47,7 @@ public class OntologyStoringController {
     }
 
     @Operation(summary = "Load transformation input from URL")
-    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "200", description = "Transformation input saved")
     @PostMapping("/urls")
     public void storeTransformationInput(
             @Parameter(description = "Transformation input containing URLs of ontology and patterns to load")
@@ -69,7 +69,7 @@ public class OntologyStoringController {
     }
 
     @Operation(summary = "Get information about the uploaded transformation input")
-    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "200", description = "Transformation input")
     @ApiResponse(responseCode = "409", description = "Ontology has not been uploaded")
     @GetMapping
     public LoadedTransformationInput getTransformationInput() {
