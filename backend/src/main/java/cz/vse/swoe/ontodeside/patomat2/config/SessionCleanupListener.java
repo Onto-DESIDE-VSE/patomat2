@@ -37,7 +37,7 @@ public class SessionCleanupListener implements HttpSessionListener {
 
     @Override
     public void sessionCreated(HttpSessionEvent se) {
-        if (sessionCounter.get() > config.getSecurity().getMaxSessions()) {
+        if (sessionCounter.get() > config.getSecurity().maxSessions()) {
             LOG.warn("Too many sessions. Marking session '{}' as invalid.", se.getSession().getId());
             invalidSessionTracker.addSession(se.getSession().getId());
             // set ultra-short inactive interval so that it can be discarded immediately

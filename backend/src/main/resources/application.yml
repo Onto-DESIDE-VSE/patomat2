@@ -12,6 +12,9 @@ patomat2:
     new-entity-iri-base: https://owl.vse.cz/patomat2/
     security:
         max-sessions: 20
+    example:
+        ontology:
+        patterns:
 server:
     servlet:
         context-path: /patomat2
