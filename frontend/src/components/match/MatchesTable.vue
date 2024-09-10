@@ -5,6 +5,7 @@ import type { NewEntity, PatternInstance, ResultBinding } from "@/types/PatternI
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
 import EditableLabel from "@/components/match/EditableLabel.vue";
 import TransformationExecutionDropdown from "@/components/match/TransformationExecutionDropdown.vue";
+import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -90,14 +91,6 @@ function applyTransformation(applyDeletes: boolean) {
   );
   props.onTransform(applyDeletes, instances);
 }
-
-function highlightNewVariables(insert: string, newEntities: NewEntity[]) {
-  insert = insert.replace(/</g, `&lt;`).replace(/>/g, `&gt;`);
-  for (const ne of newEntities) {
-    insert = insert.replace(new RegExp(`&lt;${ne.identifier}&gt;`, "g"), (match) => `<b>${match}</b>`);
-  }
-  return insert;
-}
 </script>
 
 <template>
@@ -123,8 +116,10 @@ function highlightNewVariables(insert: string, newEntities: NewEntity[]) {
       </ul>
     </template>
     <template v-slot:item.transformationSparql="{ value }">
-      <pre class="mb-2 mt-1">{{ value.del }}</pre>
-      <div v-html="`<pre>${highlightNewVariables(value.insert, value.newEntities)}</pre>`" class="mb-1" />
+      <div class="mb-2 mt-1 sparql">{{ value.del }}</div>
+      <div class="mb-1 sparql">
+        <SparqlWithVariables :sparql="value.insert" :new-entities="value.newEntities"></SparqlWithVariables>
+      </div>
     </template>
     <template v-slot:item.newEntities="{ value }">
       <ul class="mt-1 mb-1">
@@ -149,3 +144,14 @@ function highlightNewVariables(insert: string, newEntities: NewEntity[]) {
     :disabled="selected.length === 0"
   ></TransformationExecutionDropdown>
 </template>
+
+<style scoped>
+.sparql {
+  font-family: monospace, monospace;
+  font-size: 90%;
+  white-space: pre;
+  word-break: normal;
+  overflow: auto;
+  padding: 0;
+}
+</style>
