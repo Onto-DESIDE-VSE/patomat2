@@ -2,7 +2,6 @@ package cz.vse.swoe.ontodeside.patomat2.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.vse.swoe.ontodeside.patomat2.model.TransformationInput;
-import cz.vse.swoe.ontodeside.patomat2.rest.handler.RestExceptionHandler;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyStoringService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,12 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.ResourceHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.accept.ContentNegotiationManager;
 
 import java.util.List;
 
@@ -26,9 +20,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-class OntologyStoringControllerTest {
-
-    private MockMvc mockMvc;
+class OntologyStoringControllerTest extends BaseControllerTestRunner {
 
     @Mock
     private OntologyStoringService ontologyStoringService;
@@ -38,10 +30,7 @@ class OntologyStoringControllerTest {
 
     @BeforeEach
     void setUp() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(sut)
-                                      .setMessageConverters(new ResourceHttpMessageConverter(), new MappingJackson2HttpMessageConverter(new ObjectMapper()))
-                                      .setControllerAdvice(new RestExceptionHandler())
-                                      .setContentNegotiationManager(new ContentNegotiationManager()).build();
+        super.setUp(sut);
     }
 
     @Test
@@ -64,7 +53,7 @@ class OntologyStoringControllerTest {
         input.setPatterns(List.of("https://raw.githubusercontent.com/Onto-DESIDE-VSE/patomat2/main/backend/src/test/resources/pattern-example.json"));
 
         mockMvc.perform(post("/ontology/urls").content(new ObjectMapper().writeValueAsString(input))
-                                             .contentType(MediaType.APPLICATION_JSON))
+                                              .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk());
         verify(ontologyStoringService).saveOntologyAndPatterns(input);
     }
