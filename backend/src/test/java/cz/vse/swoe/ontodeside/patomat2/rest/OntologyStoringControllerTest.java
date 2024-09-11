@@ -48,9 +48,8 @@ class OntologyStoringControllerTest extends BaseControllerTestRunner {
 
     @Test
     void storeTransformationInputSavesProvidedTransformationInputSoThatItCanBeLoadedFromUrls() throws Exception {
-        final TransformationInput input = new TransformationInput();
-        input.setOntology("https://www.w3.org/TR/skos-reference/skos.rdf");
-        input.setPatterns(List.of("https://raw.githubusercontent.com/Onto-DESIDE-VSE/patomat2/main/backend/src/test/resources/pattern-example.json"));
+        final TransformationInput input = new TransformationInput("https://www.w3.org/TR/skos-reference/skos.rdf",
+                List.of("https://raw.githubusercontent.com/Onto-DESIDE-VSE/patomat2/main/backend/src/test/resources/pattern-example.json"));
 
         mockMvc.perform(post("/ontology/urls").content(new ObjectMapper().writeValueAsString(input))
                                               .contentType(MediaType.APPLICATION_JSON))
