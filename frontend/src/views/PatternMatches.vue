@@ -16,7 +16,7 @@ import { getLoadedInput } from "@/api/OntologyStorageApi";
 const router = useRouter();
 const messageStore = useMessageStore();
 
-const transformationInput = ref<LoadedTransformationInput>({ ontology: "", patterns: [] });
+const transformationInput = ref<LoadedTransformationInput | null>({ ontology: "", patterns: [] });
 const matches = ref<PatternInstance[]>([]);
 const transformationSummary = ref<TransformationSummary | null>(null);
 const showProgress = ref(false);
@@ -42,6 +42,9 @@ const fetchMatches = async () => {
 
 onMounted(async () => {
   transformationInput.value = await getLoadedInput();
+  if (transformationInput.value === null) {
+    messageStore.publishMessage("Ontology not uploaded, yet.");
+  }
   await fetchMatches();
 });
 
@@ -92,7 +95,11 @@ const downloadTransformedOntology = async () => {
   <v-overlay :model-value="showProgress" class="align-center justify-center">
     <v-progress-circular color="primary" size="64" indeterminate></v-progress-circular>
   </v-overlay>
-  <MatchesStatistics :matches="matches" :transformation-input="transformationInput" />
+  <MatchesStatistics
+    v-if="transformationInput !== null"
+    :matches="matches"
+    :transformation-input="transformationInput"
+  />
   <MatchesTable :matches="matches" :on-instance-change="onInstanceChange" :on-transform="applyTransformation" />
   <TransformationSummaryView :summary="transformationSummary" />
 </template>

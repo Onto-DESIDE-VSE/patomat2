@@ -2,9 +2,6 @@ package cz.vse.swoe.ontodeside.patomat2.service;
 
 import cz.vse.swoe.ontodeside.patomat2.config.ApplicationConfig;
 import cz.vse.swoe.ontodeside.patomat2.exception.NotFoundException;
-import cz.vse.swoe.ontodeside.patomat2.model.Pattern;
-import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
-import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
 import cz.vse.swoe.ontodeside.patomat2.model.TransformationInput;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,14 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExampleServiceTest {
-
-    @Mock
-    private MatchService matchService;
-
     @Mock
     private OntologyStoringService storingService;
 
@@ -33,33 +25,28 @@ class ExampleServiceTest {
     void getExamplesReturnsNamesOfConfiguredExamples() {
         final ApplicationConfig config = new ApplicationConfig();
         config.setExamples(List.of(new ApplicationConfig.Example("test", "http://example.com/ontology.ttl", List.of("http://example.com/pattern.json"))));
-        final ExampleService sut = new ExampleService(matchService, storingService, config);
+        final ExampleService sut = new ExampleService(storingService, config);
 
         assertEquals(List.of("test"), sut.getExamples());
     }
 
     @Test
-    void getExampleMatchesStoresExampleFilesAndGetsMatches() {
+    void loadExampleLoadsExamplesFromUrls() {
         final ApplicationConfig config = new ApplicationConfig();
         config.setExamples(List.of(new ApplicationConfig.Example("test", "http://example.com/ontology.ttl", List.of("http://example.com/pattern.json"))));
-        final ExampleService sut = new ExampleService(matchService, storingService, config);
-        final PatternInstance inst = new PatternInstance(1, "test", new PatternMatch(new Pattern("pattern.json", "test", List.of(), List.of(), List.of(), List.of()), List.of()), "INSERT", "DELETE", List.of());
-        when(matchService.findMatches()).thenReturn(List.of(inst));
+        final ExampleService sut = new ExampleService(storingService, config);
 
-        final List<PatternInstance> result = sut.getExampleMatches("test");
-        assertEquals(List.of(inst), result);
+        sut.loadExample("test");
         verify(storingService).saveOntologyAndPatterns(new TransformationInput("http://example.com/ontology.ttl", List.of("http://example.com/pattern.json")));
-        verify(matchService).findMatches();
     }
 
     @Test
-    void getExampleMatchesThrowsNotFoundExceptionWhenNoSuchExampleExists() {
+    void loadExampleThrowsNotFoundExceptionWhenNoSuchExampleExists() {
         final ApplicationConfig config = new ApplicationConfig();
         config.setExamples(List.of(new ApplicationConfig.Example("test", "http://example.com/ontology.ttl", List.of("http://example.com/pattern.json"))));
-        final ExampleService sut = new ExampleService(matchService, storingService, config);
+        final ExampleService sut = new ExampleService(storingService, config);
 
-        assertThrows(NotFoundException.class, () -> sut.getExampleMatches("unknown"));
+        assertThrows(NotFoundException.class, () -> sut.loadExample("unknown"));
         verify(storingService, never()).saveOntologyAndPatterns(any());
-        verify(matchService, never()).findMatches();
     }
 }

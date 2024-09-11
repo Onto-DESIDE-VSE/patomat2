@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,10 +47,9 @@ class ExampleControllerTest extends BaseControllerTestRunner {
     }
 
     @Test
-    void getExampleMatchesRetrievesMatchesFromService() throws Exception {
+    void loadExamplesLoadsExampleInService() throws Exception {
         final String exampleName = "test";
-        when(service.getExampleMatches(exampleName)).thenReturn(List.of());
-        mockMvc.perform(get("/examples/matches").queryParam("name", exampleName)).andExpect(status().isOk());
-        verify(service).getExampleMatches(exampleName);
+        mockMvc.perform(post("/examples").queryParam("name", exampleName)).andExpect(status().isOk());
+        verify(service).loadExample(exampleName);
     }
 }
