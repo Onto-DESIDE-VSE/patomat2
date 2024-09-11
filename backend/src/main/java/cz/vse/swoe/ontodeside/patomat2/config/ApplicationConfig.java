@@ -2,6 +2,7 @@ package cz.vse.swoe.ontodeside.patomat2.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ConfigurationProperties(prefix = "patomat2")
@@ -24,7 +25,7 @@ public class ApplicationConfig {
 
     private Security security = new Security();
 
-    private List<Example> examples;
+    private List<Example> examples = List.of();
 
     public String getStorage() {
         return storage;

@@ -5,7 +5,7 @@ import Constants from "@/constants/Constants";
 
 <template>
   <div class="about">
-    <h1>About PatOMat2</h1>
+    <h3 class="text-h3 mb-6">About PatOMat2</h3>
     <p class="mb-1">
       The PatOMat2 application aims at pattern-based transformation of existing ontologies. It allows bridging different
       modeling styles of web ontologies.

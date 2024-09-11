@@ -2,7 +2,6 @@ package cz.vse.swoe.ontodeside.patomat2.service;
 
 import cz.vse.swoe.ontodeside.patomat2.config.ApplicationConfig;
 import cz.vse.swoe.ontodeside.patomat2.exception.NotFoundException;
-import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
 import cz.vse.swoe.ontodeside.patomat2.model.TransformationInput;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +14,11 @@ import java.util.Optional;
 @Service
 public class ExampleService {
 
-    private final MatchService matchService;
-
     private final OntologyStoringService ontologyStoringService;
 
     private final List<ApplicationConfig.Example> examples;
 
-    public ExampleService(MatchService matchService, OntologyStoringService ontologyStoringService,
-                          ApplicationConfig config) {
-        this.matchService = matchService;
+    public ExampleService(OntologyStoringService ontologyStoringService, ApplicationConfig config) {
         this.ontologyStoringService = ontologyStoringService;
         this.examples = config.getExamples();
     }
@@ -38,11 +33,11 @@ public class ExampleService {
     }
 
     /**
-     * Gets matches of the example patterns in the example ontology.
+     * Loads the ontology and patterns specified in example with the given name.
      *
-     * @return Example pattern matches
+     * @param exampleName Name of the example to load
      */
-    public List<PatternInstance> getExampleMatches(String exampleName) {
+    public void loadExample(String exampleName) {
         final Optional<ApplicationConfig.Example> example = examples.stream()
                                                                     .filter(e -> e.getName().equals(exampleName))
                                                                     .findFirst();
@@ -52,6 +47,5 @@ public class ExampleService {
         final TransformationInput input = new TransformationInput(example.get().getOntology(), example.get()
                                                                                                       .getPatterns());
         ontologyStoringService.saveOntologyAndPatterns(input);
-        return matchService.findMatches();
     }
 }
