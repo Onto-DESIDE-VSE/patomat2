@@ -82,5 +82,3 @@ function removePattern(index: number) {
     </div>
   </v-form>
 </template>
-
-<style scoped></style>

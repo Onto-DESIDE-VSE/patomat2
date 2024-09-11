@@ -3,6 +3,8 @@ import type { PatternInstance } from "@/types/PatternInstance";
 import { computed } from "vue";
 import type { PatternMatchStatistics } from "@/types/PatternMatchStatistics";
 import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
+import { downloadOntologyFile } from "@/api/OntologyStorageApi";
+import { mdiDownload } from "@mdi/js";
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -31,6 +33,19 @@ const stats = computed(() => {
     <v-expansion-panel>
       <v-expansion-panel-title class="font-weight-bold">Statistics</v-expansion-panel-title>
       <v-expansion-panel-text>
+        <div class="font-weight-bold">
+          Ontology:
+          <v-btn
+            @click="downloadOntologyFile"
+            color="primary"
+            variant="tonal"
+            title="Download the ontology file"
+            class="ml-1"
+          >
+            <v-icon left>{{ mdiDownload }}</v-icon>
+            {{ transformationInput.ontology }}
+          </v-btn>
+        </div>
         <v-table>
           <thead>
             <tr>

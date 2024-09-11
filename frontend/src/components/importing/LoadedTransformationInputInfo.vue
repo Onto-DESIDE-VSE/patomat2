@@ -1,24 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { mdiDownload } from "@mdi/js";
-import Constants from "../../constants/Constants";
 import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
-import { downloadAttachment } from "@/util/Utils";
-import { getLoadedInput } from "@/api/OntologyStorageApi";
+import { downloadOntologyFile, getLoadedInput } from "@/api/OntologyStorageApi";
 
 const loadedData = ref<LoadedTransformationInput | null>(null);
 
 onMounted(async () => {
   loadedData.value = await getLoadedInput();
 });
-
-const downloadOntologyFile = async () => {
-  const resp = await fetch(`${Constants.SERVER_URL}/ontology/content`, {
-    method: "GET",
-    credentials: "include"
-  });
-  downloadAttachment(resp);
-};
 </script>
 
 <template>
