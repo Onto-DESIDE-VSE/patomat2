@@ -58,5 +58,3 @@ async function onApply(example: string) {
     </div>
   </template>
 </template>
-
-<style scoped></style>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Constants from "../constants/Constants"
+import Constants from "../constants/Constants";
 </script>
 
 <template>
@@ -8,5 +8,3 @@ import Constants from "../constants/Constants"
     <h3 class="text-h3">Welcome to {{ Constants.APP_NAME }}</h3>
   </div>
 </template>
-
-<style scoped></style>

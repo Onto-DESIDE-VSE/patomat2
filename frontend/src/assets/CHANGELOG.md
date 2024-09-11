@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2024-09-11
+
+- Allow providing examples of transformation input and using these examples.
+
 ### 2024-09-06
 
 - Allow loading ontology and patterns from URL.

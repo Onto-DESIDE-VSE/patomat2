@@ -10,5 +10,3 @@ import TransformationExamples from "@/components/importing/TransformationExample
   <TransformationInput></TransformationInput>
   <TransformationExamples></TransformationExamples>
 </template>
-
-<style scoped></style>
