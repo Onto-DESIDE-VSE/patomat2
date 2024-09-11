@@ -46,14 +46,17 @@ PatOMat2 uses several language related sources:
 
 The application can be deployed using Docker Compose. The following parameters can be configured:
 
-| Parameter             | Default value                  | Description                                                                                                                                                                                                                                                      |
-|:----------------------|:-------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `ROOT`                | `/patomat2`                    | Context path at which the application should be available.                                                                                                                                                                                                       |
-| `HOST_PORT`           | `1234`                         | Port at which the application should be available to the host system.                                                                                                                                                                                            |
-| `PUBLIC_URL`          | `http://localhost:1234`        | **Public** URL at which the application is running, without the context path (`ROOT`).                                                                                                                                                                           |
-| `PUBLIC_PORT`         | `''`                           | **Public** port at which the application is running. Use only if the application is not available at the default 80 (HTTP) or 443 (HTTPS) port. If the application is running behind a regular server proxy, do not set this variable and just use `PUBLIC_URL`. |
-| `NEW_ENTITY_IRI_BASE` | `https://owl.vse.cz/patomat2/` | Default IRI base for new entities in case PatOMat2 is unable to get ontology IRI.                                                                                                                                                                                |
-| `MAX_SESSIONS`        | `20`                           | Maximum number of concurrent sessions allowed by the application. Any more requests will be rejected until a session is closed.                                                                                                                                  |
+| Parameter               | Default value                  | Description                                                                                                                                                                                                                                                      |
+|:------------------------|:-------------------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ROOT`                  | `/patomat2`                    | Context path at which the application should be available.                                                                                                                                                                                                       |
+| `HOST_PORT`             | `1234`                         | Port at which the application should be available to the host system.                                                                                                                                                                                            |
+| `PUBLIC_URL`            | `http://localhost:1234`        | **Public** URL at which the application is running, without the context path (`ROOT`).                                                                                                                                                                           |
+| `PUBLIC_PORT`           | `''`                           | **Public** port at which the application is running. Use only if the application is not available at the default 80 (HTTP) or 443 (HTTPS) port. If the application is running behind a regular server proxy, do not set this variable and just use `PUBLIC_URL`. |
+| `NEW_ENTITY_IRI_BASE`   | `https://owl.vse.cz/patomat2/` | Default IRI base for new entities in case PatOMat2 is unable to get ontology IRI.                                                                                                                                                                                |
+| `SECURITY_MAX_SESSIONS` | `20`                           | Maximum number of concurrent sessions allowed by the application. Any more requests will be rejected until a session is closed.                                                                                                                                  |
+| `EXAMPLES_NAME`         | -                              | Name of an example transformation input. Multiple examples may be specified.                                                                                                                                                                                     |
+| `EXAMPLES_ONTOLOGY`     | -                              | URL of an example transformation ontology. Multiple examples may be specified.                                                                                                                                                                                   |
+| `EXAMPLES_PATTERNS`     | []                             | List of URLs of example transformation patterns. Multiple examples may be specified.                                                                                                                                                                             |
 
 The easiest way to configure them is by creating a `.env` file and setting them there. This file will be automatically
 picked by Docker compose.
@@ -73,7 +76,8 @@ existing sessions time out due to inactivity.
 
 ## Documentation
 
-- Documentation for the backend REST API is accessible from each instance in the `About` section, or at `${BACKEND_URL}/v3/api-docs`.
+- Documentation for the backend REST API is accessible from each instance in the `About` section, or
+  at `${BACKEND_URL}/v3/api-docs`.
 - Javadoc for the backend is published via GitHub Pages and is available at https://onto-deside-vse.github.io/patomat2/.
 
 ## License
