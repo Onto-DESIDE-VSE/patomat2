@@ -68,7 +68,7 @@ public class RestExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<ErrorInfo> illegalStateException(IllegalStateException ex, HttpServletRequest request) {
         logException(ex, request);
-        return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.INTERNAL_SERVER_ERROR);
+        return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ResourceFetchException.class)

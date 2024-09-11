@@ -22,9 +22,9 @@ public class ApplicationConfig {
      */
     private String newEntityIriBase;
 
-    private Security security = new Security(20);
+    private Security security = new Security();
 
-    private Example example = new Example();
+    private List<Example> examples;
 
     public String getStorage() {
         return storage;
@@ -58,33 +58,86 @@ public class ApplicationConfig {
         this.security = security;
     }
 
-    public Example getExample() {
-        return example;
+    public List<Example> getExamples() {
+        return examples;
     }
 
-    public void setExample(Example example) {
-        this.example = example;
+    public void setExamples(List<Example> examples) {
+        this.examples = examples;
     }
 
     /**
      * Security configuration.
-     *
-     * @param maxSessions Maximum number of concurrent sessions in the application. Used to limit the number of loaded
-     *                    ontologies to prevent memory or disk space exhaustion.
      */
-    public record Security(int maxSessions) {
+    public static class Security {
+
+        /**
+         * Maximum number of concurrent sessions in the application.
+         * <p>
+         * Used to limit the number of loaded ontologies to prevent memory or disk space exhaustion.
+         */
+        private int maxSessions = 20;
+
+        public int getMaxSessions() {
+            return maxSessions;
+        }
+
+        public void setMaxSessions(int maxSessions) {
+            this.maxSessions = maxSessions;
+        }
     }
 
     /**
      * Configuration of an example transformation input.
-     *
-     * @param ontology URL from which to download the example ontology.
-     * @param patterns URLs from which to download the example transformation patterns.
      */
-    public record Example(String ontology, List<String> patterns) {
+    public static class Example {
+
+        /**
+         * Name of the example
+         */
+        private String name;
+
+        /**
+         * URL from which to download the example ontology.
+         */
+        private String ontology;
+
+        /**
+         * URLs from which to download the example transformation patterns.
+         */
+        private List<String> patterns;
 
         public Example() {
-            this("", List.of());
+        }
+
+        public Example(String name, String ontology, List<String> patterns) {
+            this.name = name;
+            this.ontology = ontology;
+            this.patterns = patterns;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getOntology() {
+            return ontology;
+        }
+
+        public void setOntology(String ontology) {
+            this.ontology = ontology;
+        }
+
+        public List<String> getPatterns() {
+            return patterns != null ? patterns : List.of();
+        }
+
+        public void setPatterns(List<String> patterns) {
+            this.patterns = patterns;
         }
     }
 }

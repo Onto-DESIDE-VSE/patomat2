@@ -76,14 +76,14 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
      * @param input Transformation input specifying ontology and pattern urls
      */
     public void saveOntologyAndPatterns(@NonNull TransformationInput input) {
-        if (input.getOntology() == null || input.getPatterns().isEmpty()) {
+        if (input.ontology() == null || input.patterns().isEmpty()) {
             throw new IncompleteTransformationInputException("No ontology or transformation pattern file URLs provided.");
         }
-        LOG.info("Storing ontology from '{}' and {} patterns for session {}.", input.getOntology(), input.getPatterns()
+        LOG.info("Storing ontology from '{}' and {} patterns for session {}.", input.ontology(), input.patterns()
                                                                                                          .size(), session.getId());
-        final File storedFile = storageService.downloadAndSaveFile(input.getOntology());
+        final File storedFile = storageService.downloadAndSaveFile(input.ontology());
         session.setAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE, storedFile.getName());
-        final List<Pattern> patterns = input.getPatterns().stream()
+        final List<Pattern> patterns = input.patterns().stream()
                                             .map(storageService::downloadAndSaveFile)
                                             .map(patternParser::readPattern)
                                             .toList();
