@@ -24,6 +24,14 @@ import Constants from "@/constants/Constants";
       >).
     </p>
     <div>
+      <h2>Screencasts</h2>
+      <ul>
+        <li><a href="https://youtu.be/Au4Se0U_u8w">Presentation and screencast for PatOMat2 (EKAW2024 demo paper submission)</a> (25 minutes)
+        <li><a href="https://youtu.be/uWrm1spTF-o">Screencast for PatOMat2 (EKAW2024 demo paper submission)</a> (15 minutes)
+        <li><a href="https://youtu.be/7Qzgkn2Tp4Q">Screencast for PatOMat2</a> (5 minutes)
+      </ul>
+    </div>
+    <div>
       <h2>API Docs</h2>
       <p>
         Documentation for the REST API of this instance is available
