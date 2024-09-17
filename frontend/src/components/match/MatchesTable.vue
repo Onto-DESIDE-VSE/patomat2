@@ -7,6 +7,7 @@ import EditableLabel from "@/components/match/EditableLabel.vue";
 import TransformationExecutionDropdown from "@/components/match/TransformationExecutionDropdown.vue";
 import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
 import Binding from "@/components/match/Binding.vue";
+import { mdiInformation } from "@mdi/js";
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -107,10 +108,14 @@ function applyTransformation(applyDeletes: boolean) {
       </ul>
     </template>
     <template v-slot:item.transformationSparql="{ value }">
-      <div class="mb-2 mt-1 sparql">{{ value.del }}</div>
-      <div class="mb-1 sparql">
+      <div v-if="value.del" class="mt-1 mb-1 sparql">{{ value.del }}</div>
+      <div class="mb-1 mt-1 sparql">
         <SparqlWithVariables :sparql="value.insert" :new-entities="value.newEntities"></SparqlWithVariables>
       </div>
+      <v-row align="center" no-gutters class="mb-1 font-italic" v-if="!value.del">
+        <v-icon v-bind="props" class="mr-1">{{ mdiInformation }}</v-icon>
+        Instance containing blank node-based binding. Cannot delete.
+      </v-row>
     </template>
     <template v-slot:item.newEntities="{ value }">
       <ul class="mt-1 mb-1">

@@ -19,13 +19,15 @@ const strValue = computed(() => valueToString(props.binding));
 </script>
 
 <template>
-  <span class="font-weight-bold">{{ props.binding.name }}</span
-  >:
-  {{ strValue }}
-  <v-tooltip v-if="binding.basedOnBlankNode" text="This value is based on a blank node">
-    <template v-slot:activator="{ props }">
-      <v-icon v-bind="props">{{ mdiInformation }}</v-icon>
-    </template>
-  </v-tooltip>
+  <v-row align="center" no-gutters>
+    <span class="font-weight-bold">{{ props.binding.name }}</span
+    >:
+    {{ strValue }}
+    <v-tooltip v-if="binding.basedOnBlankNode" text="This value is based on a blank node">
+      <template v-slot:activator="{ props }">
+        <v-icon v-bind="props">{{ mdiInformation }}</v-icon>
+      </template>
+    </v-tooltip>
+  </v-row>
 </template>
 <style scoped></style>
