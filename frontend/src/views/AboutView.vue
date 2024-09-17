@@ -16,7 +16,7 @@ import Constants from "@/constants/Constants";
         >https://github.com/Onto-DESIDE-VSE/patomat2</a
       >.
     </p>
-    <p class="mb-3">
+    <p class="mb-6">
       Its development was supported by the EU’s Horizon Europe grant no. 101058682 (<a
         href="https://ontodeside.eu/"
         target="_blank"
@@ -24,6 +24,7 @@ import Constants from "@/constants/Constants";
       >).
     </p>
     <div>
+      <h4 class="text-h4 mb-2">Docs</h4>
       <h2>Screencasts</h2>
       <ul>
         <li><a href="https://youtu.be/Au4Se0U_u8w">Presentation and screencast for PatOMat2 (EKAW2024 demo paper submission)</a> (25 minutes)</li>
@@ -32,10 +33,13 @@ import Constants from "@/constants/Constants";
       </ul>
     </div>
     <div>
-      <h2>API Docs</h2>
       <p>
         Documentation for the REST API of this instance is available
-        <a :href="`${Constants.SERVER_URL}/swagger-ui/index.html`" target="_blank noreferrer noopener">here</a>.
+        <a :href="`${Constants.SERVER_URL}/swagger-ui/index.html`" target="_blank noreferrer noopener">here</a>. Javadoc
+        for the backend implementation is available at
+        <a href="https://onto-deside-vse.github.io/patomat2/" target="_blank noreferrer noopener"
+          >https://onto-deside-vse.github.io/patomat2/</a
+        >.
       </p>
     </div>
   </div>

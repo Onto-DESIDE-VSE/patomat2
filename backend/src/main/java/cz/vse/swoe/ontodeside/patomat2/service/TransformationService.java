@@ -76,7 +76,7 @@ public class TransformationService {
     }
 
     private void applyTransformation(PatternInstance instance, boolean applyDeletes) {
-        if (applyDeletes) {
+        if (applyDeletes && instance.hasDelete()) {
             ontologyHolder.applyTransformationQuery(instance.sparqlDelete());
         }
         ontologyHolder.applyTransformationQuery(instance.sparqlInsert());

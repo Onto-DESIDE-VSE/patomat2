@@ -86,9 +86,12 @@ public record Pattern(@JsonIgnore String fileName, String name, List<String> sou
      * ontology.
      *
      * @param instance Pattern instance to delete
-     * @return SPARQL DELETE query
+     * @return SPARQL DELETE query, {@code null} if the specified instance is based on a blank node
      */
     public String createTargetDeleteSparql(PatternMatch instance) {
+        if (instance.isBasedOnBlankNode()) {
+            return null;
+        }
         final String delete = """
                 DELETE DATA {
                 %s

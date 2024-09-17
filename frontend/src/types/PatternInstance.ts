@@ -17,6 +17,7 @@ export type ResultBinding = {
   name: string;
   value: string;
   datatype: string;
+  basedOnBlankNode?: boolean;
 };
 
 export type NewEntity = {

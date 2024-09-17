@@ -50,7 +50,7 @@ function onToggleApply(index: number) {
 
 <template>
   <LabelEditDialog :label="editedLabel" :on-cancel="cancelEdit" :on-submit="save"></LabelEditDialog>
-  <div v-for="(label, index) in props.entity.labels" :key="label.value">
+  <v-row no-gutters v-for="(label, index) in props.entity.labels" :key="label.value">
     <span class="editable-label">
       <v-tooltip :text="label.apply ? 'This label will be applied' : 'This label will not be applied'">
         <template v-slot:activator="{ props }">
@@ -69,7 +69,7 @@ function onToggleApply(index: number) {
         <v-icon>{{ mdiPencil }}</v-icon>
       </v-btn>
     </span>
-  </div>
+  </v-row>
 </template>
 
 <style scoped>

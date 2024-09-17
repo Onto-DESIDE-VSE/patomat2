@@ -6,6 +6,8 @@ import type { PatternInstanceTransformation } from "@/types/PatternInstanceTrans
 import EditableLabel from "@/components/match/EditableLabel.vue";
 import TransformationExecutionDropdown from "@/components/match/TransformationExecutionDropdown.vue";
 import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
+import Binding from "@/components/match/Binding.vue";
+import { mdiInformation } from "@mdi/js";
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -57,14 +59,6 @@ const headers = [
   }
 ];
 
-function valueToString(binding: ResultBinding) {
-  if (binding.datatype === "http://www.w3.org/2000/01/rdf-schema#Resource") {
-    return `<${binding.value}>`;
-  } else {
-    return `${binding.value}^^${binding.datatype}`;
-  }
-}
-
 function onNewEntityLabelChanged(patternInstanceId: number, ne: NewEntity) {
   const instance = props.matches.find((inst) => inst.id === patternInstanceId);
   if (instance) {
@@ -108,18 +102,20 @@ function applyTransformation(applyDeletes: boolean) {
   <v-data-table :headers="headers" :items="props.matches" show-select v-model="selected" return-object>
     <template v-slot:item.bindings="{ value }">
       <ul class="mt-1 mb-1">
-        <li v-for="binding in value">
-          <span class="font-weight-bold">{{ binding.name }}</span
-          >:
-          {{ valueToString(binding) }}
+        <li v-for="binding in value" :key="binding.id" class="mb-1">
+          <Binding :binding="binding"></Binding>
         </li>
       </ul>
     </template>
     <template v-slot:item.transformationSparql="{ value }">
-      <div class="mb-2 mt-1 sparql">{{ value.del }}</div>
-      <div class="mb-1 sparql">
+      <div v-if="value.del" class="mt-1 mb-1 sparql">{{ value.del }}</div>
+      <div class="mb-1 mt-1 sparql">
         <SparqlWithVariables :sparql="value.insert" :new-entities="value.newEntities"></SparqlWithVariables>
       </div>
+      <v-row align="center" no-gutters class="mb-1 font-italic" v-if="!value.del">
+        <v-icon v-bind="props" class="mr-1">{{ mdiInformation }}</v-icon>
+        Instance containing blank node-based binding. Cannot delete.
+      </v-row>
     </template>
     <template v-slot:item.newEntities="{ value }">
       <ul class="mt-1 mb-1">

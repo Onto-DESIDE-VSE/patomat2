@@ -11,4 +11,8 @@ public record PatternInstance(int id, String patternName, PatternMatch match, St
                                                                                                                 .map(ne -> new NewEntity(ne.variableName(), ne.identifier(), ne.labels()))
                                                                                                                 .toList()));
     }
+
+    public boolean hasDelete() {
+        return sparqlDelete != null;
+    }
 }

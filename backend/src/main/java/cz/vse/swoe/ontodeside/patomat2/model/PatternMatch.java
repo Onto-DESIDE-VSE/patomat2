@@ -60,6 +60,10 @@ public class PatternMatch {
         return bindings.stream().map(ResultBinding::name).collect(Collectors.toSet());
     }
 
+    public boolean isBasedOnBlankNode() {
+        return bindings.stream().anyMatch(ResultBinding::basedOnBlankNode);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}

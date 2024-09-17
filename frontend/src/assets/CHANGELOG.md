@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2024-09-17
+
+- Support blank nodes in pattern match query results when they represent a `owl:unionOf`.
+
 ### 2024-09-11
 
 - Allow providing examples of transformation input and using these examples.
