@@ -25,15 +25,7 @@ import Constants from "@/constants/Constants";
     </p>
     <div>
       <h4 class="text-h4 mb-2">Docs</h4>
-      <h2>Screencasts</h2>
-      <ul>
-        <li><a href="https://youtu.be/Au4Se0U_u8w">Presentation and screencast for PatOMat2 (EKAW2024 demo paper submission)</a> (25 minutes)</li>
-        <li><a href="https://youtu.be/uWrm1spTF-o">Screencast for PatOMat2 (EKAW2024 demo paper submission)</a> (15 minutes)</li>
-        <li><a href="https://youtu.be/7Qzgkn2Tp4Q">Screencast for PatOMat2</a> (5 minutes)</li>
-      </ul>
-    </div>
-    <div>
-      <p>
+      <p class="mb-2">
         Documentation for the REST API of this instance is available
         <a :href="`${Constants.SERVER_URL}/swagger-ui/index.html`" target="_blank noreferrer noopener">here</a>. Javadoc
         for the backend implementation is available at
@@ -41,8 +33,30 @@ import Constants from "@/constants/Constants";
           >https://onto-deside-vse.github.io/patomat2/</a
         >.
       </p>
+
+      <h2>Screencasts</h2>
+      <div>
+        <ul class="list-inside">
+          <li>
+            <a href="https://youtu.be/Au4Se0U_u8w"
+              >Presentation and screencast for PatOMat2 (EKAW2024 demo paper submission)</a
+            >
+            (25 minutes)
+          </li>
+          <li>
+            <a href="https://youtu.be/uWrm1spTF-o">Screencast for PatOMat2 (EKAW2024 demo paper submission)</a> (15
+            minutes)
+          </li>
+          <li><a href="https://youtu.be/7Qzgkn2Tp4Q">Screencast for PatOMat2</a> (5 minutes)</li>
+        </ul>
+      </div>
     </div>
   </div>
 
   <Changelog />
 </template>
+<style scoped>
+.list-inside {
+  list-style: inside;
+}
+</style>
