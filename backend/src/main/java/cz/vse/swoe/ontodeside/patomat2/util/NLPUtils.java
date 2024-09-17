@@ -32,9 +32,7 @@ public class NLPUtils {
         // set up pipeline properties
         Properties props = new Properties();
         // set the list of annotators to run
-        props.setProperty("annotators", "tokenize,pos,lemma,ner,parse,depparse,coref,kbp,quote");
-        // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
-        props.setProperty("coref.algorithm", "neural");
+        props.setProperty("annotators", "tokenize,pos,lemma,ner,parse");
         // build pipeline
         return new StanfordCoreNLP(props);
     }
