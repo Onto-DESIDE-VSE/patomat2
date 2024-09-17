@@ -6,6 +6,7 @@ import type { PatternInstanceTransformation } from "@/types/PatternInstanceTrans
 import EditableLabel from "@/components/match/EditableLabel.vue";
 import TransformationExecutionDropdown from "@/components/match/TransformationExecutionDropdown.vue";
 import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
+import Binding from "@/components/match/Binding.vue";
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -57,14 +58,6 @@ const headers = [
   }
 ];
 
-function valueToString(binding: ResultBinding) {
-  if (binding.datatype === "http://www.w3.org/2000/01/rdf-schema#Resource") {
-    return `<${binding.value}>`;
-  } else {
-    return `${binding.value}^^${binding.datatype}`;
-  }
-}
-
 function onNewEntityLabelChanged(patternInstanceId: number, ne: NewEntity) {
   const instance = props.matches.find((inst) => inst.id === patternInstanceId);
   if (instance) {
@@ -108,10 +101,8 @@ function applyTransformation(applyDeletes: boolean) {
   <v-data-table :headers="headers" :items="props.matches" show-select v-model="selected" return-object>
     <template v-slot:item.bindings="{ value }">
       <ul class="mt-1 mb-1">
-        <li v-for="binding in value">
-          <span class="font-weight-bold">{{ binding.name }}</span
-          >:
-          {{ valueToString(binding) }}
+        <li v-for="binding in value" :key="binding.id" class="mb-1">
+          <Binding :binding="binding"></Binding>
         </li>
       </ul>
     </template>
