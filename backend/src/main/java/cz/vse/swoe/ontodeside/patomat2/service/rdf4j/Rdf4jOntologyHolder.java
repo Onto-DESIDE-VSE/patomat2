@@ -1,7 +1,6 @@
 package cz.vse.swoe.ontodeside.patomat2.service.rdf4j;
 
 import cz.vse.swoe.ontodeside.patomat2.exception.AmbiguousOntologyException;
-import cz.vse.swoe.ontodeside.patomat2.exception.BlankNodeResultException;
 import cz.vse.swoe.ontodeside.patomat2.exception.OntologyReadException;
 import cz.vse.swoe.ontodeside.patomat2.exception.PatOMat2Exception;
 import cz.vse.swoe.ontodeside.patomat2.model.OntologyDiff;
@@ -9,6 +8,7 @@ import cz.vse.swoe.ontodeside.patomat2.model.Pattern;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
 import cz.vse.swoe.ontodeside.patomat2.model.ResultBinding;
 import cz.vse.swoe.ontodeside.patomat2.service.OntologyHolder;
+import org.eclipse.rdf4j.model.BNode;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Statement;
@@ -40,9 +40,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @SessionScope
 @Component
@@ -120,14 +123,7 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
             final TupleQuery tq = conn.prepareTupleQuery(pattern.sourceSparql());
             try (final TupleQueryResult tqResult = tq.evaluate()) {
                 for (BindingSet bindings : tqResult) {
-                    final List<ResultBinding> row = new ArrayList<>();
-                    try {
-                        bindings.getBindingNames().forEach(name -> row.add(toResultBinding(name, bindings)));
-                    } catch (BlankNodeResultException e) {
-                        LOG.warn("Skipping result because it contains a blank node.");
-                        continue;
-                    }
-                    result.add(new PatternMatch(pattern, row));
+                    result.addAll(bindingSetToPatternMatches(bindings, pattern, conn));
                 }
             }
         }
@@ -140,15 +136,36 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
         }
     }
 
-    private static ResultBinding toResultBinding(String name, BindingSet bs) {
+    private List<PatternMatch> bindingSetToPatternMatches(BindingSet bs, Pattern pattern, RepositoryConnection conn) {
+        final Map<String, List<ResultBinding>> row = new HashMap<>();
+        bs.getBindingNames().forEach(name -> row.put(name, toResultBinding(name, bs, conn)));
+        return cartesianProduct(new ArrayList<>(row.values()), 0).flatMap(l -> Stream.of(new PatternMatch(pattern, l)))
+                                                                 .toList();
+    }
+
+    private Stream<List<ResultBinding>> cartesianProduct(List<List<ResultBinding>> sets, int index) {
+        if (index == sets.size()) {
+            List<ResultBinding> emptyList = new ArrayList<>();
+            return Stream.of(emptyList);
+        }
+        List<ResultBinding> currentSet = sets.get(index);
+        return currentSet.stream().flatMap(element -> cartesianProduct(sets, index + 1)
+                .map(list -> {
+                    List<ResultBinding> newList = new ArrayList<>(list);
+                    newList.addFirst(element);
+                    return newList;
+                }));
+    }
+
+    static List<ResultBinding> toResultBinding(String name, BindingSet bs, RepositoryConnection conn) {
         final Value value = bs.getValue(name);
         final String strValue = value.stringValue();
         if (value.isBNode()) {
-            throw new BlankNodeResultException("Value " + value + " is a blank node");
+            return new Rdf4jUnionOfResolver(conn).resolveUnionOf(name, (BNode) value);
         }
         final String datatype = value.isResource() ? RDFS.RESOURCE.stringValue() : ((Literal) value).getDatatype()
                                                                                                     .stringValue();
-        return new ResultBinding(name, strValue, datatype);
+        return List.of(new ResultBinding(name, strValue, datatype));
     }
 
     @Override
