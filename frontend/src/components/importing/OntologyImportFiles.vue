@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import Constants from "@/constants/Constants";
 import { useRouter } from "vue-router";
 import useMessageStore from "@/store/messageStore";
+import { uploadTransformationInputFiles } from "@/api/OntologyStorageApi";
 
 const router = useRouter();
 const messageStore = useMessageStore();
@@ -13,20 +13,17 @@ const showProgress = ref<boolean>(false);
 
 const valid = computed(() => ontologyFile.value !== undefined && patternFiles.value.length > 0);
 
-const upload = async () => {
+async function upload() {
+  await uploadAndHandleResponse(() => router.push("/matches"));
+}
+
+async function uploadAndHandleResponse(onSuccess: () => Promise<any>) {
   showProgress.value = true;
-  const formData = new FormData();
-  formData.append("ontology", ontologyFile.value!);
-  patternFiles.value.forEach((file) => formData.append("pattern", file));
-  const resp = await fetch(`${Constants.SERVER_URL}/ontology/files`, {
-    credentials: Constants.SERVER_URL.length > 0 ? "include" : "same-origin",
-    method: "POST",
-    body: formData
-  });
+  const resp = await uploadTransformationInputFiles(ontologyFile.value!, patternFiles.value);
   showProgress.value = false;
   if (resp.ok) {
     messageStore.publishMessage("Ontology and patterns uploaded.");
-    await router.push("/matches");
+    await onSuccess();
   } else if (resp.status === 401) {
     messageStore.publishMessage("PatOMat2 is currently fully utilized. Please try again later.");
   } else {
@@ -35,7 +32,11 @@ const upload = async () => {
       "Failed to load and process ontology and patterns. Server responded with error: " + error.message
     );
   }
-};
+}
+
+async function uploadAndTransform() {
+  await uploadAndHandleResponse(() => router.push({ name: "pattern-matches", query: { transform: "true" } }));
+}
 </script>
 
 <template>
@@ -54,6 +55,14 @@ const upload = async () => {
 
     <div class="float-right">
       <v-btn color="primary" :disabled="!valid || showProgress" :loading="showProgress" @click="upload">Load</v-btn>
+      <v-btn
+        color="primary"
+        :disabled="!valid || showProgress"
+        :loading="showProgress"
+        @click="uploadAndTransform"
+        class="ml-2"
+        >Load and transform</v-btn
+      >
     </div>
   </v-form>
 </template>

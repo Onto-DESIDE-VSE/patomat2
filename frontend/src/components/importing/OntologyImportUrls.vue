@@ -3,7 +3,7 @@ import { useRouter } from "vue-router";
 import useMessageStore from "@/store/messageStore";
 import { computed, ref, useTemplateRef } from "vue";
 import { mdiMinus, mdiPlus } from "@mdi/js";
-import Constants from "@/constants/Constants";
+import { uploadTransformationInputUrls } from "@/api/OntologyStorageApi";
 
 const router = useRouter();
 const messageStore = useMessageStore();
@@ -20,22 +20,19 @@ const valid = computed(
 );
 
 async function submit() {
+  await importAndHandleResponse(() => router.push("/matches"));
+}
+
+async function importAndHandleResponse(onSuccess: () => Promise<any>) {
   showProgress.value = true;
-  const resp = await fetch(`${Constants.SERVER_URL}/ontology/urls`, {
-    credentials: Constants.SERVER_URL.length > 0 ? "include" : "same-origin",
-    method: "POST",
-    headers: {
-      "Content-Type": Constants.MEDIA_TYPE_JSON
-    },
-    body: JSON.stringify({
-      ontology: ontologyUrl.value!.trim(),
-      patterns: patternUrls.value.filter((purl) => purl.trim().length > 0).map((purl) => purl.trim())
-    })
-  });
+  const resp = await uploadTransformationInputUrls(
+    ontologyUrl.value!.trim(),
+    patternUrls.value.map((purl) => purl.trim()).filter((purl) => purl.length > 0)
+  );
   showProgress.value = false;
   if (resp.ok) {
     messageStore.publishMessage("Ontology and patterns loaded.");
-    await router.push("/matches");
+    await onSuccess();
   } else if (resp.status === 401) {
     messageStore.publishMessage("PatOMat2 is currently fully utilized. Please try again later.");
   } else {
@@ -44,6 +41,10 @@ async function submit() {
       "Failed to load and process ontology and patterns. Server responded with error: " + error.message
     );
   }
+}
+
+async function submitAndTransform() {
+  await importAndHandleResponse(() => router.push({ name: "pattern-matches", query: { transform: "true" } }));
 }
 
 function addPatternInput() {
@@ -79,6 +80,14 @@ function removePattern(index: number) {
     ></v-text-field>
     <div class="float-right">
       <v-btn color="primary" :disabled="!valid || showProgress" :loading="showProgress" @click="submit">Load </v-btn>
+      <v-btn
+        color="primary"
+        :disabled="!valid || showProgress"
+        :loading="showProgress"
+        @click="submitAndTransform"
+        class="ml-2"
+        >Load and transform</v-btn
+      >
     </div>
   </v-form>
 </template>
