@@ -44,8 +44,15 @@ onMounted(async () => {
   transformationInput.value = await getLoadedInput();
   if (transformationInput.value === null) {
     messageStore.publishMessage("Ontology not uploaded, yet.");
+    return;
   }
   await fetchMatches();
+  if (router.currentRoute.value.query.transform === "true") {
+    await applyTransformation(
+      true,
+      matches.value.map((m) => ({ id: m.id }))
+    );
+  }
 });
 
 function onInstanceChange(change: PatternInstance) {
