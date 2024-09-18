@@ -99,7 +99,14 @@ function applyTransformation(applyDeletes: boolean) {
       <v-select clearable label="Select pattern" :items="patternNames" v-model="search" multiple></v-select>
     </v-col>
   </v-row>
-  <v-data-table :headers="headers" :items="props.matches" show-select v-model="selected" return-object>
+  <v-data-table
+    :headers="headers"
+    :items="props.matches"
+    show-select
+    v-model="selected"
+    select-strategy="all"
+    return-object
+  >
     <template v-slot:item.bindings="{ value }">
       <ul class="mt-1 mb-1">
         <li v-for="binding in value" :key="binding.id" class="mb-1">
