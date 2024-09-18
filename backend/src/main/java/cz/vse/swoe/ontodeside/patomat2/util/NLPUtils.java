@@ -32,7 +32,7 @@ public class NLPUtils {
         // set up pipeline properties
         Properties props = new Properties();
         // set the list of annotators to run
-        props.setProperty("annotators", "tokenize,pos,lemma,ner,parse");
+        props.setProperty("annotators", "tokenize,pos,lemma,parse");
         // build pipeline
         return new StanfordCoreNLP(props);
     }
