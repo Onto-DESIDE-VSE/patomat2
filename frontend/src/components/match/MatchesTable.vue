@@ -46,7 +46,8 @@ const headers = [
     value: (item: PatternInstance) => ({
       insert: item.sparqlInsert,
       del: item.sparqlDelete,
-      newEntities: item.newEntities
+      newEntities: item.newEntities,
+      bindings: item.match.bindings
     }),
     filterable: false
   },
@@ -122,11 +123,13 @@ function applyTransformation(applyDeletes: boolean) {
         <SparqlWithVariables
           :sparql="value.insert"
           :bindings="
-            value.newEntities.map((ne: NewEntity) => ({
-              name: ne.variableName,
-              value: ne.identifier,
-              datatype: Constants.RDFS_RESOURCE
-            }))
+            value.newEntities
+              .map((ne: NewEntity) => ({
+                name: ne.variableName,
+                value: ne.identifier,
+                datatype: Constants.RDFS_RESOURCE
+              }))
+              .concat(value.bindings)
           "
         ></SparqlWithVariables>
       </div>
