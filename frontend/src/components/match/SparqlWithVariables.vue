@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ResultBinding } from "@/types/PatternInstance";
 import { computed } from "vue";
+import { valueToString } from "@/util/Utils";
 
 const props = defineProps<{
   sparql: string;
@@ -28,8 +29,10 @@ const toRender = computed(() => {
     }
     for (let j = 0; j < lineTokens.length; j++) {
       for (const binding of props.bindings) {
-        if (lineTokens[j] === `<${binding.value}>`) {
-          bindingPositions[i] = {};
+        if (lineTokens[j] === valueToString(binding)) {
+          if (!bindingPositions[i]) {
+            bindingPositions[i] = {};
+          }
           bindingPositions[i][j] = {
             present: true,
             binding
