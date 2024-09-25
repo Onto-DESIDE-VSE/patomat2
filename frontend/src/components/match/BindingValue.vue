@@ -2,18 +2,11 @@
 import type { ResultBinding } from "@/types/PatternInstance";
 import { computed } from "vue";
 import { mdiInformation } from "@mdi/js";
+import { valueToString } from "@/util/Utils";
 
 const props = defineProps<{
   binding: ResultBinding;
 }>();
-
-function valueToString(binding: ResultBinding) {
-  if (binding.datatype === "http://www.w3.org/2000/01/rdf-schema#Resource") {
-    return `<${binding.value}>`;
-  } else {
-    return `${binding.value}^^${binding.datatype}`;
-  }
-}
 
 const strValue = computed(() => valueToString(props.binding));
 </script>
