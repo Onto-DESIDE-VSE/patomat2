@@ -46,8 +46,9 @@ const headers = [
     value: (item: PatternInstance) => ({
       insert: item.sparqlInsert,
       del: item.sparqlDelete,
-      newEntities: item.newEntities,
-      bindings: item.match.bindings
+      variables: item.newEntities
+        .map((ne) => ({ name: ne.variableName, value: ne.identifier, datatype: Constants.RDFS_RESOURCE }))
+        .concat(item.match.bindings)
     }),
     filterable: false
   },
@@ -118,20 +119,11 @@ function applyTransformation(applyDeletes: boolean) {
       </ul>
     </template>
     <template v-slot:[`item.transformationSparql`]="{ value }">
-      <div v-if="value.del" class="mt-1 mb-1 sparql">{{ value.del }}</div>
+      <div v-if="value.del" class="mt-1 mb-1 sparql">
+        <SparqlWithVariables :sparql="value.del" :bindings="value.variables"></SparqlWithVariables>
+      </div>
       <div class="mb-1 mt-1 sparql">
-        <SparqlWithVariables
-          :sparql="value.insert"
-          :bindings="
-            value.newEntities
-              .map((ne: NewEntity) => ({
-                name: ne.variableName,
-                value: ne.identifier,
-                datatype: Constants.RDFS_RESOURCE
-              }))
-              .concat(value.bindings)
-          "
-        ></SparqlWithVariables>
+        <SparqlWithVariables :sparql="value.insert" :bindings="value.variables"></SparqlWithVariables>
       </div>
       <v-row align="center" no-gutters class="mb-1 font-italic" v-if="!value.del">
         <v-icon v-bind="props" class="mr-1">{{ mdiInformation }}</v-icon>
