@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { NewEntity } from "@/types/PatternInstance";
+import type { ResultBinding } from "@/types/PatternInstance";
 import { computed } from "vue";
 
 const props = defineProps<{
   sparql: string;
-  newEntities: NewEntity[];
+  bindings: ResultBinding[];
 }>();
 
 /**
@@ -13,7 +13,7 @@ const props = defineProps<{
  * Lines not containing new entities are again joined into a single token to simplify the rendering.
  */
 const toRender = computed(() => {
-  const newEntityPositions: any = {};
+  const bindingPositions: any = {};
   const tokens = [];
   const lines = props.sparql.split("\n");
   for (let i = 0; i < lines.length; i++) {
@@ -27,12 +27,12 @@ const toRender = computed(() => {
       lineTokens.unshift(" ".repeat(leadingSpacesCount - 1));
     }
     for (let j = 0; j < lineTokens.length; j++) {
-      for (const ne of props.newEntities) {
-        if (lineTokens[j] === `<${ne.identifier}>`) {
-          newEntityPositions[i] = {};
-          newEntityPositions[i][j] = {
+      for (const binding of props.bindings) {
+        if (lineTokens[j] === `<${binding.value}>`) {
+          bindingPositions[i] = {};
+          bindingPositions[i][j] = {
             present: true,
-            newEntity: ne
+            binding
           };
         }
       }
@@ -40,23 +40,23 @@ const toRender = computed(() => {
     if (i < lines.length - 1) {
       lineTokens.push("\n");
     }
-    if (!newEntityPositions[i]) {
+    if (!bindingPositions[i]) {
       lineTokens = [lineTokens.join(" ")];
     }
     tokens.push(lineTokens);
   }
   return {
-    newEntityPositions,
+    bindingPositions,
     tokens
   };
 });
 
-function newEntityPresent(
+function bindingPresent(
   line: number,
   column: number,
-  newEntityPositions: { [key: number]: { [key: number]: { present: boolean; newEntity: NewEntity } } }
+  bindingPositions: { [key: number]: { [key: number]: { present: boolean; binding: ResultBinding } } }
 ) {
-  return newEntityPositions[line] && newEntityPositions[line][column] && newEntityPositions[line][column].present;
+  return bindingPositions[line] && bindingPositions[line][column] && bindingPositions[line][column].present;
 }
 </script>
 
@@ -64,8 +64,8 @@ function newEntityPresent(
   <template v-for="(line, lineIndex) in toRender.tokens" :key="lineIndex">
     <template v-for="(token, index) in line" :key="index">
       <template v-if="index > 0">{{ " " }}</template>
-      <template v-if="newEntityPresent(lineIndex, index, toRender.newEntityPositions)">
-        <v-tooltip :text="toRender.newEntityPositions[lineIndex][index].newEntity.variableName">
+      <template v-if="bindingPresent(lineIndex, index, toRender.bindingPositions)">
+        <v-tooltip :text="toRender.bindingPositions[lineIndex][index].binding.name">
           <template v-slot:activator="{ props }">
             <span class="font-weight-bold" v-bind="props">{{ token }}</span>
           </template>

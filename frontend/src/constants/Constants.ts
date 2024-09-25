@@ -28,6 +28,7 @@ export function getEnv(name: string, defaultValue?: string): string {
 const SKOS_PREF_LABEL = "http://www.w3.org/2004/02/skos/core#prefLabel";
 const SKOS_ALT_LABEL = "http://www.w3.org/2004/02/skos/core#altLabel";
 const RDFS_LABEL = "http://www.w3.org/2000/01/rdf-schema#label";
+const RDFS_RESOURCE = "http://www.w3.org/2000/01/rdf-schema#Resource";
 
 const LABEL_TYPES: { [key: string]: { property: string; propertyPrefixed: string; icon: string } } = {};
 LABEL_TYPES[RDFS_LABEL] = {
@@ -55,6 +56,7 @@ const Constants = {
   SKOS_PREF_LABEL,
   SKOS_ALT_LABEL,
   RDFS_LABEL,
+  RDFS_RESOURCE,
 
   LABEL_TYPES
 };

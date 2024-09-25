@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import _ from "lodash";
-import type { NewEntity, PatternInstance, ResultBinding } from "@/types/PatternInstance";
+import type { NewEntity, PatternInstance } from "@/types/PatternInstance";
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
 import EditableLabel from "@/components/match/EditableLabel.vue";
 import TransformationExecutionDropdown from "@/components/match/TransformationExecutionDropdown.vue";
 import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
-import Binding from "@/components/match/Binding.vue";
+import BindingValue from "@/components/match/BindingValue.vue";
 import { mdiInformation } from "@mdi/js";
+import Constants from "@/constants/Constants";
+import { valueToString } from "@/util/Utils";
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -107,28 +109,37 @@ function applyTransformation(applyDeletes: boolean) {
     select-strategy="all"
     return-object
   >
-    <template v-slot:item.bindings="{ value }">
+    <template v-slot:[`item.bindings`]="{ value }">
       <ul class="mt-1 mb-1">
         <li v-for="binding in value" :key="binding.id" class="mb-1">
-          <Binding :binding="binding"></Binding>
+          <BindingValue :binding="binding"></BindingValue>
         </li>
       </ul>
     </template>
-    <template v-slot:item.transformationSparql="{ value }">
+    <template v-slot:[`item.transformationSparql`]="{ value }">
       <div v-if="value.del" class="mt-1 mb-1 sparql">{{ value.del }}</div>
       <div class="mb-1 mt-1 sparql">
-        <SparqlWithVariables :sparql="value.insert" :new-entities="value.newEntities"></SparqlWithVariables>
+        <SparqlWithVariables
+          :sparql="value.insert"
+          :bindings="
+            value.newEntities.map((ne: NewEntity) => ({
+              name: ne.variableName,
+              value: ne.identifier,
+              datatype: Constants.RDFS_RESOURCE
+            }))
+          "
+        ></SparqlWithVariables>
       </div>
       <v-row align="center" no-gutters class="mb-1 font-italic" v-if="!value.del">
         <v-icon v-bind="props" class="mr-1">{{ mdiInformation }}</v-icon>
         Instance containing blank node-based binding. Cannot delete.
       </v-row>
     </template>
-    <template v-slot:item.newEntities="{ value }">
+    <template v-slot:[`item.newEntities`]="{ value }">
       <ul class="mt-1 mb-1">
-        <li v-for="entity in value.newEntities">
+        <li v-for="entity in value.newEntities" v-bind:key="entity.variableName">
           <span class="font-weight-bold">{{ entity.variableName }}</span
-          >: <{{ entity.identifier }}>
+          >: {{ valueToString({ value: entity.identifier, datatype: Constants.RDFS_RESOURCE }) }}
           <div v-if="entity.labels?.length > 0" class="ml-4">
             <EditableLabel
               :patternInstanceId="value.id"
