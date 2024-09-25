@@ -17,6 +17,10 @@ const toRender = computed(() => {
   const bindingPositions: any = {};
   const tokens = [];
   const lines = props.sparql.split("\n");
+  const bindingMap = {} as any;
+  for (const binding of props.bindings) {
+    bindingMap[valueToString(binding)] = binding;
+  }
   for (let i = 0; i < lines.length; i++) {
     let leadingSpacesCount = 0;
     while (lines[i].charAt(leadingSpacesCount) === " ") {
@@ -28,16 +32,15 @@ const toRender = computed(() => {
       lineTokens.unshift(" ".repeat(leadingSpacesCount - 1));
     }
     for (let j = 0; j < lineTokens.length; j++) {
-      for (const binding of props.bindings) {
-        if (lineTokens[j] === valueToString(binding)) {
-          if (!bindingPositions[i]) {
-            bindingPositions[i] = {};
-          }
-          bindingPositions[i][j] = {
-            present: true,
-            binding
-          };
+      const b = bindingMap[lineTokens[j]];
+      if (b) {
+        if (!bindingPositions[i]) {
+          bindingPositions[i] = {};
         }
+        bindingPositions[i][j] = {
+          present: true,
+          binding: b
+        };
       }
     }
     if (i < lines.length - 1) {
