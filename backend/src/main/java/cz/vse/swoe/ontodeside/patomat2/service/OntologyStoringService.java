@@ -17,10 +17,12 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,30 +46,60 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
     }
 
     /**
-     * Stores the specified ontology and pattern files.
+     * Saves ontology and patterns for transformation.
      * <p>
-     * It saves the stored file paths in the session.
+     * If the ontology file is provided, it takes precedence over the URL from which it is to be loaded specified in
+     * {@code input}.
+     * <p>
+     * Patterns are loaded both from the specified files and from the URLs specified in {@code input}.
      *
-     * @param ontologyFile  Ontology file
-     * @param patternsFiles List of pattern files
+     * @param ontologyFile  File containing the source ontology, optional
+     * @param patternsFiles List of files containing transformation patterns, possibly empty
+     * @param input         Object specifying URLs of ontology and patterns to download
      */
-    public void saveOntologyAndPatterns(@NonNull MultipartFile ontologyFile,
-                                        @NonNull List<MultipartFile> patternsFiles) {
-        if (patternsFiles.isEmpty()) {
-            throw new IncompleteTransformationInputException("No transformation pattern files provided.");
+    public void saveOntologyAndPatterns(@Nullable MultipartFile ontologyFile,
+                                        @NonNull List<MultipartFile> patternsFiles,
+                                        @NonNull TransformationInput input) {
+        if (ontologyFile == null && (input.ontology() == null || input.ontology().isBlank())) {
+            throw new IncompleteTransformationInputException("No source ontology has been provided.");
         }
-        LOG.info("Storing ontology file '{}' and {} patterns for session {}.", ontologyFile.getOriginalFilename(), patternsFiles.size(), session.getId());
-        final File storedFile = storageService.saveFile(ontologyFile);
+        if (patternsFiles.isEmpty() && input.patterns().isEmpty()) {
+            throw new IncompleteTransformationInputException("No transformation patterns have been provided.");
+        }
+        final File storedOntology = storeOntology(ontologyFile, input);
+        final List<Pattern> patterns = storePatterns(patternsFiles, input);
+        LOG.info("Stored ontology '{}' and {} patterns for session {}.", storedOntology.getName(), patterns.size(), session.getId());
+        eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE)
+                                                                               .toString(), patterns));
+    }
+
+    private File storeOntology(MultipartFile ontologyFile, TransformationInput input) {
+        final File storedFile;
+        if (ontologyFile != null) {
+            storedFile = storageService.saveFile(ontologyFile);
+        } else {
+            storedFile = storageService.downloadAndSaveFile(input.ontology());
+        }
         session.setAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE, storedFile.getName());
-        final List<Pattern> patterns = patternsFiles
+        return storedFile;
+    }
+
+    private List<Pattern> storePatterns(List<MultipartFile> patternsFiles, TransformationInput input) {
+        final List<Pattern> patternsFromFiles = patternsFiles
                 .stream()
                 .map(storageService::saveFile)
                 .map(patternParser::readPattern)
                 .toList();
+        final List<Pattern> patternsFromUrls = input.patterns().stream()
+                                                    .map(storageService::downloadAndSaveFile)
+                                                    .map(patternParser::readPattern)
+                                                    .toList();
+        final List<Pattern> patterns = new ArrayList<>(patternsFromFiles);
+        patterns.addAll(patternsFromUrls);
         session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream()
                                                                                 .map(p -> new PatternInfo(p.name(), p.fileName()))
                                                                                 .toList());
-        eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns));
+        return patterns;
     }
 
     /**
@@ -80,7 +112,7 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
             throw new IncompleteTransformationInputException("No ontology or transformation pattern file URLs provided.");
         }
         LOG.info("Storing ontology from '{}' and {} patterns for session {}.", input.ontology(), input.patterns()
-                                                                                                         .size(), session.getId());
+                                                                                                      .size(), session.getId());
         final File storedFile = storageService.downloadAndSaveFile(input.ontology());
         session.setAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE, storedFile.getName());
         final List<Pattern> patterns = input.patterns().stream()
