@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2024-09-26
+
+- Support combining files and URLs as transformation input.
+
 ### 2024-09-18
 
 - Support to apply transformation immediately on the (up)loaded transformation input.
