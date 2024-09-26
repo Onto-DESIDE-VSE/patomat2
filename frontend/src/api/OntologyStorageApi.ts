@@ -37,28 +37,3 @@ export async function uploadTransformationInput(ontology: File | string, pattern
     body: formData
   });
 }
-
-export async function uploadTransformationInputFiles(ontology: File, patterns: File[]) {
-  const formData = new FormData();
-  formData.append("ontology", ontology);
-  patterns.forEach((file) => formData.append("pattern", file));
-  return await fetch(`${Constants.SERVER_URL}/ontology/files`, {
-    credentials: Constants.SERVER_URL.length > 0 ? "include" : "same-origin",
-    method: "POST",
-    body: formData
-  });
-}
-
-export async function uploadTransformationInputUrls(ontology: string, patterns: string[]) {
-  return await fetch(`${Constants.SERVER_URL}/ontology/urls`, {
-    credentials: Constants.SERVER_URL.length > 0 ? "include" : "same-origin",
-    method: "POST",
-    headers: {
-      "Content-Type": Constants.MEDIA_TYPE_JSON
-    },
-    body: JSON.stringify({
-      ontology,
-      patterns
-    })
-  });
-}
