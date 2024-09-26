@@ -21,6 +21,23 @@ export async function downloadOntologyFile() {
   await downloadAttachment(resp);
 }
 
+export async function uploadTransformationInput(ontology: File | string, patternFiles: File[], patternUrls: string[]) {
+  const formData = new FormData();
+  patternFiles.forEach((file) => formData.append("pattern", file));
+  const data = { patterns: patternUrls } as any;
+  if (typeof ontology === "string") {
+    data.ontology = ontology;
+  } else {
+    formData.append("ontology", ontology);
+  }
+  formData.append("data", new Blob([JSON.stringify(data)], { type: Constants.MEDIA_TYPE_JSON }));
+  return await fetch(`${Constants.SERVER_URL}/ontology`, {
+    credentials: Constants.SERVER_URL.length > 0 ? "include" : "same-origin",
+    method: "POST",
+    body: formData
+  });
+}
+
 export async function uploadTransformationInputFiles(ontology: File, patterns: File[]) {
   const formData = new FormData();
   formData.append("ontology", ontology);
