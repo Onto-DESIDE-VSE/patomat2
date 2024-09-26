@@ -15,10 +15,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,23 +35,16 @@ public class OntologyStoringController {
     public OntologyStoringController(
             OntologyStoringService ontologyStoringService) {this.ontologyStoringService = ontologyStoringService;}
 
-    @Operation(summary = "Upload ontology and transformation pattern files")
-    @ApiResponse(responseCode = "200")
-    @PostMapping(value = "/files")
+    @Operation(summary = "Upload ontology transformation input")
+    @ApiResponse(responseCode = "200", description = "Transformation input loaded and saved")
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public void storeTransformationInput(@Parameter(description = "Ontology file")
-                                         @RequestParam(value = "ontology") MultipartFile ontology,
+                                         @RequestPart(value = "ontology", required = false) MultipartFile ontology,
                                          @Parameter(description = "Transformation pattern files")
-                                         @RequestParam(value = "pattern") List<MultipartFile> patterns) {
-        ontologyStoringService.saveOntologyAndPatterns(ontology, patterns);
-    }
-
-    @Operation(summary = "Load transformation input from URL")
-    @ApiResponse(responseCode = "200", description = "Transformation input saved")
-    @PostMapping("/urls")
-    public void storeTransformationInput(
-            @Parameter(description = "Transformation input containing URLs of ontology and patterns to load")
-            @RequestBody TransformationInput transformationInput) {
-        ontologyStoringService.saveOntologyAndPatterns(transformationInput);
+                                         @RequestPart(value = "pattern", required = false) Optional<List<MultipartFile>> patterns,
+                                         @Parameter(description = "Transformation input")
+                                         @RequestPart(value = "data") TransformationInput transformationInput) {
+        ontologyStoringService.saveOntologyAndPatterns(ontology, patterns.orElse(List.of()), transformationInput);
     }
 
     @Operation(summary = "Check if an ontology has been uploaded")
