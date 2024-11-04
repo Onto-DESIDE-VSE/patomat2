@@ -207,8 +207,8 @@ function applyTransformation(applyDeletes: boolean) {
   align-items: center;
   list-style: none;
   gap: 20px;
-  margin-bottom: 10px;
-  padding: 0;
+  margin: 10px;
+  padding: 5px;
 }
 .pagination-wrapper {
   align-items: center;
