@@ -118,7 +118,7 @@ function applyTransformation(applyDeletes: boolean) {
       <v-select clearable label="Select pattern" :items="patternNames" v-model="search" multiple></v-select>
     </v-col>
   </v-row>
-  <v-row justify="end">
+  <v-row justify="end" class="ma-2">
     <div class="items-wrap">
        
       <div class="pagination-controls">Items per page:</div>
