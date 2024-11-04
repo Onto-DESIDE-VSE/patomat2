@@ -135,7 +135,6 @@ function applyTransformation(applyDeletes: boolean) {
       <button @click="nextPage" :disabled="pagination.page >= pageCount" class="pa-2">next</button>
     </div>
   </v-row>
-  <v-pagination v-model="pagination.page" :length="pageCount" total-visible="5"></v-pagination>
   <v-data-table
     :headers="headers"
     :items="props.matches"
