@@ -29,7 +29,7 @@ function filterByPatternName(value: string) {
   return search.value.includes("All") || search.value.includes(value);
 }
 const pagination = ref({
-  page: 1,
+  page: 0,
   itemsPerPage: 5
 });
 
@@ -119,12 +119,15 @@ function applyTransformation(applyDeletes: boolean) {
     </v-col>
   </v-row>
   <v-row justify="end">
-    <div class="small-select">
-      Items per page:
-      <v-select v-model="pagination.itemsPerPage" :items="[5, 10, 15, 20]" class="pa-2">
+    <div class="items-wrap">
+       
+      <div class="pagination-controls">Items per page:</div>
+      <v-select v-model="pagination.itemsPerPage" :items="[5, 10, 15, 20]" class="pa-2 pagination-select">
         {{ pagination.itemsPerPage }}}}
       </v-select>
     </div>
+    <div class="pagination-controls">Page {{ pagination.page }} of {{ pageCount }}</div>
+
     <div class="pagination-controls">
       <button @click="previousPage" :disabled="pagination.page === 1" class="pa-2">previous</button>
     </div>
@@ -199,10 +202,6 @@ function applyTransformation(applyDeletes: boolean) {
   overflow: auto;
   padding: 0;
 }
-
-.small-select {
-  width: 120px;
-}
 .pagination-controls {
   display: flex;
   justify-content: center;
@@ -215,5 +214,9 @@ function applyTransformation(applyDeletes: boolean) {
 .pagination-wrapper {
   align-items: center;
   gap: 10px;
+}
+.items-wrap {
+  display: flex;
+  flex-direction: row;
 }
 </style>
