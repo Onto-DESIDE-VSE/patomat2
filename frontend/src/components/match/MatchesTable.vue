@@ -36,11 +36,11 @@ const pagination = ref({
 // Computed property to calculate total page count based on items and items per page
 const pageCount = computed(() => Math.ceil(props.matches.length / pagination.value.itemsPerPage));
 const nextPage = () => {
-  pagination.page += 1;
+  pagination.value.page += 1;
 };
 
 const previousPage = () => {
-  pagination.page = Math.max(1, pagination.page - 1);
+  pagination.value.page = Math.max(1, pagination.value.page - 1);
 };
 
 const headers = [
