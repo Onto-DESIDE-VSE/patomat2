@@ -10,7 +10,6 @@ import BindingValue from "@/components/match/BindingValue.vue";
 import { mdiInformation } from "@mdi/js";
 import Constants from "@/constants/Constants";
 import { valueToString } from "@/util/Utils";
-import { reactive } from "vue";
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -28,20 +27,6 @@ const search = ref<string[]>(["All"]);
 function filterByPatternName(value: string) {
   return search.value.includes("All") || search.value.includes(value);
 }
-const pagination = ref({
-  page: 0,
-  itemsPerPage: 5
-});
-
-// Computed property to calculate total page count based on items and items per page
-const pageCount = computed(() => Math.ceil(props.matches.length / pagination.value.itemsPerPage));
-const nextPage = () => {
-  pagination.value.page += 1;
-};
-
-const previousPage = () => {
-  pagination.value.page = Math.max(1, pagination.value.page - 1);
-};
 
 const headers = [
   {
@@ -118,36 +103,13 @@ function applyTransformation(applyDeletes: boolean) {
       <v-select clearable label="Select pattern" :items="patternNames" v-model="search" multiple></v-select>
     </v-col>
   </v-row>
-  <v-row justify="end" class="ma-2">
-    <div class="items-wrap">
-       
-      <div class="pagination-controls">Items per page:</div>
-      <v-select v-model="pagination.itemsPerPage" :items="[5, 10, 15, 20]" class="pa-2 pagination-select">
-        {{ pagination.itemsPerPage }}}}
-      </v-select>
-    </div>
-    <div class="pagination-controls">Page {{ pagination.page }} of {{ pageCount }}</div>
-
-    <div class="pagination-controls">
-      <button @click="previousPage" :disabled="pagination.page === 1" class="pa-2">previous</button>
-    </div>
-    <div class="pagination-controls">
-      <button @click="nextPage" :disabled="pagination.page >= pageCount" class="pa-2">next</button>
-    </div>
-  </v-row>
   <v-data-table
     :headers="headers"
     :items="props.matches"
-    :items-per-page="pagination.itemsPerPage"
-    :page.sync="pagination.page"
-    :items-per-page-options="[5, 10, 15, 20]"
     show-select
     v-model="selected"
     select-strategy="all"
     return-object
-    :footer-props="{
-      itemsPerPageOptions: [5, 10, 15, 20]
-    }"
   >
     <template v-slot:[`item.bindings`]="{ value }">
       <ul class="mt-1 mb-1">
@@ -200,22 +162,5 @@ function applyTransformation(applyDeletes: boolean) {
   word-break: normal;
   overflow: auto;
   padding: 0;
-}
-.pagination-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  list-style: none;
-  gap: 20px;
-  margin: 10px;
-  padding: 5px;
-}
-.pagination-wrapper {
-  align-items: center;
-  gap: 10px;
-}
-.items-wrap {
-  display: flex;
-  flex-direction: row;
 }
 </style>
