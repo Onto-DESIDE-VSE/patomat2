@@ -114,8 +114,15 @@ function applyTransformation(applyDeletes: boolean) {
     :disabled="selected.length === 0"
   ></TransformationExecutionDropdown>
   <v-row class="align-center">
-    <v-col cols="2" :disabled="props.matches.length < 1">
-      <v-select clearable label="Pattern Name" :items="patternNames" v-model="search" multiple></v-select>
+    <v-col cols="2">
+      <v-select
+        :disabled="props.matches.length < 1"
+        clearable
+        label="Pattern Name"
+        :items="patternNames"
+        v-model="search"
+        multiple
+      ></v-select>
     </v-col>
   </v-row>
   <v-row justify="end" class="ma-2">
