@@ -30,12 +30,12 @@ function filterByPatternName(value: string) {
 
 const headers = [
   {
-    title: "Pattern Name",
+    title: "Pattern name",
     value: "patternName",
     filter: filterByPatternName
   },
   {
-    title: "Matching Bindings",
+    title: "Matching bindings",
     key: "bindings",
     value: "match.bindings",
     filterable: false
