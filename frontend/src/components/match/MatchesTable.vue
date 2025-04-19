@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import _ from "lodash";
 import type { NewEntity, PatternInstance } from "@/types/PatternInstance";
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
+import MatchesTablePagination from "@/components/match/MatchesTablePagination.vue";
 import EditableLabel from "@/components/match/EditableLabel.vue";
 import TransformationExecutionDropdown from "@/components/match/TransformationExecutionDropdown.vue";
 import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
@@ -10,6 +11,15 @@ import BindingValue from "@/components/match/BindingValue.vue";
 import { mdiInformation } from "@mdi/js";
 import Constants from "@/constants/Constants";
 import { valueToString } from "@/util/Utils";
+
+const itemsPerPage = ref(10);
+const page = ref(1);
+
+const startIndex = computed(() => (page.value - 1) * itemsPerPage.value);
+
+const endIndex = computed(() => Math.min(page.value * itemsPerPage.value, props.matches.length));
+
+const paginatedItems = computed(() => props.matches.slice(startIndex.value, endIndex.value));
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -97,19 +107,29 @@ function applyTransformation(applyDeletes: boolean) {
     :execute-inserts="() => applyTransformation(false)"
     :execute-inserts-and-deletes="() => applyTransformation(true)"
     :disabled="selected.length === 0"
-  ></TransformationExecutionDropdown>
+  ></TransformationExecutionDropdown
+  ><!--TODO replace-->
   <v-row class="align-center">
     <v-col cols="2">
       <v-select clearable label="Select pattern" :items="patternNames" v-model="search" multiple></v-select>
     </v-col>
   </v-row>
+
+  <MatchesTablePagination
+    v-model:page="page"
+    v-model:items-per-page="itemsPerPage"
+    :total-items="props.matches.length"
+  />
+
   <v-data-table
     :headers="headers"
-    :items="props.matches"
+    :items="paginatedItems"
     show-select
     v-model="selected"
     select-strategy="all"
     return-object
+    :items-per-page="itemsPerPage"
+    hide-default-footer
   >
     <template v-slot:[`item.bindings`]="{ value }">
       <ul class="mt-1 mb-1">
@@ -146,6 +166,14 @@ function applyTransformation(applyDeletes: boolean) {
       </ul>
     </template>
   </v-data-table>
+
+  <MatchesTablePagination
+    class="mt-5"
+    v-model:page="page"
+    v-model:items-per-page="itemsPerPage"
+    :total-items="props.matches.length"
+  />
+
   <TransformationExecutionDropdown
     menu-position="top"
     :execute-inserts="() => applyTransformation(false)"
