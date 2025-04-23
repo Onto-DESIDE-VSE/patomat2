@@ -47,7 +47,7 @@ watch(modelItemsPerPage, () => {
 </script>
 
 <template>
-  <v-row class="my-1" justify="end">
+  <v-row class="mx-2" justify="end">
     <div class="mr-1 my-auto text-lg-caption text-grey-darken-2">
       Items {{ startIndex + 1 }}–{{ endIndex }} of {{ totalItems }}
     </div>
