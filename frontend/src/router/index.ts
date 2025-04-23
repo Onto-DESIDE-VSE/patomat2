@@ -13,12 +13,18 @@ const router = createRouter({
     {
       path: "/load",
       name: "load",
-      component: () => import("../views/TransformationInputView.vue")
+      component: () => import("../views/TransformationInputView.vue"),
+      meta: {
+        title: "Load ontology and patterns"
+      }
     },
     {
       path: "/matches",
       name: "pattern-matches",
-      component: () => import("../views/PatternMatches.vue")
+      component: () => import("../views/PatternMatches.vue"),
+      meta: {
+        title: "Pattern matches"
+      }
     },
     {
       path: "/about",
@@ -26,7 +32,10 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import("../views/AboutView.vue")
+      component: () => import("../views/AboutView.vue"),
+      meta: {
+        title: "About"
+      }
     }
   ]
 });
