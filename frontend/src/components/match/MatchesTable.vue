@@ -9,7 +9,7 @@ import PatternInstanceStatusToggle from "@/components/match/PatternInstanceStatu
 import EditableLabel from "@/components/match/EditableLabel.vue";
 import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
 import BindingValue from "@/components/match/BindingValue.vue";
-import { mdiInformation } from "@mdi/js";
+import { mdiInformation, mdiMenuDown } from "@mdi/js";
 import Constants from "@/constants/Constants";
 import { valueToString } from "@/util/Utils";
 
@@ -29,6 +29,7 @@ const props = defineProps<{
 }>();
 
 const selected = computed(() => paginatedItems.value.filter((item) => item.status === true));
+const rejected = computed(() => paginatedItems.value.filter((item) => item.status === false));
 
 // keys are pattern instance ids, value are mapping of variable names to new labels
 const newEntityLabels = ref<Map<number, { [key: string]: string }>>(new Map());
@@ -131,11 +132,44 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
     </v-col>
   </v-row>
 
-  <MatchesTablePagination
-    v-model:page="page"
-    v-model:items-per-page="itemsPerPage"
-    :total-items="props.matches.length"
-  />
+  <v-row class="mt-5">
+    <v-col cols="12" lg="2" order-lg="2">
+      <v-menu>
+        <template #activator="{ props: menuProps }">
+          <v-btn
+            v-bind="menuProps"
+            color="grey-lighten-3"
+            size="small"
+            variant="flat"
+            style="text-transform: none"
+            :append-icon="mdiMenuDown"
+          >
+            Select status
+          </v-btn>
+        </template>
+
+        <v-list>
+          <v-list-item @click="props.matches.map((item) => (item.status === null ? (item.status = true) : item))">
+            <v-list-item-title>Approve all undecided</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="props.matches.map((item) => (item.status === null ? (item.status = false) : item))">
+            <v-list-item-title>Reject all undecided</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="props.matches.map((item) => (item.status = null))">
+            <v-list-item-title>Clear decisions</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-col>
+
+    <v-col cols="12" lg="10" order-lg="2">
+      <MatchesTablePagination
+        v-model:page="page"
+        v-model:items-per-page="itemsPerPage"
+        :total-items="props.matches.length"
+      />
+    </v-col>
+  </v-row>
 
   <v-data-table
     :headers="headers"
