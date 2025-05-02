@@ -5,6 +5,7 @@ export type PatternInstance = {
   sparqlInsert: string;
   sparqlDelete: string;
   newEntities: NewEntity[];
+  status: boolean | null;
 };
 
 export type PatternMatch = {

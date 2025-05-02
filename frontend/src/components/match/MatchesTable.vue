@@ -1,9 +1,11 @@
+<!--suppress CssUnusedSymbol -->
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import _ from "lodash";
 import type { NewEntity, PatternInstance } from "@/types/PatternInstance";
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
 import MatchesTablePagination from "@/components/match/MatchesTablePagination.vue";
+import PatternInstanceStatusToggle from "@/components/match/PatternInstanceStatusToggle.vue";
 import EditableLabel from "@/components/match/EditableLabel.vue";
 import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
 import BindingValue from "@/components/match/BindingValue.vue";
@@ -26,7 +28,8 @@ const props = defineProps<{
   onTransform: (applyDeletes: boolean, instances: PatternInstanceTransformation[]) => void;
 }>();
 
-const selected = ref<PatternInstance[]>([]);
+const selected = computed(() => paginatedItems.value.filter((item) => item.status === true));
+
 // keys are pattern instance ids, value are mapping of variable names to new labels
 const newEntityLabels = ref<Map<number, { [key: string]: string }>>(new Map());
 
@@ -38,6 +41,10 @@ function filterByPatternName(value: string) {
 }
 
 const headers = [
+  {
+    title: "Status",
+    value: "status"
+  },
   {
     title: "Pattern name",
     value: "patternName",
@@ -133,13 +140,13 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
   <v-data-table
     :headers="headers"
     :items="paginatedItems"
-    show-select
-    v-model="selected"
-    select-strategy="all"
     return-object
     :items-per-page="itemsPerPage"
     hide-default-footer
   >
+    <template v-slot:[`item.status`]="{ item }">
+      <PatternInstanceStatusToggle v-model:status="item.status" />
+    </template>
     <template v-slot:[`item.bindings`]="{ value }">
       <ul class="mt-1 mb-1">
         <li v-for="binding in value" :key="binding.id" class="mb-1">
