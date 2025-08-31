@@ -1,6 +1,6 @@
 <!--suppress CssUnusedSymbol -->
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import _ from "lodash";
 import type { NewEntity, PatternInstance } from "@/types/PatternInstance";
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
@@ -9,18 +9,9 @@ import PatternInstanceStatusToggle from "@/components/match/PatternInstanceStatu
 import EditableLabel from "@/components/match/EditableLabel.vue";
 import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
 import BindingValue from "@/components/match/BindingValue.vue";
-import { mdiInformation, mdiMenuDown } from "@mdi/js";
+import { mdiInformation, mdiMenuDown, mdiCloseCircle } from "@mdi/js";
 import Constants from "@/constants/Constants";
 import { valueToString } from "@/util/Utils";
-
-const itemsPerPage = ref(10);
-const page = ref(1);
-
-const startIndex = computed(() => (page.value - 1) * itemsPerPage.value);
-
-const endIndex = computed(() => Math.min(page.value * itemsPerPage.value, props.matches.length));
-
-const paginatedItems = computed(() => props.matches.slice(startIndex.value, endIndex.value));
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -34,22 +25,129 @@ const rejected = computed(() => paginatedItems.value.filter((item) => item.statu
 // keys are pattern instance ids, value are mapping of variable names to new labels
 const newEntityLabels = ref<Map<number, { [key: string]: string }>>(new Map());
 
-const patternNames = computed(() => ["All", ...new Set(props.matches.map((m: PatternInstance) => m.patternName))]);
-const search = ref<string[]>(["All"]);
+const filteredItems = computed(() => {
+  return props.matches.filter((item) => {
+    // filter by status
+    if (!filterByStatus(item.status)) {
+      return false;
+    }
+
+    // filter by patternName
+    if (!filterByPatternName(item.patternName)) {
+      return false;
+    }
+
+    // fulltext search
+    if (!searchText.value) {
+      return true;
+    } else {
+      const searchTextLower = searchText.value.toLowerCase();
+
+      if (item.match.bindings.some((binding) => binding.value.toLowerCase().includes(searchTextLower))) {
+        return true;
+      }
+
+      return item.newEntities?.some((entity) =>
+        entity.labels?.some((label) => label.value.toLowerCase().includes(searchTextLower))
+      );
+    }
+  });
+});
+
+const patternNames = computed(() => [...new Set(props.matches.map((m: PatternInstance) => m.patternName))]);
+const searchPatternName = ref<string[]>([]);
+// watching for pattern names change - select default value
+watch(
+  patternNames,
+  (newPatternNames) => {
+    if (newPatternNames.length === 1) {
+      searchPatternName.value = [newPatternNames[0]]; // vybereme jediný pattern
+    }
+  },
+  { immediate: true }
+);
 
 function filterByPatternName(value: string) {
-  return search.value.includes("All") || search.value.includes(value);
+  return searchPatternName.value.length === 0 || searchPatternName.value.includes(value);
 }
+
+const statusNames = computed(() => ["All", "Approved", "Rejected", "Undecided"]);
+const searchStatus = ref<string>("All");
+
+function filterByStatus(value: boolean | null) {
+  switch (searchStatus.value) {
+    case "Approved":
+      return value === true;
+    case "Rejected":
+      return value === false;
+    case "Undecided":
+      return value === null;
+    default:
+      return true;
+  }
+}
+
+const searchText = ref<string>();
+
+const isFilterActive = computed(() => {
+  return (
+    searchStatus.value !== "All" ||
+    (patternNames.value.length > 1 && searchPatternName.value.length > 0) ||
+    searchText.value
+  );
+});
+
+function clearFilter() {
+  searchStatus.value = "All";
+  searchPatternName.value = [];
+  searchText.value = "";
+}
+
+const itemsCountHtml = computed(() => {
+  if (props.matches.length === 0) {
+    return "<strong class='text-red'>No matches found</strong>";
+  }
+  if (isFilterActive.value) {
+    if (filteredItems.value.length === 0) {
+      return (
+        "<strong class='text-red'>No matches corresponding filter</strong>, total matches: <strong>" +
+        props.matches.length +
+        "</strong>"
+      );
+    } else {
+      return (
+        "Filtered <strong>" +
+        filteredItems.value.length +
+        "</strong> of <strong>" +
+        props.matches.length +
+        "</strong> matches"
+      );
+    }
+  } else {
+    return "Total matches: <strong>" + props.matches.length + "</strong>, no filtering";
+  }
+});
+
+const itemsPerPage = ref(10);
+const page = ref(1);
+const startIndex = computed(() => (page.value - 1) * itemsPerPage.value);
+const endIndex = computed(() => Math.min(page.value * itemsPerPage.value, filteredItems.value.length));
+const paginatedItems = computed(() => filteredItems.value.slice(startIndex.value, endIndex.value));
+
+watch([searchStatus, searchPatternName, searchText], () => {
+  page.value = 1; // reset na první stránku
+});
 
 const headers = [
   {
     title: "Status",
-    value: "status"
+    value: "status",
+    filterable: false
   },
   {
     title: "Pattern name",
     value: "patternName",
-    filter: filterByPatternName
+    filterable: false
   },
   {
     title: "Matching bindings",
@@ -125,10 +223,55 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
     >
   </div>
 
-  <!--TODO replace-->
-  <v-row class="align-center">
+  <v-row class="align-center mt-4" dense>
     <v-col cols="2">
-      <v-select clearable label="Select pattern" :items="patternNames" v-model="search" multiple></v-select>
+      <v-select
+        clearable
+        label="Filter by pattern"
+        :items="patternNames"
+        v-model="searchPatternName"
+        multiple
+        placeholder="All patterns"
+        density="comfortable"
+        :disabled="patternNames.length <= 1"
+        hide-details
+      ></v-select>
+    </v-col>
+    <v-col cols="2">
+      <v-select
+        label="Filter by status"
+        :items="statusNames"
+        v-model="searchStatus"
+        density="comfortable"
+        hide-details
+      ></v-select>
+    </v-col>
+    <v-col cols="4">
+      <v-text-field
+        clearable
+        label="Search URI or label"
+        v-model="searchText"
+        variant="filled"
+        density="comfortable"
+        rounded="md"
+        hide-details
+      ></v-text-field>
+    </v-col>
+  </v-row>
+  <v-row class="align-center" dense>
+    <v-col class="d-flex align-center">
+      <span class="text-body-2 px-2 py-2 px-lg-4" v-html="itemsCountHtml"></span>
+      <v-btn
+        v-if="isFilterActive"
+        variant="plain"
+        color="primary"
+        class="text-body-2"
+        density="comfortable"
+        :prepend-icon="mdiCloseCircle"
+        @click="clearFilter"
+      >
+        Clear filter
+      </v-btn>
     </v-col>
   </v-row>
 
@@ -144,7 +287,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
             style="text-transform: none"
             :append-icon="mdiMenuDown"
           >
-            Select status
+            Change status
           </v-btn>
         </template>
 
@@ -166,7 +309,8 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
       <MatchesTablePagination
         v-model:page="page"
         v-model:items-per-page="itemsPerPage"
-        :total-items="props.matches.length"
+        :show-items-count="false"
+        :total-items="filteredItems.length"
       />
     </v-col>
   </v-row>
@@ -226,7 +370,9 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         color="grey-darken-2"
         @click="applyTransformation(true)"
       >
-        <span v-if="selected.length > 0">Selected items: {{ selected.length }}</span>
+        <span v-if="selected.length > 0"
+          >Selected items: <strong>{{ selected.length }}</strong></span
+        >
         <span v-else>Select items to transform</span>
       </v-btn>
     </v-col>
@@ -235,7 +381,8 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
       <MatchesTablePagination
         v-model:page="page"
         v-model:items-per-page="itemsPerPage"
-        :total-items="props.matches.length"
+        :show-items-count="false"
+        :total-items="filteredItems.length"
       />
     </v-col>
   </v-row>
