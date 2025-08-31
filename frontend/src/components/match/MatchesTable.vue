@@ -277,7 +277,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
 
   <v-row class="mt-5">
     <v-col cols="12" lg="2" order-lg="2">
-      <v-menu>
+      <v-menu v-if="filteredItems.length > 0">
         <template #activator="{ props: menuProps }">
           <v-btn
             v-bind="menuProps"
@@ -292,13 +292,25 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         </template>
 
         <v-list>
-          <v-list-item @click="props.matches.map((item) => (item.status === null ? (item.status = true) : item))">
+          <v-list-item
+            @click="
+              filteredItems.forEach((item) => {
+                if (item.status === null) item.status = true;
+              })
+            "
+          >
             <v-list-item-title>Approve all undecided</v-list-item-title>
           </v-list-item>
-          <v-list-item @click="props.matches.map((item) => (item.status === null ? (item.status = false) : item))">
+          <v-list-item
+            @click="
+              filteredItems.forEach((item) => {
+                if (item.status === null) item.status = false;
+              })
+            "
+          >
             <v-list-item-title>Reject all undecided</v-list-item-title>
           </v-list-item>
-          <v-list-item @click="props.matches.map((item) => (item.status = null))">
+          <v-list-item @click="filteredItems.forEach((item) => (item.status = null))">
             <v-list-item-title>Clear decisions</v-list-item-title>
           </v-list-item>
         </v-list>
