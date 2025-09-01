@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { ResultBinding } from "@/types/PatternInstance";
-import { computed, toRaw } from "vue";
+import { computed } from "vue";
 import { mdiInformation } from "@mdi/js";
-import { splitBindingParts, splitUriParts, valueToString } from "@/util/Utils";
+import { splitBindingParts } from "@/util/Utils";
 import { getBindingColor } from "@/util/BindingColors";
 
 const props = defineProps<{
