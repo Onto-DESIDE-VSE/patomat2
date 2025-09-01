@@ -11,7 +11,6 @@ import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
 import BindingValue from "@/components/match/BindingValue.vue";
 import { mdiInformation, mdiMenuDown, mdiCloseCircle } from "@mdi/js";
 import Constants from "@/constants/Constants";
-import { valueToString } from "@/util/Utils";
 
 interface MatchesTablePreferences {
   showTransformationSparql: boolean;
@@ -199,7 +198,13 @@ const headers = ref([
       insert: item.sparqlInsert,
       del: item.sparqlDelete,
       variables: item.newEntities
-        .map((ne) => ({ name: ne.variableName, value: ne.identifier, datatype: Constants.RDFS_RESOURCE }))
+        .map((newEntity) => {
+          return {
+            name: newEntity.variableName,
+            value: newEntity.identifier,
+            datatype: Constants.RDFS_RESOURCE
+          };
+        })
         .concat(item.match.bindings)
     }),
     filterable: false,
@@ -210,7 +215,12 @@ const headers = ref([
     key: "newEntities",
     value: (item: PatternInstance) => ({
       id: item.id,
-      newEntities: item.newEntities
+      newEntities: item.newEntities.map((newEntity) => ({
+        name: newEntity.variableName,
+        value: newEntity.identifier,
+        datatype: Constants.RDFS_RESOURCE,
+        labels: newEntity.labels
+      }))
     }),
     filterable: false,
     visible: true
@@ -411,19 +421,17 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
       </v-row>
     </template>
     <template v-slot:[`item.newEntities`]="{ value }">
-      <ul class="mt-1 mb-1">
-        <li v-for="entity in value.newEntities" v-bind:key="entity.variableName">
-          <span class="font-weight-bold">{{ entity.variableName }}</span
-          >: {{ valueToString({ value: entity.identifier, datatype: Constants.RDFS_RESOURCE }) }}
+      <v-list dense class="mt-1 mb-1">
+        <v-list-item v-for="entity in value.newEntities" :key="entity.name" class="px-0">
+          <v-list-item-title class="text-body-2">
+            <BindingValue :binding="entity"></BindingValue>
+          </v-list-item-title>
+
           <div v-if="entity.labels?.length > 0" class="ml-4">
-            <EditableLabel
-              :patternInstanceId="value.id"
-              :entity="entity"
-              :onSave="onNewEntityLabelChanged"
-            ></EditableLabel>
+            <EditableLabel :patternInstanceId="value.id" :entity="entity" :onSave="onNewEntityLabelChanged" />
           </div>
-        </li>
-      </ul>
+        </v-list-item>
+      </v-list>
     </template>
   </v-data-table>
 

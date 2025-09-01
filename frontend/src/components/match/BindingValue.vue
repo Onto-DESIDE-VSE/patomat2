@@ -29,4 +29,3 @@ const bindingColor = computed(() => getBindingColor(props.binding.name));
     </v-tooltip>
   </v-row>
 </template>
-<style scoped></style>

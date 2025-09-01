@@ -3,7 +3,7 @@ const bindingColors = [
   "text-blue",
   "text-orange",
   "text-teal",
-  "text-lime-darken-1",
+  "text-lime-darken-2",
   "text-purple",
   "text-indigo",
   "text-cyan",
