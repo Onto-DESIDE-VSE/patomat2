@@ -1,6 +1,6 @@
 <!--suppress CssUnusedSymbol -->
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import _ from "lodash";
 import type { NewEntity, PatternInstance } from "@/types/PatternInstance";
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
@@ -13,6 +13,41 @@ import { mdiInformation, mdiMenuDown, mdiCloseCircle } from "@mdi/js";
 import Constants from "@/constants/Constants";
 import { valueToString } from "@/util/Utils";
 
+interface MatchesTablePreferences {
+  showTransformationSparql: boolean;
+  itemsPerPage: number;
+}
+
+const defaultTablePreferences: MatchesTablePreferences = {
+  showTransformationSparql: false,
+  itemsPerPage: 10
+};
+
+const tablePreferences = ref<MatchesTablePreferences>(defaultTablePreferences);
+
+onMounted(() => {
+  const saved = localStorage.getItem("tablePreferences");
+  if (saved) {
+    tablePreferences.value = JSON.parse(saved);
+  }
+});
+
+watch(
+  tablePreferences,
+  (newVal) => {
+    localStorage.setItem("tablePreferences", JSON.stringify(newVal));
+  },
+  { deep: true }
+);
+
+watch(
+  () => tablePreferences.value.showTransformationSparql,
+  (val) => {
+    const col = headers.value.find((h) => h.key === "transformationSparql");
+    if (col) col.visible = val;
+  }
+);
+
 const props = defineProps<{
   matches: PatternInstance[];
   onInstanceChange: (instance: PatternInstance) => void;
@@ -20,7 +55,7 @@ const props = defineProps<{
 }>();
 
 const selected = computed(() => paginatedItems.value.filter((item) => item.status === true));
-const rejected = computed(() => paginatedItems.value.filter((item) => item.status === false));
+//const rejected = computed(() => paginatedItems.value.filter((item) => item.status === false));
 
 // keys are pattern instance ids, value are mapping of variable names to new labels
 const newEntityLabels = ref<Map<number, { [key: string]: string }>>(new Map());
@@ -128,32 +163,34 @@ const itemsCountHtml = computed(() => {
   }
 });
 
-const itemsPerPage = ref(10);
 const page = ref(1);
-const startIndex = computed(() => (page.value - 1) * itemsPerPage.value);
-const endIndex = computed(() => Math.min(page.value * itemsPerPage.value, filteredItems.value.length));
+const startIndex = computed(() => (page.value - 1) * tablePreferences.value.itemsPerPage);
+const endIndex = computed(() => Math.min(page.value * tablePreferences.value.itemsPerPage, filteredItems.value.length));
 const paginatedItems = computed(() => filteredItems.value.slice(startIndex.value, endIndex.value));
 
 watch([searchStatus, searchPatternName, searchText], () => {
   page.value = 1; // reset na první stránku
 });
 
-const headers = [
+const headers = ref([
   {
     title: "Status",
     value: "status",
-    filterable: false
+    filterable: false,
+    visible: true
   },
   {
     title: "Pattern name",
     value: "patternName",
-    filterable: false
+    filterable: false,
+    visible: true
   },
   {
     title: "Matching bindings",
     key: "bindings",
     value: "match.bindings",
-    filterable: false
+    filterable: false,
+    visible: true
   },
   {
     title: "Transformation SPARQL",
@@ -165,7 +202,8 @@ const headers = [
         .map((ne) => ({ name: ne.variableName, value: ne.identifier, datatype: Constants.RDFS_RESOURCE }))
         .concat(item.match.bindings)
     }),
-    filterable: false
+    filterable: false,
+    visible: tablePreferences.value.showTransformationSparql
   },
   {
     title: "New entities",
@@ -174,9 +212,10 @@ const headers = [
       id: item.id,
       newEntities: item.newEntities
     }),
-    filterable: false
+    filterable: false,
+    visible: true
   }
-];
+]);
 
 function onNewEntityLabelChanged(patternInstanceId: number, ne: NewEntity) {
   const instance = props.matches.find((inst) => inst.id === patternInstanceId);
@@ -224,7 +263,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
   </div>
 
   <v-row class="align-center mt-4" dense>
-    <v-col cols="2">
+    <v-col cols="12" lg="2">
       <v-select
         clearable
         label="Filter by pattern"
@@ -237,7 +276,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         hide-details
       ></v-select>
     </v-col>
-    <v-col cols="2">
+    <v-col cols="12" lg="2">
       <v-select
         label="Filter by status"
         :items="statusNames"
@@ -246,7 +285,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         hide-details
       ></v-select>
     </v-col>
-    <v-col cols="4">
+    <v-col cols="12" lg="4">
       <v-text-field
         clearable
         label="Search URI or label"
@@ -275,52 +314,67 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
     </v-col>
   </v-row>
 
-  <v-row class="mt-5">
-    <v-col cols="12" lg="2" order-lg="2">
-      <v-menu v-if="filteredItems.length > 0">
-        <template #activator="{ props: menuProps }">
-          <v-btn
-            v-bind="menuProps"
-            color="grey-lighten-3"
-            size="small"
-            variant="flat"
-            style="text-transform: none"
-            :append-icon="mdiMenuDown"
-          >
-            Change status
-          </v-btn>
-        </template>
+  <v-row class="mt-5 align-center">
+    <v-col cols="12" lg="4" order-lg="2">
+      <div class="d-flex flex-row align-center" v-if="filteredItems.length > 0">
+        <v-menu>
+          <template #activator="{ props: menuProps }">
+            <v-btn
+              v-bind="menuProps"
+              color="grey-lighten-2"
+              size="small"
+              variant="flat"
+              style="text-transform: none"
+              :append-icon="mdiMenuDown"
+            >
+              Change status
+            </v-btn>
+          </template>
 
-        <v-list>
-          <v-list-item
-            @click="
-              filteredItems.forEach((item) => {
-                if (item.status === null) item.status = true;
-              })
-            "
-          >
-            <v-list-item-title>Approve all undecided</v-list-item-title>
-          </v-list-item>
-          <v-list-item
-            @click="
-              filteredItems.forEach((item) => {
-                if (item.status === null) item.status = false;
-              })
-            "
-          >
-            <v-list-item-title>Reject all undecided</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="filteredItems.forEach((item) => (item.status = null))">
-            <v-list-item-title>Clear decisions</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+          <v-list>
+            <v-list-item
+              @click="
+                filteredItems.forEach((item) => {
+                  if (item.status === null) item.status = true;
+                })
+              "
+            >
+              <v-list-item-title>Approve all undecided</v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              @click="
+                filteredItems.forEach((item) => {
+                  if (item.status === null) item.status = false;
+                })
+              "
+            >
+              <v-list-item-title>Reject all undecided</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="filteredItems.forEach((item) => (item.status = null))">
+              <v-list-item-title>Clear decisions</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+
+        <v-switch
+          v-model="tablePreferences.showTransformationSparql"
+          title="Show Transformation SPARQL"
+          label="Show SPARQL"
+          density="compact"
+          hide-details
+          class="ml-6"
+        >
+          <template #label>
+            <span class="text-body-2" title="Show Transformation SPARQL">Show SPARQL</span>
+          </template>
+        </v-switch>
+      </div>
     </v-col>
 
-    <v-col cols="12" lg="10" order-lg="2">
+    <v-col cols="12" lg="8" order-lg="2">
       <MatchesTablePagination
         v-model:page="page"
-        v-model:items-per-page="itemsPerPage"
+        v-model:items-per-page="tablePreferences.itemsPerPage"
         :show-items-count="false"
         :total-items="filteredItems.length"
       />
@@ -328,10 +382,10 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
   </v-row>
 
   <v-data-table
-    :headers="headers"
+    :headers="headers.filter((h) => h.visible)"
     :items="paginatedItems"
     return-object
-    :items-per-page="itemsPerPage"
+    :items-per-page="tablePreferences.itemsPerPage"
     hide-default-footer
   >
     <template v-slot:[`item.status`]="{ item }">
@@ -392,7 +446,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
     <v-col cols="12" lg="10" order-lg="2">
       <MatchesTablePagination
         v-model:page="page"
-        v-model:items-per-page="itemsPerPage"
+        v-model:items-per-page="tablePreferences.itemsPerPage"
         :show-items-count="false"
         :total-items="filteredItems.length"
       />
