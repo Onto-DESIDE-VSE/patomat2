@@ -21,6 +21,19 @@ export type ResultBinding = {
   basedOnBlankNode?: boolean;
 };
 
+export type UriParts = {
+  base: string;
+  localName: string;
+};
+
+export type ResultBindingParts = {
+  prefix: string; // eg. "<"
+  base: string; // eg. "http://cmt/"
+  localName: string; // eg. "assignReviewer"
+  suffix: string; // eg. ">" nebo "^^datatype"
+  basedOnBlankNode?: boolean;
+};
+
 export type NewEntity = {
   identifier: string;
   variableName: string;
