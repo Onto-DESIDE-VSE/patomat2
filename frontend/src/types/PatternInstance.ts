@@ -1,3 +1,5 @@
+import type { ResultBindingInfo } from "@/types/SparqlTokenInfo";
+
 export type PatternInstance = {
   id: number;
   patternName: string;
@@ -19,6 +21,11 @@ export type ResultBinding = {
   value: string;
   datatype: string;
   basedOnBlankNode?: boolean;
+};
+
+export type ResultBindingInfo = ResultBinding & {
+  bindingParts: ResultBindingParts;
+  bindingColor: string;
 };
 
 export type UriParts = {

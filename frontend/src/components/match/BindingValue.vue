@@ -14,7 +14,7 @@ const bindingColor = computed(() => getBindingColor(props.binding.name));
 </script>
 
 <template>
-  <v-row align="center" class="text-grey-darken-2" no-gutters>
+  <v-row align="center" class="text-grey-darken-3" no-gutters>
     <span :class="['font-weight-bold mr-1', bindingColor]">{{ props.binding.name }}:</span>
 
     <span>
