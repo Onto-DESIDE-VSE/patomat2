@@ -1,5 +1,3 @@
-import type { ResultBindingInfo } from "@/types/SparqlTokenInfo";
-
 export type PatternInstance = {
   id: number;
   patternName: string;
