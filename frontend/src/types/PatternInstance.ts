@@ -5,6 +5,7 @@ export type PatternInstance = {
   sparqlInsert: string;
   sparqlDelete: string;
   newEntities: NewEntity[];
+  status: boolean | null;
 };
 
 export type PatternMatch = {
@@ -17,6 +18,24 @@ export type ResultBinding = {
   name: string;
   value: string;
   datatype: string;
+  basedOnBlankNode?: boolean;
+};
+
+export type ResultBindingInfo = ResultBinding & {
+  bindingParts: ResultBindingParts;
+  bindingColor: string;
+};
+
+export type UriParts = {
+  base: string;
+  localName: string;
+};
+
+export type ResultBindingParts = {
+  prefix: string; // eg. "<"
+  base: string; // eg. "http://cmt/"
+  localName: string; // eg. "assignReviewer"
+  suffix: string; // eg. ">" nebo "^^datatype"
   basedOnBlankNode?: boolean;
 };
 

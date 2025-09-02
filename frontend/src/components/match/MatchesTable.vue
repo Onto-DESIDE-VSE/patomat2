@@ -1,24 +1,51 @@
+<!--suppress CssUnusedSymbol -->
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import _ from "lodash";
 import type { NewEntity, PatternInstance } from "@/types/PatternInstance";
 import type { PatternInstanceTransformation } from "@/types/PatternInstanceTransformation";
 import MatchesTablePagination from "@/components/match/MatchesTablePagination.vue";
+import PatternInstanceStatusToggle from "@/components/match/PatternInstanceStatusToggle.vue";
 import EditableLabel from "@/components/match/EditableLabel.vue";
 import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
 import BindingValue from "@/components/match/BindingValue.vue";
-import { mdiInformation } from "@mdi/js";
+import { mdiInformation, mdiMenuDown, mdiCloseCircle } from "@mdi/js";
 import Constants from "@/constants/Constants";
-import { valueToString } from "@/util/Utils";
 
-const itemsPerPage = ref(10);
-const page = ref(1);
+interface MatchesTablePreferences {
+  showTransformationSparql: boolean;
+  itemsPerPage: number;
+}
 
-const startIndex = computed(() => (page.value - 1) * itemsPerPage.value);
+const defaultTablePreferences: MatchesTablePreferences = {
+  showTransformationSparql: false,
+  itemsPerPage: 10
+};
 
-const endIndex = computed(() => Math.min(page.value * itemsPerPage.value, props.matches.length));
+const tablePreferences = ref<MatchesTablePreferences>(defaultTablePreferences);
 
-const paginatedItems = computed(() => props.matches.slice(startIndex.value, endIndex.value));
+onMounted(() => {
+  const saved = localStorage.getItem("tablePreferences");
+  if (saved) {
+    tablePreferences.value = JSON.parse(saved);
+  }
+});
+
+watch(
+  tablePreferences,
+  (newVal) => {
+    localStorage.setItem("tablePreferences", JSON.stringify(newVal));
+  },
+  { deep: true }
+);
+
+watch(
+  () => tablePreferences.value.showTransformationSparql,
+  (val) => {
+    const col = headers.value.find((h) => h.key === "transformationSparql");
+    if (col) col.visible = val;
+  }
+);
 
 const props = defineProps<{
   matches: PatternInstance[];
@@ -26,28 +53,143 @@ const props = defineProps<{
   onTransform: (applyDeletes: boolean, instances: PatternInstanceTransformation[]) => void;
 }>();
 
-const selected = ref<PatternInstance[]>([]);
+const selected = computed(() => paginatedItems.value.filter((item) => item.status === true));
+//const rejected = computed(() => paginatedItems.value.filter((item) => item.status === false));
+
 // keys are pattern instance ids, value are mapping of variable names to new labels
 const newEntityLabels = ref<Map<number, { [key: string]: string }>>(new Map());
 
-const patternNames = computed(() => ["All", ...new Set(props.matches.map((m: PatternInstance) => m.patternName))]);
-const search = ref<string[]>(["All"]);
+const filteredItems = computed(() => {
+  return props.matches.filter((item) => {
+    // filter by status
+    if (!filterByStatus(item.status)) {
+      return false;
+    }
+
+    // filter by patternName
+    if (!filterByPatternName(item.patternName)) {
+      return false;
+    }
+
+    // fulltext search
+    if (!searchText.value) {
+      return true;
+    } else {
+      const searchTextLower = searchText.value.toLowerCase();
+
+      if (item.match.bindings.some((binding) => binding.value.toLowerCase().includes(searchTextLower))) {
+        return true;
+      }
+
+      return item.newEntities?.some((entity) =>
+        entity.labels?.some((label) => label.value.toLowerCase().includes(searchTextLower))
+      );
+    }
+  });
+});
+
+const patternNames = computed(() => [...new Set(props.matches.map((m: PatternInstance) => m.patternName))]);
+const searchPatternName = ref<string[]>([]);
+// watching for pattern names change - select default value
+watch(
+  patternNames,
+  (newPatternNames) => {
+    if (newPatternNames.length === 1) {
+      searchPatternName.value = [newPatternNames[0]]; // vybereme jediný pattern
+    }
+  },
+  { immediate: true }
+);
 
 function filterByPatternName(value: string) {
-  return search.value.includes("All") || search.value.includes(value);
+  return searchPatternName.value.length === 0 || searchPatternName.value.includes(value);
 }
 
-const headers = [
+const statusNames = computed(() => ["All", "Approved", "Rejected", "Undecided"]);
+const searchStatus = ref<string>("All");
+
+function filterByStatus(value: boolean | null) {
+  switch (searchStatus.value) {
+    case "Approved":
+      return value === true;
+    case "Rejected":
+      return value === false;
+    case "Undecided":
+      return value === null;
+    default:
+      return true;
+  }
+}
+
+const searchText = ref<string>();
+
+const isFilterActive = computed(() => {
+  return (
+    searchStatus.value !== "All" ||
+    (patternNames.value.length > 1 && searchPatternName.value.length > 0) ||
+    searchText.value
+  );
+});
+
+function clearFilter() {
+  searchStatus.value = "All";
+  searchPatternName.value = [];
+  searchText.value = "";
+}
+
+const itemsCountHtml = computed(() => {
+  if (props.matches.length === 0) {
+    return "<strong class='text-red'>No matches found</strong>";
+  }
+  if (isFilterActive.value) {
+    if (filteredItems.value.length === 0) {
+      return (
+        "<strong class='text-red'>No matches corresponding filter</strong>, total matches: <strong>" +
+        props.matches.length +
+        "</strong>"
+      );
+    } else {
+      return (
+        "Filtered <strong>" +
+        filteredItems.value.length +
+        "</strong> of <strong>" +
+        props.matches.length +
+        "</strong> matches"
+      );
+    }
+  } else {
+    return "Total matches: <strong>" + props.matches.length + "</strong>, no filtering";
+  }
+});
+
+const page = ref(1);
+const startIndex = computed(() => (page.value - 1) * tablePreferences.value.itemsPerPage);
+const endIndex = computed(() => Math.min(page.value * tablePreferences.value.itemsPerPage, filteredItems.value.length));
+const paginatedItems = computed(() => filteredItems.value.slice(startIndex.value, endIndex.value));
+
+watch([searchStatus, searchPatternName, searchText], () => {
+  page.value = 1; // reset na první stránku
+});
+
+const headers = ref([
+  {
+    title: "Status",
+    value: "status",
+    filterable: false,
+    visible: true
+  },
   {
     title: "Pattern name",
     value: "patternName",
-    filter: filterByPatternName
+    filterable: false,
+    visible: true
   },
   {
     title: "Matching bindings",
     key: "bindings",
     value: "match.bindings",
-    filterable: false
+    filterable: false,
+    visible: true
   },
   {
     title: "Transformation SPARQL",
@@ -56,21 +198,34 @@ const headers = [
       insert: item.sparqlInsert,
       del: item.sparqlDelete,
       variables: item.newEntities
-        .map((ne) => ({ name: ne.variableName, value: ne.identifier, datatype: Constants.RDFS_RESOURCE }))
+        .map((newEntity) => {
+          return {
+            name: newEntity.variableName,
+            value: newEntity.identifier,
+            datatype: Constants.RDFS_RESOURCE
+          };
+        })
         .concat(item.match.bindings)
     }),
-    filterable: false
+    filterable: false,
+    visible: tablePreferences.value.showTransformationSparql
   },
   {
     title: "New entities",
     key: "newEntities",
     value: (item: PatternInstance) => ({
       id: item.id,
-      newEntities: item.newEntities
+      newEntities: item.newEntities.map((newEntity) => ({
+        name: newEntity.variableName,
+        value: newEntity.identifier,
+        datatype: Constants.RDFS_RESOURCE,
+        labels: newEntity.labels
+      }))
     }),
-    filterable: false
+    filterable: false,
+    visible: true
   }
-];
+]);
 
 function onNewEntityLabelChanged(patternInstanceId: number, ne: NewEntity) {
   const instance = props.matches.find((inst) => inst.id === patternInstanceId);
@@ -117,29 +272,135 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
     >
   </div>
 
-  <!--TODO replace-->
-  <v-row class="align-center">
-    <v-col cols="2">
-      <v-select clearable label="Select pattern" :items="patternNames" v-model="search" multiple></v-select>
+  <v-row class="align-center mt-4" dense>
+    <v-col cols="12" lg="2">
+      <v-select
+        clearable
+        label="Filter by pattern"
+        :items="patternNames"
+        v-model="searchPatternName"
+        multiple
+        placeholder="All patterns"
+        density="comfortable"
+        :disabled="patternNames.length <= 1"
+        hide-details
+      ></v-select>
+    </v-col>
+    <v-col cols="12" lg="2">
+      <v-select
+        label="Filter by status"
+        :items="statusNames"
+        v-model="searchStatus"
+        density="comfortable"
+        hide-details
+      ></v-select>
+    </v-col>
+    <v-col cols="12" lg="4">
+      <v-text-field
+        clearable
+        label="Search URI or label"
+        v-model="searchText"
+        variant="filled"
+        density="comfortable"
+        rounded="md"
+        hide-details
+      ></v-text-field>
+    </v-col>
+  </v-row>
+  <v-row class="align-center" dense>
+    <v-col class="d-flex align-center">
+      <span class="text-body-2 px-2 py-2 px-lg-4" v-html="itemsCountHtml"></span>
+      <v-btn
+        v-if="isFilterActive"
+        variant="plain"
+        color="primary"
+        class="text-body-2"
+        density="comfortable"
+        :prepend-icon="mdiCloseCircle"
+        @click="clearFilter"
+      >
+        Clear filter
+      </v-btn>
     </v-col>
   </v-row>
 
-  <MatchesTablePagination
-    v-model:page="page"
-    v-model:items-per-page="itemsPerPage"
-    :total-items="props.matches.length"
-  />
+  <v-row class="mt-5 align-center">
+    <v-col cols="12" lg="4" order-lg="2">
+      <div class="d-flex flex-row align-center" v-if="filteredItems.length > 0">
+        <v-menu>
+          <template #activator="{ props: menuProps }">
+            <v-btn
+              v-bind="menuProps"
+              color="grey-lighten-2"
+              size="small"
+              variant="flat"
+              style="text-transform: none"
+              :append-icon="mdiMenuDown"
+            >
+              Change status
+            </v-btn>
+          </template>
+
+          <v-list>
+            <v-list-item
+              @click="
+                filteredItems.forEach((item) => {
+                  if (item.status === null) item.status = true;
+                })
+              "
+            >
+              <v-list-item-title>Approve all undecided</v-list-item-title>
+            </v-list-item>
+            <v-list-item
+              @click="
+                filteredItems.forEach((item) => {
+                  if (item.status === null) item.status = false;
+                })
+              "
+            >
+              <v-list-item-title>Reject all undecided</v-list-item-title>
+            </v-list-item>
+            <v-list-item @click="filteredItems.forEach((item) => (item.status = null))">
+              <v-list-item-title>Clear decisions</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+
+        <v-switch
+          v-model="tablePreferences.showTransformationSparql"
+          title="Show Transformation SPARQL"
+          label="Show SPARQL"
+          density="compact"
+          hide-details
+          class="ml-6"
+        >
+          <template #label>
+            <span class="text-body-2" title="Show Transformation SPARQL">Show SPARQL</span>
+          </template>
+        </v-switch>
+      </div>
+    </v-col>
+
+    <v-col cols="12" lg="8" order-lg="2">
+      <MatchesTablePagination
+        v-model:page="page"
+        v-model:items-per-page="tablePreferences.itemsPerPage"
+        :show-items-count="false"
+        :total-items="filteredItems.length"
+      />
+    </v-col>
+  </v-row>
 
   <v-data-table
-    :headers="headers"
+    :headers="headers.filter((h) => h.visible)"
     :items="paginatedItems"
-    show-select
-    v-model="selected"
-    select-strategy="all"
     return-object
-    :items-per-page="itemsPerPage"
+    :items-per-page="tablePreferences.itemsPerPage"
     hide-default-footer
   >
+    <template v-slot:[`item.status`]="{ item }">
+      <PatternInstanceStatusToggle v-model:status="item.status" />
+    </template>
     <template v-slot:[`item.bindings`]="{ value }">
       <ul class="mt-1 mb-1">
         <li v-for="binding in value" :key="binding.id" class="mb-1">
@@ -160,19 +421,17 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
       </v-row>
     </template>
     <template v-slot:[`item.newEntities`]="{ value }">
-      <ul class="mt-1 mb-1">
-        <li v-for="entity in value.newEntities" v-bind:key="entity.variableName">
-          <span class="font-weight-bold">{{ entity.variableName }}</span
-          >: {{ valueToString({ value: entity.identifier, datatype: Constants.RDFS_RESOURCE }) }}
+      <v-list dense class="mt-1 mb-1">
+        <v-list-item v-for="entity in value.newEntities" :key="entity.name" class="px-0">
+          <v-list-item-title class="text-body-2">
+            <BindingValue :binding="entity"></BindingValue>
+          </v-list-item-title>
+
           <div v-if="entity.labels?.length > 0" class="ml-4">
-            <EditableLabel
-              :patternInstanceId="value.id"
-              :entity="entity"
-              :onSave="onNewEntityLabelChanged"
-            ></EditableLabel>
+            <EditableLabel :patternInstanceId="value.id" :entity="entity" :onSave="onNewEntityLabelChanged" />
           </div>
-        </li>
-      </ul>
+        </v-list-item>
+      </v-list>
     </template>
   </v-data-table>
 
@@ -185,7 +444,9 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         color="grey-darken-2"
         @click="applyTransformation(true)"
       >
-        <span v-if="selected.length > 0">Selected items: {{ selected.length }}</span>
+        <span v-if="selected.length > 0"
+          >Selected items: <strong>{{ selected.length }}</strong></span
+        >
         <span v-else>Select items to transform</span>
       </v-btn>
     </v-col>
@@ -193,8 +454,9 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
     <v-col cols="12" lg="10" order-lg="2">
       <MatchesTablePagination
         v-model:page="page"
-        v-model:items-per-page="itemsPerPage"
-        :total-items="props.matches.length"
+        v-model:items-per-page="tablePreferences.itemsPerPage"
+        :show-items-count="false"
+        :total-items="filteredItems.length"
       />
     </v-col>
   </v-row>

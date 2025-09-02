@@ -28,7 +28,12 @@ const fetchMatches = async () => {
   });
   showProgress.value = false;
   if (resp.status === 200) {
-    matches.value = await resp.json();
+    const data = await resp.json();
+    data.map((match: PatternInstance) => {
+      match.status = null;
+      return match;
+    });
+    matches.value = data; //default value of selection status for UI
   } else if (resp.status === 409) {
     messageStore.publishMessage("Ontology not uploaded, yet.");
     await router.push("/load");

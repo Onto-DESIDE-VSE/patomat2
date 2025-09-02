@@ -2,6 +2,11 @@
 import { computed, watch } from "vue";
 
 const props = defineProps({
+  showItemsCount: {
+    type: Boolean,
+    required: false,
+    default: true
+  },
   page: {
     type: Number,
     required: true
@@ -48,8 +53,9 @@ watch(modelItemsPerPage, () => {
 
 <template>
   <v-row class="mx-2" justify="end">
-    <div class="mr-1 my-auto text-lg-caption text-grey-darken-2">
-      Items {{ startIndex + 1 }}–{{ endIndex }} of {{ totalItems }}
+    <div class="mr-1 my-auto text-lg-caption text-grey-darken-2" v-if="showItemsCount">
+      <span v-if="totalItems > 0"> Items {{ startIndex + 1 }}–{{ endIndex }} of {{ totalItems }} </span>
+      <span v-else> No items found </span>
     </div>
 
     <v-pagination v-model="modelPage" :length="pageCount" :total-visible="6" color="primary"></v-pagination>
