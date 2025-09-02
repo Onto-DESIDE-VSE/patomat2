@@ -27,8 +27,8 @@ import Constants from "@/constants/Constants";
       <h4 class="text-h4 mb-2">Docs</h4>
       <p class="mb-2">
         Documentation for the REST API of this instance is available
-        <a :href="`${Constants.SERVER_URL}/swagger-ui/index.html`" target="_blank noreferrer noopener">here</a>. Javadoc
-        for the backend implementation is available at
+        <a :href="`${Constants.SERVER_URL}/swagger-ui/`" target="_blank noreferrer noopener">here</a>. Javadoc for the
+        backend implementation is available at
         <a href="https://onto-deside-vse.github.io/patomat2/" target="_blank noreferrer noopener"
           >https://onto-deside-vse.github.io/patomat2/</a
         >.
