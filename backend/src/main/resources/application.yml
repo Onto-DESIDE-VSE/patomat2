@@ -26,4 +26,5 @@ logging:
 springdoc:
     swagger-ui:
         path: /swagger-ui
-        disable-swagger-default-url: false
+        url: /v3/api-docs
+        disable-swagger-default-url: true

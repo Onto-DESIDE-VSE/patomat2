@@ -20,7 +20,7 @@ services:
         environment:
             PATOMAT2_CORSALLOWEDORIGINS: ${PUBLIC_URL:-http://localhost:${HOST_PORT:-1234}}
             PATOMAT2_NEWENTITYIRIBASE: ${NEW_ENTITY_IRI_BASE:-https://owl.vse.cz/patomat2/}
-            SPRINGDOC_SWAGGER_UI_URL: ${ROOT}/service/server/v3/api-docs
+            SPRINGDOC_SWAGGER_UI_URL: /v3/api-docs
             PATOMAT2_SECURITY_MAXSESSIONS: ${MAX_SESSIONS:-20}
         env_file:
             - .env
