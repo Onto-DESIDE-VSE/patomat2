@@ -19,6 +19,7 @@ export type ResultBinding = {
   value: string;
   datatype: string;
   basedOnBlankNode?: boolean;
+  label?: string;
 };
 
 export type ResultBindingInfo = ResultBinding & {

@@ -4,6 +4,7 @@ import { computed } from "vue";
 import { splitBindingParts, valueToString } from "@/util/Utils";
 import type { SparqlTokenInfo } from "@/types/SparqlTokenInfo";
 import { getBindingColor } from "@/util/BindingColors";
+import { mdiLabel } from "@mdi/js";
 
 const props = defineProps<{
   sparql: string;
@@ -153,6 +154,14 @@ const tokensToRender = computed(() => {
           <template v-else v-slot:activator="{ props }">
             <strong class="text-grey-darken-3" v-bind="props">{{ token.text }}</strong>
           </template>
+
+          <div v-if="token.bindingInfo?.name">
+            {{ token.bindingInfo.name }}
+            <span class="d-flex align-center" v-if="token.bindingInfo.label">
+              <v-icon size="small" :class="['mr-1', token.bindingInfo?.bindingColor]">{{ mdiLabel }}</v-icon>
+              {{ token.bindingInfo.label }}
+            </span>
+          </div>
         </v-tooltip>
       </template>
 

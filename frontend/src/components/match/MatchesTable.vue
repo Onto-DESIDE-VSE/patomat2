@@ -404,7 +404,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
     <template v-slot:[`item.bindings`]="{ value }">
       <ul class="mt-1 mb-1">
         <li v-for="binding in value" :key="binding.id" class="mb-1">
-          <BindingValue :binding="binding"></BindingValue>
+          <BindingValue :binding="binding" :tooltip-with-label="true"></BindingValue>
         </li>
       </ul>
     </template>
