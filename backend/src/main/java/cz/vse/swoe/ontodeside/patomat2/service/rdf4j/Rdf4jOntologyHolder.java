@@ -29,6 +29,7 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -138,7 +139,7 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
 
     private List<PatternMatch> bindingSetToPatternMatches(BindingSet bs, Pattern pattern, RepositoryConnection conn) {
         final Map<String, List<ResultBinding>> row = new HashMap<>();
-        bs.getBindingNames().forEach(name -> row.put(name, toResultBinding(name, bs, conn)));
+        bs.getBindingNames().forEach(name -> row.put(name, toResultBindingWithLabel(name, bs, conn)));
         return cartesianProduct(new ArrayList<>(row.values()), 0).flatMap(l -> Stream.of(new PatternMatch(pattern, l)))
                                                                  .toList();
     }
@@ -158,6 +159,10 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
     }
 
     static List<ResultBinding> toResultBinding(String name, BindingSet bs, RepositoryConnection conn) {
+        return toResultBinding(name, bs, conn, Optional.empty());
+    }
+
+    private static List<ResultBinding> toResultBinding(String name, @NotNull BindingSet bs, RepositoryConnection conn, Optional<String> label) {
         final Value value = bs.getValue(name);
         final String strValue = value.stringValue();
         if (value.isBNode()) {
@@ -165,7 +170,11 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
         }
         final String datatype = value.isResource() ? RDFS.RESOURCE.stringValue() : ((Literal) value).getDatatype()
                                                                                                     .stringValue();
-        return List.of(new ResultBinding(name, strValue, datatype));
+        return List.of(new ResultBinding(name, strValue, datatype, false, label));
+    }
+
+    List<ResultBinding> toResultBindingWithLabel(String name, BindingSet bs, RepositoryConnection conn) {
+        return toResultBinding(name, bs, conn, getLabel(bs.getValue(name).stringValue()));
     }
 
     @Override
