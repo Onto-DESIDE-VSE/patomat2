@@ -9,8 +9,9 @@ import PatternInstanceStatusToggle from "@/components/match/PatternInstanceStatu
 import EditableLabel from "@/components/match/EditableLabel.vue";
 import SparqlWithVariables from "@/components/match/SparqlWithVariables.vue";
 import BindingValue from "@/components/match/BindingValue.vue";
-import { mdiInformation, mdiMenuDown, mdiCloseCircle } from "@mdi/js";
+import { mdiInformation, mdiMenuDown, mdiCloseCircle, mdiCloudDownloadOutline, mdiCloudCheckOutline } from "@mdi/js";
 import Constants from "@/constants/Constants";
+import type { SortMethod } from "@/types/SortMethod";
 
 interface MatchesTablePreferences {
   showTransformationSparql: boolean;
@@ -45,6 +46,10 @@ const props = defineProps<{
   matches: PatternInstance[];
   onInstanceChange: (instance: PatternInstance) => void;
   onTransform: (applyDeletes: boolean, instances: PatternInstanceTransformation[]) => void;
+  sortMethods: SortMethod[];
+  defaultSortMethod: SortMethod;
+  loadedSortMethods: Set<string>;
+  onSortChange: (sortMethod: SortMethod) => Promise<boolean>;
 }>();
 
 const selected = computed(() => paginatedItems.value.filter((item) => item.status === true));
@@ -53,8 +58,12 @@ const selected = computed(() => paginatedItems.value.filter((item) => item.statu
 // keys are pattern instance ids, value are mapping of variable names to new labels
 const newEntityLabels = ref<Map<number, { [key: string]: string }>>(new Map());
 
+const sortMethod = ref<SortMethod>(props.defaultSortMethod);
+
+const isSortMethodLoaded = (sortMethod: SortMethod) => props.loadedSortMethods.has(sortMethod.value);
+
 const filteredItems = computed(() => {
-  return props.matches.filter((item) => {
+  let items = props.matches.filter((item) => {
     // filter by status
     if (!filterByStatus(item.status)) {
       return false;
@@ -80,6 +89,9 @@ const filteredItems = computed(() => {
       );
     }
   });
+
+  // Apply sorting
+  return _.sortBy(items, (item) => item.sortValues?.[sortMethod.value.value] ?? Infinity);
 });
 
 const patternNames = computed(() => [...new Set(props.matches.map((m: PatternInstance) => m.patternName))]);
@@ -308,6 +320,46 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         rounded="md"
         hide-details
       ></v-text-field>
+    </v-col>
+    <v-col cols="12" lg="2">
+      <v-select
+        label="Sort items"
+        :items="sortMethods"
+        item-title="name"
+        item-value="value"
+        return-object
+        v-model="sortMethod"
+        @update:model-value="onSortChange"
+        density="comfortable"
+        hide-details
+      >
+        <template #item="{ props: itemProps, item }">
+          <v-list-item v-bind="itemProps">
+            <template #title>
+              {{ item.raw.name }}
+            </template>
+
+            <template #append v-if="item.raw.value !== defaultSortMethod.value">
+              <v-icon
+                v-if="isSortMethodLoaded(item.raw)"
+                :icon="mdiCloudCheckOutline"
+                color="grey"
+                size="small"
+                class="ml-2"
+                title="Sorted data are already loaded"
+              />
+              <v-icon
+                v-else
+                :icon="mdiCloudDownloadOutline"
+                color="primary-darken-2"
+                size="small"
+                class="ml-2"
+                title="Sorted data will be loaded"
+              />
+            </template>
+          </v-list-item>
+        </template>
+      </v-select>
     </v-col>
   </v-row>
   <v-row class="align-center" dense>

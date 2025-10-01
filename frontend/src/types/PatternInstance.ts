@@ -6,6 +6,7 @@ export type PatternInstance = {
   sparqlDelete: string;
   newEntities: NewEntity[];
   status: boolean | null;
+  sortValues?: Record<string, number>;
 };
 
 export type PatternMatch = {

@@ -12,6 +12,7 @@ import TransformationSummaryView from "@/components/match/TransformationSummaryV
 import MatchesStatistics from "@/components/match/MatchesStatistics.vue";
 import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
 import { getLoadedInput } from "@/api/OntologyStorageApi";
+import type { SortMethod } from "@/types/SortMethod";
 
 const router = useRouter();
 const messageStore = useMessageStore();
@@ -20,6 +21,9 @@ const transformationInput = ref<LoadedTransformationInput | null>({ ontology: ""
 const matches = ref<PatternInstance[]>([]);
 const transformationSummary = ref<TransformationSummary | null>(null);
 const showProgress = ref(false);
+const sortMethods = ref<SortMethod[]>([]);
+const loadedSortMethods = ref<Set<string>>(new Set());
+const defaultSortMethod: SortMethod = { value: "default", name: "Default", includeSparql: false };
 
 const fetchMatches = async () => {
   showProgress.value = true;
@@ -29,10 +33,15 @@ const fetchMatches = async () => {
   showProgress.value = false;
   if (resp.status === 200) {
     const data = await resp.json();
-    data.map((match: PatternInstance) => {
+    data.map((match: PatternInstance, index: number) => {
       match.status = null;
+      match.sortValues = {
+        ...(match.sortValues || {}),
+        default: index // default order obtained from server
+      };
       return match;
     });
+    loadedSortMethods.value = new Set([defaultSortMethod.value]);
     matches.value = data; //default value of selection status for UI
   } else if (resp.status === 409) {
     messageStore.publishMessage("Ontology not uploaded, yet.");
@@ -45,12 +54,91 @@ const fetchMatches = async () => {
   }
 };
 
+const fetchSortMethods = async () => {
+  try {
+    const resp = await fetch(`${Constants.SERVER_URL}/sort`, {
+      credentials: "include"
+    });
+    if (resp.status === 200) {
+      const data = await resp.json();
+      sortMethods.value = [
+        defaultSortMethod,
+        ...data.map((item: any) => ({
+          value: item.method,
+          name: item.name,
+          includeSparql: item.includeSparql
+        }))
+      ];
+    } else {
+      sortMethods.value = [defaultSortMethod];
+      messageStore.publishMessage("Unable to get sort methods.");
+    }
+  } catch (error) {
+    sortMethods.value = [defaultSortMethod];
+    messageStore.publishMessage("Failed to fetch sort methods: " + error);
+  }
+};
+
+const applySorting = async (sortMethod: SortMethod): Promise<boolean> => {
+  // check, if it is necessary to load sort values from server
+  if (loadedSortMethods.value.has(sortMethod.value)) {
+    return true;
+  }
+
+  showProgress.value = true;
+  try {
+    const instancesJson = matches.value.map((instance) => ({
+      id: instance.id,
+      patternName: instance.patternName,
+      match: instance.match,
+      sparqlInsert: sortMethod.includeSparql ? instance.sparqlInsert : "",
+      sparqlDelete: sortMethod.includeSparql ? instance.sparqlDelete : "",
+      newEntities: instance.newEntities
+    }));
+
+    const resp = await fetch(`${Constants.SERVER_URL}/sort/${sortMethod.value}`, {
+      method: "POST",
+      body: JSON.stringify(instancesJson),
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (resp.status === 200) {
+      const sortedData = await resp.json();
+      sortedData.forEach((sortedInstance: PatternInstance, index: number) => {
+        const match = matches.value.find((m) => m.id === sortedInstance.id);
+        if (match) {
+          match.sortValues = {
+            ...(match.sortValues || {}),
+            [sortMethod.value]: index
+          };
+        }
+      });
+
+      loadedSortMethods.value.add(sortMethod.value);
+      return true;
+    } else {
+      const error = await resp.json();
+      messageStore.publishMessage("Unable to apply sorting. Got message: " + error.message);
+      return false;
+    }
+  } catch (error) {
+    messageStore.publishMessage("Failed to apply sorting: " + error);
+    return false;
+  } finally {
+    showProgress.value = false;
+  }
+};
+
 onMounted(async () => {
   transformationInput.value = await getLoadedInput();
   if (transformationInput.value === null) {
     messageStore.publishMessage("Ontology not uploaded, yet.");
     return;
   }
+  await fetchSortMethods();
   await fetchMatches();
   if (router.currentRoute.value.query.transform === "true") {
     await applyTransformation(
@@ -112,6 +200,14 @@ const downloadTransformedOntology = async () => {
     :matches="matches"
     :transformation-input="transformationInput"
   />
-  <MatchesTable :matches="matches" :on-instance-change="onInstanceChange" :on-transform="applyTransformation" />
+  <MatchesTable
+    :matches="matches"
+    :on-instance-change="onInstanceChange"
+    :on-transform="applyTransformation"
+    :sort-methods="sortMethods"
+    :default-sort-method="defaultSortMethod"
+    :loaded-sort-methods="loadedSortMethods"
+    :on-sort-change="applySorting"
+  />
   <TransformationSummaryView :summary="transformationSummary" />
 </template>
