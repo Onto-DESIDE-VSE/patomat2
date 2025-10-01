@@ -14,11 +14,13 @@ import Constants from "@/constants/Constants";
 
 interface MatchesTablePreferences {
   showTransformationSparql: boolean;
+  showPatternName: boolean;
   itemsPerPage: number;
 }
 
 const defaultTablePreferences: MatchesTablePreferences = {
   showTransformationSparql: false,
+  showPatternName: true,
   itemsPerPage: 10
 };
 
@@ -37,14 +39,6 @@ watch(
     localStorage.setItem("tablePreferences", JSON.stringify(newVal));
   },
   { deep: true }
-);
-
-watch(
-  () => tablePreferences.value.showTransformationSparql,
-  (val) => {
-    const col = headers.value.find((h) => h.key === "transformationSparql");
-    if (col) col.visible = val;
-  }
 );
 
 const props = defineProps<{
@@ -100,6 +94,8 @@ watch(
   },
   { immediate: true }
 );
+
+const allowShowPatternNameSwitch = computed(() => patternNames.value.length === 1);
 
 function filterByPatternName(value: string) {
   return searchPatternName.value.length === 0 || searchPatternName.value.includes(value);
@@ -171,25 +167,30 @@ watch([searchStatus, searchPatternName, searchText], () => {
   page.value = 1; // reset na první stránku
 });
 
-const headers = ref([
+const headers = computed(() => [
   {
     title: "Status",
     value: "status",
     filterable: false,
-    visible: true
+    visible: true,
+    width: "50px",
+    sortable: false
   },
   {
     title: "Pattern name",
+    key: "patternName",
     value: "patternName",
     filterable: false,
-    visible: true
+    visible: !allowShowPatternNameSwitch.value || tablePreferences.value.showPatternName,
+    sortable: false
   },
   {
     title: "Matching bindings",
     key: "bindings",
     value: "match.bindings",
     filterable: false,
-    visible: true
+    visible: true,
+    sortable: false
   },
   {
     title: "Transformation SPARQL",
@@ -208,7 +209,8 @@ const headers = ref([
         .concat(item.match.bindings)
     }),
     filterable: false,
-    visible: tablePreferences.value.showTransformationSparql
+    visible: tablePreferences.value.showTransformationSparql,
+    sortable: false
   },
   {
     title: "New entities",
@@ -223,7 +225,8 @@ const headers = ref([
       }))
     }),
     filterable: false,
-    visible: true
+    visible: true,
+    sortable: false
   }
 ]);
 
@@ -325,7 +328,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
   </v-row>
 
   <v-row class="mt-5 align-center">
-    <v-col cols="12" lg="4" order-lg="2">
+    <v-col cols="12" lg="5" order-lg="2">
       <div class="d-flex flex-row align-center" v-if="filteredItems.length > 0">
         <v-menu>
           <template #activator="{ props: menuProps }">
@@ -367,6 +370,19 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         </v-menu>
 
         <v-switch
+          v-model="tablePreferences.showPatternName"
+          title="Show Pattern name"
+          density="compact"
+          hide-details
+          class="ml-6"
+          v-show="allowShowPatternNameSwitch"
+        >
+          <template #label>
+            <span class="text-body-2" title="Show Pattern name">Pattern name</span>
+          </template>
+        </v-switch>
+
+        <v-switch
           v-model="tablePreferences.showTransformationSparql"
           title="Show Transformation SPARQL"
           label="Show SPARQL"
@@ -381,7 +397,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
       </div>
     </v-col>
 
-    <v-col cols="12" lg="8" order-lg="2">
+    <v-col cols="12" lg="7" order-lg="2">
       <MatchesTablePagination
         v-model:page="page"
         v-model:items-per-page="tablePreferences.itemsPerPage"
@@ -409,10 +425,10 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
       </ul>
     </template>
     <template v-slot:[`item.transformationSparql`]="{ value }">
-      <div v-if="value.del" class="mt-1 mb-1 sparql">
-        <SparqlWithVariables :sparql="value.del" :bindings="value.variables"></SparqlWithVariables>
-      </div>
       <div class="mb-1 mt-1 sparql">
+        <div v-if="value.del" class="mt-1 mb-1">
+          <SparqlWithVariables :sparql="value.del" :bindings="value.variables"></SparqlWithVariables>
+        </div>
         <SparqlWithVariables :sparql="value.insert" :bindings="value.variables"></SparqlWithVariables>
       </div>
       <v-row align="center" no-gutters class="mb-1 font-italic" v-if="!value.del">
@@ -486,6 +502,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
   word-break: normal;
   overflow: auto;
   padding: 0;
+  max-width: 35vw;
 }
 .btn-selected-items-count.v-btn--disabled {
   opacity: 1 !important;
