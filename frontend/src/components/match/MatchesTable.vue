@@ -329,6 +329,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         item-value="value"
         return-object
         v-model="sortMethod"
+        v-if="sortMethods.length > 1"
         @update:model-value="onSortChange"
         density="comfortable"
         hide-details
