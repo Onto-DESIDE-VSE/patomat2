@@ -23,7 +23,7 @@ const transformationSummary = ref<TransformationSummary | null>(null);
 const showProgress = ref(false);
 const sortMethods = ref<SortMethod[]>([]);
 const loadedSortMethods = ref<Set<string>>(new Set());
-const defaultSortMethod: SortMethod = { value: "default", name: "Default", includeSparql: false };
+const defaultSortMethod: SortMethod = { value: "default", name: "Default" };
 
 const fetchMatches = async () => {
   showProgress.value = true;
@@ -56,7 +56,7 @@ const fetchMatches = async () => {
 
 const fetchSortMethods = async () => {
   try {
-    const resp = await fetch(`${Constants.SERVER_URL}/sort`, {
+    const resp = await fetch(`${Constants.SERVER_URL}/sort/options`, {
       credentials: "include"
     });
     if (resp.status === 200) {
@@ -65,8 +65,7 @@ const fetchSortMethods = async () => {
         defaultSortMethod,
         ...data.map((item: any) => ({
           value: item.method,
-          name: item.name,
-          includeSparql: item.includeSparql
+          name: item.name
         }))
       ];
     } else {
@@ -91,8 +90,8 @@ const applySorting = async (sortMethod: SortMethod): Promise<boolean> => {
       id: instance.id,
       patternName: instance.patternName,
       match: instance.match,
-      sparqlInsert: sortMethod.includeSparql ? instance.sparqlInsert : "",
-      sparqlDelete: sortMethod.includeSparql ? instance.sparqlDelete : "",
+      sparqlInsert: "",
+      sparqlDelete: "",
       newEntities: instance.newEntities
     }));
 
