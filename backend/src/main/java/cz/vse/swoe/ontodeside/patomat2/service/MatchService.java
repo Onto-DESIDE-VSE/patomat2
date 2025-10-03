@@ -3,11 +3,14 @@ package cz.vse.swoe.ontodeside.patomat2.service;
 import cz.vse.swoe.ontodeside.patomat2.event.OntologyFileUploadedEvent;
 import cz.vse.swoe.ontodeside.patomat2.exception.IncompleteTransformationInputException;
 import cz.vse.swoe.ontodeside.patomat2.exception.PatOMat2Exception;
+import cz.vse.swoe.ontodeside.patomat2.exception.UnsupportedSortMethodException;
 import cz.vse.swoe.ontodeside.patomat2.model.NewEntity;
 import cz.vse.swoe.ontodeside.patomat2.model.NewEntityGenerator;
 import cz.vse.swoe.ontodeside.patomat2.model.Pattern;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
+import cz.vse.swoe.ontodeside.patomat2.service.sort.PatternInstanceSorter;
+import cz.vse.swoe.ontodeside.patomat2.service.sort.Sort;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.SessionScope;
@@ -19,6 +22,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -34,17 +38,25 @@ public class MatchService {
 
     private final NewEntityGenerator newEntityGenerator;
 
+    private final List<PatternInstanceSorter> sorters;
+
     private Map<String, Pattern> patterns;
 
     private Map<Integer, PatternInstance> matches;
 
     public MatchService(FileStorageService storageService, OntologyHolder ontologyHolder,
-                        NewEntityGenerator newEntityGenerator) {
+                        NewEntityGenerator newEntityGenerator, List<PatternInstanceSorter> sorters) {
         this.storageService = storageService;
         this.ontologyHolder = ontologyHolder;
         this.newEntityGenerator = newEntityGenerator;
+        this.sorters = sorters;
     }
 
+    /**
+     * Finds matches of the provided patterns in the provided ontology.
+     *
+     * @return List of pattern matches
+     */
     public List<PatternInstance> findMatches() {
         if (patterns == null) {
             throw new IncompleteTransformationInputException("Ontology not uploaded, yet.");
@@ -96,6 +108,22 @@ public class MatchService {
             ontologyHolder.clear();
         }
         ontologyHolder.loadOntology(ontologyFile);
+    }
+
+    /**
+     * Finds matches of the provided patterns in the provided ontology and returns them sorted using the specified
+     * sorting method.
+     *
+     * @param sort Pattern instance sorting method
+     * @return List of pattern matches
+     */
+    public List<PatternInstance> findMatches(Sort sort) {
+        final List<PatternInstance> matches = findMatches();
+        final Optional<PatternInstanceSorter> sorter = sorters.stream().filter(s -> s.getSortMethod() == sort).findFirst();
+        if (sorter.isEmpty()) {
+            throw new UnsupportedSortMethodException("No sorter for sort method " + sort);
+        }
+        return sorter.get().sort(matches);
     }
 
     @EventListener
