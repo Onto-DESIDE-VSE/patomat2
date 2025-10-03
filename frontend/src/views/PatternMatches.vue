@@ -64,7 +64,7 @@ const fetchSortMethods = async () => {
       sortMethods.value = [
         defaultSortMethod,
         ...data.map((item: any) => ({
-          value: item.method,
+          value: item.value,
           name: item.name
         }))
       ];
@@ -86,22 +86,8 @@ const applySorting = async (sortMethod: SortMethod): Promise<boolean> => {
 
   showProgress.value = true;
   try {
-    const instancesJson = matches.value.map((instance) => ({
-      id: instance.id,
-      patternName: instance.patternName,
-      match: instance.match,
-      sparqlInsert: "",
-      sparqlDelete: "",
-      newEntities: instance.newEntities
-    }));
-
-    const resp = await fetch(`${Constants.SERVER_URL}/sort/${sortMethod.value}`, {
-      method: "POST",
-      body: JSON.stringify(instancesJson),
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json"
-      }
+    const resp = await fetch(`${Constants.SERVER_URL}/matches?sort=${sortMethod.value}`, {
+      credentials: "include"
     });
 
     if (resp.status === 200) {

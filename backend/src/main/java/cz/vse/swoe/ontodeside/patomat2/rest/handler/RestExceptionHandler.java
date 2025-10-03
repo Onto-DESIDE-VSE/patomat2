@@ -7,6 +7,7 @@ import cz.vse.swoe.ontodeside.patomat2.exception.NotFoundException;
 import cz.vse.swoe.ontodeside.patomat2.exception.OntologyReadException;
 import cz.vse.swoe.ontodeside.patomat2.exception.PatOMat2Exception;
 import cz.vse.swoe.ontodeside.patomat2.exception.ResourceFetchException;
+import cz.vse.swoe.ontodeside.patomat2.exception.UnsupportedSortMethodException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,13 @@ public class RestExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Void> notFoundException() {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UnsupportedSortMethodException.class)
+    public ResponseEntity<ErrorInfo> unsupportedSortMethodException(UnsupportedSortMethodException ex,
+                                                                    HttpServletRequest request) {
+        logException(ex, request);
+        return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(IllegalStateException.class)
