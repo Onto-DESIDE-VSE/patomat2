@@ -82,6 +82,19 @@ public record Pattern(@JsonIgnore String fileName, String name, List<String> sou
     }
 
     /**
+     * Creates a SPARQL INSERT query to insert data into the target ontology, without setting the variable values.
+     *
+     * @return SPARQL INSERT query
+     * @see #createTargetInsertSparql(PatternMatch, List)
+     */
+    public String createInsertSparqlTemplate() {
+        return """
+                INSERT DATA {
+                %s
+                }""".formatted(targetTriples.stream().map(t -> "  " + t + " .").collect(Collectors.joining("\n")));
+    }
+
+    /**
      * Creates a SPARQL DELETE query to delete data corresponding to the specified pattern match from the target
      * ontology.
      *
