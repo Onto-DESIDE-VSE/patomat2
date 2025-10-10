@@ -1,6 +1,7 @@
 package cz.vse.swoe.ontodeside.patomat2.service;
 
 import cz.vse.swoe.ontodeside.patomat2.exception.IncompleteTransformationInputException;
+import cz.vse.swoe.ontodeside.patomat2.model.EntityLabel;
 import cz.vse.swoe.ontodeside.patomat2.model.NewEntity;
 import cz.vse.swoe.ontodeside.patomat2.model.OntologyDiff;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
@@ -64,7 +65,11 @@ public class TransformationService {
             transformedOntologyHolder.setTransformedOntology(newOntology);
             final OntologyDiff diff = ontologyHolder.difference(storingService.getOntologyFile());
             return new TransformationSummary(diff.addedStatements(), diff.removedStatements(),
-                    appliedInstances.stream().map(pi -> pi.newEntities().size()).reduce(0, Integer::sum));
+                    appliedInstances.stream().flatMap(pi -> pi.newEntities().stream()
+                                                              .map(ne -> ne.withLabels(ne.labels().stream()
+                                                                                         .filter(EntityLabel::apply)
+                                                                                         .toList())))
+                                    .toList());
         } catch (RuntimeException e) {
             matchService.clear();
             throw e;

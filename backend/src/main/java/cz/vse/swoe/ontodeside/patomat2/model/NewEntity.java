@@ -16,4 +16,8 @@ public record NewEntity(String variableName, String identifier, List<EntityLabel
         sb.append('}');
         return sb.toString();
     }
+
+    public NewEntity withLabels(List<EntityLabel> labels) {
+        return new NewEntity(variableName, identifier, labels);
+    }
 }
