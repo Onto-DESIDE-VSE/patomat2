@@ -5,6 +5,16 @@ spring:
         multipart:
             max-request-size: 12MB
             max-file-size: 10MB
+    ai:
+        model:
+            chat: "ollama"
+        ollama:
+            base-url:
+            chat:
+                options:
+                    model: llama-3.3-70b-instruct:q4
+                    keep-alive: 1m
+                    num-ctx: 4096
 
 patomat2:
     storage: data
