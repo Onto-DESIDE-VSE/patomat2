@@ -12,6 +12,7 @@ import BindingValue from "@/components/match/BindingValue.vue";
 import { mdiInformation, mdiMenuDown, mdiCloseCircle, mdiCloudDownloadOutline, mdiCloudCheckOutline } from "@mdi/js";
 import Constants from "@/constants/Constants";
 import type { SortMethod } from "@/types/SortMethod";
+import { entityToBinding } from "@/util/Utils";
 
 interface MatchesTablePreferences {
   showTransformationSparql: boolean;
@@ -229,12 +230,7 @@ const headers = computed(() => [
     key: "newEntities",
     value: (item: PatternInstance) => ({
       id: item.id,
-      newEntities: item.newEntities.map((newEntity) => ({
-        name: newEntity.variableName,
-        value: newEntity.identifier,
-        datatype: Constants.RDFS_RESOURCE,
-        labels: newEntity.labels
-      }))
+      newEntities: item.newEntities
     }),
     filterable: false,
     visible: true,
@@ -283,8 +279,8 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
           ? 'Select at leat one item'
           : 'Show transformation summary and download transformation file'
       "
-      >Apply transformation</v-btn
-    >
+      >Apply transformation
+    </v-btn>
   </div>
 
   <v-row class="align-center mt-4" dense>
@@ -491,9 +487,9 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
     </template>
     <template v-slot:[`item.newEntities`]="{ value }">
       <v-list dense class="mt-1 mb-1">
-        <v-list-item v-for="entity in value.newEntities" :key="entity.name" class="px-0">
+        <v-list-item v-for="entity in value.newEntities" :key="entity.variableName" class="px-0">
           <v-list-item-title class="text-body-2">
-            <BindingValue :binding="entity"></BindingValue>
+            <BindingValue :binding="entityToBinding(entity)"></BindingValue>
           </v-list-item-title>
 
           <div v-if="entity.labels?.length > 0" class="ml-4">
@@ -541,8 +537,8 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
             ? 'Select at leat one item'
             : 'Show transformation summary and download transformation file'
         "
-        >Apply transformation</v-btn
-      >
+        >Apply transformation
+      </v-btn>
     </v-col>
   </v-row>
 </template>
@@ -557,6 +553,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
   padding: 0;
   max-width: 35vw;
 }
+
 .btn-selected-items-count.v-btn--disabled {
   opacity: 1 !important;
 }

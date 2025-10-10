@@ -1,5 +1,5 @@
 import Constants from "@/constants/Constants";
-import type { ResultBinding, ResultBindingParts, UriParts } from "@/types/PatternInstance";
+import type { NewEntity, ResultBinding, ResultBindingParts, UriParts } from "@/types/PatternInstance";
 
 export async function downloadAttachment(resp: Response) {
   const blob = await resp.blob();
@@ -61,4 +61,12 @@ export function splitUriParts(uri: string): UriParts {
   } else {
     return { base: "", localName: uri };
   }
+}
+
+export function entityToBinding(entity: NewEntity): ResultBinding {
+  return {
+    value: entity.identifier,
+    datatype: Constants.RDFS_RESOURCE,
+    name: entity.variableName
+  };
 }
