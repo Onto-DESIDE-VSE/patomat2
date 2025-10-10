@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpSessionListener;
 import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 
 @Configuration
 public class AppConfig {
@@ -21,5 +23,10 @@ public class AppConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI().info(new Info().title("PatOMat2 REST API").description("PatOMat2 REST API definition."));
+    }
+
+    @Bean
+    public RestClient.Builder restClientBuilder() {
+        return RestClient.builder().requestFactory(new JdkClientHttpRequestFactory());
     }
 }
