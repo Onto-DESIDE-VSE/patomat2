@@ -11,7 +11,13 @@ public enum Sort {
      * Random shuffle of pattern matches.
      */
     @Schema(description = "Random shuffle of pattern matches")
-    RANDOM("random", "Random");
+    RANDOM("random", "Random"),
+
+    /**
+     * Sort using an LLM call with a Likert scale.
+     */
+    @Schema(description = "LLM with Likert scale")
+    LLM_LIKERT("llm_likert", "LLM with Likert scale");
 
     private final String value;
     private final String name;

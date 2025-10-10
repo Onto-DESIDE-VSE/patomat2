@@ -72,7 +72,7 @@ public class MatchService {
                            .map(pm -> {
                                final Pattern p = pm.getPattern();
                                final List<NewEntity> newEntities = initNewEntities(pm);
-                               final PatternInstance instance = new PatternInstance(pm.hashCode(), p.name(), pm,
+                               final PatternInstance instance = new PatternInstance(pm.hashCode(), p, pm,
                                        p.createTargetInsertSparql(pm, newEntities), p.createTargetDeleteSparql(pm),
                                        newEntities);
                                matches.put(pm.hashCode(), instance);
