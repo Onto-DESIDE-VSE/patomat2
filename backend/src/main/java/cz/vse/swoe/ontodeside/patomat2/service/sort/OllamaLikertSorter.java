@@ -100,7 +100,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
                                                                  throw new LlmSortException("Unable to resolve match order from LLM response.");
                                                              }
                                                          })
-                                                         .sorted(Comparator.comparing(PatternInstanceLine::likertScore))
+                                                         .sorted(Comparator.comparing(PatternInstanceLine::likertScore).reversed())
                                                          .toList();
         if (lines.size() != patternInstances.size()) {
             throw new LlmSortException("LLM response does not contain equal number of items as provided pattern instances.");
