@@ -54,13 +54,14 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
                                                                             .createInsertSparqlTemplate())
                                        .replace("$VALUES$", constructValues(patternInstances));
         final Prompt prompt = Prompt.builder().content(promptTemplate).build();
+        LOG.debug("Sorting pattern matches using Ollama.");
         LOG.trace("Synchronously calling Ollama with prompt: '{}'.", prompt.getContents());
         final long start = System.currentTimeMillis();
         final ChatResponse resp = chatModel.call(prompt);
         final String result = resp.getResult().getOutput().getText();
         final long end = System.currentTimeMillis();
         LOG.trace("Received Ollama response: {}.", result);
-        LOG.trace("Ollama invocation took {} s.", (end - start) / 1000);
+        LOG.debug("Ollama invocation took {} s.", (end - start) / 1000);
         assert result != null;
         return actuallySort(patternInstances, result);
     }
