@@ -57,6 +57,9 @@ The application can be deployed using Docker Compose. The following parameters c
 | `PATOMAT2_EXAMPLES_NAME`     | -                              | Name of an example transformation input. Multiple examples may be specified.                                                                                                                                                                                     |
 | `PATOMAT2_EXAMPLES_ONTOLOGY` | -                              | URL of an example transformation ontology. Multiple examples may be specified.                                                                                                                                                                                   |
 | `PATOMAT2_EXAMPLES_PATTERNS` | []                             | List of URLs of example transformation patterns. Multiple examples may be specified.                                                                                                                                                                             |
+| `PATOMAT2_LLM_SORT_MAXINSTANCES`  | 10                        | Configure maximum number of pattern instances supported by LLM sorting .                                        |
+| `SPRING_AI_OLLAMA_BASEURL`   | -                              | URL of the Ollama LLM service                                                                                   |
+| `SPRING_AI_OLLAMA_CHAT_OPTIONS_MODEL` |                       | Name of the LLM model in Ollama to use for LLM calls, e.g. gpt-oss:20b.                                         |
 
 The easiest way to configure them is by creating a `.env` file and setting them there. This file will be automatically
 picked by Docker compose.
