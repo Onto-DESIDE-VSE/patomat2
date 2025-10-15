@@ -1,5 +1,6 @@
 package cz.vse.swoe.ontodeside.patomat2.service.sort;
 
+import cz.vse.swoe.ontodeside.patomat2.exception.LlmSortException;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,13 +74,24 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         return sb.toString();
     }
 
-    private List<PatternInstance> actuallySort(List<PatternInstance> patternInstances, String csvOrder) {
+    private List<PatternInstance> actuallySort(List<PatternInstance> patternInstances, String llmOutput) {
         final List<PatternInstance> result = new ArrayList<>(patternInstances.size());
-        final List<PatternInstanceLine> lines = csvOrder.lines().map(line -> {
-            final String[] items = line.split(",");
-            return new PatternInstanceLine(Integer.parseInt(items[0]), Integer.parseInt(items[1]));
-        }).sorted(Comparator.comparing(PatternInstanceLine::likertScore)).toList();
-        assert patternInstances.size() == lines.size();
+        final List<PatternInstanceLine> lines = llmOutput.lines().map(String::trim).filter(this::isSortResult)
+                                                         .map(line -> {
+                                                             final String[] items = line.split(",");
+                                                             assert items.length == 3;
+                                                             try {
+                                                                 return new PatternInstanceLine(Integer.parseInt(items[0].trim()), Integer.parseInt(items[1].trim()));
+                                                             } catch (NumberFormatException e) {
+                                                                 LOG.error("Unable to parse pattern match position or Likert score from LLM response.", e);
+                                                                 throw new LlmSortException("Unable to resolve match order from LLM response.");
+                                                             }
+                                                         })
+                                                         .sorted(Comparator.comparing(PatternInstanceLine::likertScore))
+                                                         .toList();
+        if (lines.size() != patternInstances.size()) {
+            throw new LlmSortException("LLM response does not contain equal number of items as provided pattern instances.");
+        }
         for (PatternInstanceLine line : lines) {
             if (line.number() > patternInstances.size()) {
                 LOG.error("LLM returned line number {} (1-based) which is greater than the number of pattern instances.", line.number());
@@ -88,6 +100,10 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
             result.add(patternInstances.get(line.number() - 1));
         }
         return result;
+    }
+
+    private boolean isSortResult(String line) {
+        return line.contains(",") && line.split(",").length == 3;
     }
 
     @Override

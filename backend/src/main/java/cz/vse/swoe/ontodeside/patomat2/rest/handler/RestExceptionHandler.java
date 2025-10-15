@@ -3,6 +3,7 @@ package cz.vse.swoe.ontodeside.patomat2.rest.handler;
 import cz.vse.swoe.ontodeside.patomat2.exception.AmbiguousOntologyException;
 import cz.vse.swoe.ontodeside.patomat2.exception.IncompleteTransformationInputException;
 import cz.vse.swoe.ontodeside.patomat2.exception.InvalidFileException;
+import cz.vse.swoe.ontodeside.patomat2.exception.LlmSortException;
 import cz.vse.swoe.ontodeside.patomat2.exception.NotFoundException;
 import cz.vse.swoe.ontodeside.patomat2.exception.OntologyReadException;
 import cz.vse.swoe.ontodeside.patomat2.exception.PatOMat2Exception;
@@ -83,5 +84,11 @@ public class RestExceptionHandler {
     public ResponseEntity<ErrorInfo> resourceFetchException(ResourceFetchException ex, HttpServletRequest request) {
         logException(ex, request);
         return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(LlmSortException.class)
+    public ResponseEntity<ErrorInfo> llmSortException(LlmSortException ex, HttpServletRequest request) {
+        logException(ex, request);
+        return new ResponseEntity<>(errorInfo(request, ex), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
