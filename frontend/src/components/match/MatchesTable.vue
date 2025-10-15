@@ -294,7 +294,8 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         placeholder="All patterns"
         density="comfortable"
         :disabled="patternNames.length <= 1"
-        hide-details
+        hint=""
+        persistent-hint
       ></v-select>
     </v-col>
     <v-col cols="12" lg="2">
@@ -303,7 +304,8 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         :items="statusNames"
         v-model="searchStatus"
         density="comfortable"
-        hide-details
+        hint=""
+        persistent-hint
       ></v-select>
     </v-col>
     <v-col cols="12" lg="4">
@@ -314,7 +316,8 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         variant="filled"
         density="comfortable"
         rounded="md"
-        hide-details
+        hint=""
+        persistent-hint
       ></v-text-field>
     </v-col>
     <v-col cols="12" lg="2">
@@ -328,7 +331,8 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         v-if="sortMethods.length > 1"
         @update:model-value="onSortChange"
         density="comfortable"
-        hide-details
+        hint="Note that LLM-based sorting may take minutes."
+        persistent-hint
       >
         <template #item="{ props: itemProps, item }">
           <v-list-item v-bind="itemProps">

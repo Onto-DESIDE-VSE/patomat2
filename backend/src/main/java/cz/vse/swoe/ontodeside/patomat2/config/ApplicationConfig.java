@@ -24,6 +24,8 @@ public class ApplicationConfig {
 
     private Security security = new Security();
 
+    private LLM llm = new LLM();
+
     private List<Example> examples = List.of();
 
     public String getStorage() {
@@ -64,6 +66,14 @@ public class ApplicationConfig {
 
     public void setExamples(List<Example> examples) {
         this.examples = examples;
+    }
+
+    public LLM getLlm() {
+        return llm;
+    }
+
+    public void setLlm(LLM llm) {
+        this.llm = llm;
     }
 
     /**
@@ -138,6 +148,38 @@ public class ApplicationConfig {
 
         public void setPatterns(List<String> patterns) {
             this.patterns = patterns;
+        }
+    }
+
+    /**
+     * LLM configuration.
+     */
+    public static class LLM {
+
+        private Sort sort = new Sort();
+
+        public Sort getSort() {
+            return sort;
+        }
+
+        public void setSort(Sort sort) {
+            this.sort = sort;
+        }
+
+        public static class Sort {
+
+            /**
+             * Maximum number of pattern instances to be sorted by the LLM.
+             */
+            private int maxInstances = 10;
+
+            public int getMaxInstances() {
+                return maxInstances;
+            }
+
+            public void setMaxInstances(int maxInstances) {
+                this.maxInstances = maxInstances;
+            }
         }
     }
 }

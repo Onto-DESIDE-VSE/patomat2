@@ -51,7 +51,7 @@ const Constants = {
   APP_NAME: "PatOMat2",
   SERVER_URL: getEnv("SERVER_URL", ""),
   CONTEXT_PATH: getEnv("CONTEXT_PATH", ""),
-  MESSAGE_TIMEOUT: 3000,
+  MESSAGE_TIMEOUT: 5000,
   MEDIA_TYPE_JSON: "application/json",
   SKOS_PREF_LABEL,
   SKOS_ALT_LABEL,

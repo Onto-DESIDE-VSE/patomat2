@@ -1,6 +1,8 @@
 package cz.vse.swoe.ontodeside.patomat2.service.sort;
 
+import cz.vse.swoe.ontodeside.patomat2.config.ApplicationConfig;
 import cz.vse.swoe.ontodeside.patomat2.exception.LlmSortException;
+import cz.vse.swoe.ontodeside.patomat2.exception.MaxSortableInstancesThresholdExceededException;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -29,12 +32,21 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
 
     private static final String promptTemplateFile = "llm_sort_likert.txt";
 
+    private final int maxSortableInstances;
+
     private final OllamaChatModel chatModel;
 
-    public OllamaLikertSorter(OllamaChatModel chatModel) {this.chatModel = chatModel;}
+    public OllamaLikertSorter(OllamaChatModel chatModel, ApplicationConfig config) {
+        this.chatModel = chatModel;
+        this.maxSortableInstances = config.getLlm().getSort().getMaxInstances();
+    }
 
     @Override
     public List<PatternInstance> sort(List<PatternInstance> patternInstances) {
+        Objects.requireNonNull(patternInstances);
+        if (patternInstances.size() > maxSortableInstances) {
+            throw new MaxSortableInstancesThresholdExceededException("Cannot sort, maximum sortable number of pattern instances (" + maxSortableInstances + ") exceeded.");
+        }
         String promptTemplate = loadPromptTemplate();
         assert !promptTemplate.isBlank();
 
