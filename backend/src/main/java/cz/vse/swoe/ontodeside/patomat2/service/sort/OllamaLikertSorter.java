@@ -1,15 +1,18 @@
 package cz.vse.swoe.ontodeside.patomat2.service.sort;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.vse.swoe.ontodeside.patomat2.config.ApplicationConfig;
 import cz.vse.swoe.ontodeside.patomat2.exception.LlmSortException;
 import cz.vse.swoe.ontodeside.patomat2.exception.MaxSortableInstancesThresholdExceededException;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.ollama.OllamaChatModel;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +20,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -30,40 +34,68 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
 
     private static final Logger LOG = LoggerFactory.getLogger(OllamaLikertSorter.class);
 
-    private static final String promptTemplateFile = "llm_sort_likert.txt";
+    private static final String promptTemplateFile = "llm_sort_system_prompt.txt";
 
-    private final int maxSortableInstances;
+    /**
+     * JSON schema for the output of the LLM.
+     */
+    private static final String OUTPUT_FORMAT = """
+            {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "input_number": { "type": "integer" },
+                      "likert_score": { "type": "integer", "minimum": 1, "maximum": 5 },
+                      "suggested_label": { "type": "string" }
+                    },
+                    "required": ["input_number", "likert_score", "suggested_label"]
+                  }
+                }
+            """;
 
-    private final OllamaChatModel chatModel;
+    private final ApplicationConfig.LLM.Sort sortConfig;
 
-    public OllamaLikertSorter(OllamaChatModel chatModel, ApplicationConfig config) {
-        this.chatModel = chatModel;
-        this.maxSortableInstances = config.getLlm().getSort().getMaxInstances();
+    private final RestTemplate restTemplate;
+
+    public OllamaLikertSorter(ApplicationConfig config, RestTemplate restTemplate) {
+        this.sortConfig = config.getLlm().getSort();
+        this.restTemplate = restTemplate;
     }
 
     @Override
     public List<PatternInstance> sort(List<PatternInstance> patternInstances) {
         Objects.requireNonNull(patternInstances);
-        if (patternInstances.size() > maxSortableInstances) {
-            throw new MaxSortableInstancesThresholdExceededException("Cannot sort, maximum sortable number of pattern instances (" + maxSortableInstances + ") exceeded.");
+        if (patternInstances.size() > sortConfig.getMaxInstances()) {
+            throw new MaxSortableInstancesThresholdExceededException("Cannot sort, maximum sortable number of pattern instances (" + sortConfig.getMaxInstances() + ") exceeded.");
+        }
+        if (patternInstances.size() > sortConfig.getBatchSize()) {
+            LOG.trace("Sorting sublist of patterns.");
+            patternInstances = new ArrayList<>(patternInstances.subList(0, sortConfig.getBatchSize()));
         }
         String promptTemplate = loadPromptTemplate();
         assert !promptTemplate.isBlank();
 
         promptTemplate = promptTemplate.replace("$SPARQL$", patternInstances.getFirst().pattern()
-                                                                            .createInsertSparqlTemplate())
-                                       .replace("$VALUES$", constructValues(patternInstances));
-        final Prompt prompt = Prompt.builder().content(promptTemplate).build();
+                                                                            .createInsertSparqlTemplate());
+        final String values = "These are the values for your task:\n\n" + constructValues(patternInstances);
+        final OllamaInput input = new OllamaInput(sortConfig.getModel(), promptTemplate, values, OUTPUT_FORMAT, Map.of("num_ctx", 8092), false);
         LOG.debug("Sorting pattern matches using Ollama.");
-        LOG.trace("Synchronously calling Ollama with prompt: '{}'.", prompt.getContents());
         final long start = System.currentTimeMillis();
-        final ChatResponse resp = chatModel.call(prompt);
-        final String result = resp.getResult().getOutput().getText();
-        final long end = System.currentTimeMillis();
-        LOG.trace("Received Ollama response: {}.", result);
-        LOG.debug("Ollama invocation took {} s.", (end - start) / 1000);
-        assert result != null;
-        return actuallySort(patternInstances, result);
+        try {
+            final ResponseEntity<OllamaOutput> response = restTemplate.postForEntity(sortConfig.getApiUrl() + "/api/generate", input, OllamaOutput.class);
+            assert response.getBody() != null;
+            final List<ResultRow> result = new ObjectMapper().readValue(response.getBody()
+                                                                                .response(), new TypeReference<>() {});
+            final long end = System.currentTimeMillis();
+            LOG.trace("Received Ollama response: {}.", result);
+            LOG.debug("Ollama invocation took {} s.", (end - start) / 1000);
+            assert result != null;
+            return actuallySort(patternInstances, result);
+        } catch (Exception e) {
+            LOG.error("Unable to retrieve LLM response or process it.", e);
+            throw new LlmSortException("Unable to retrieve LLM response or process it.");
+        }
     }
 
     private static String loadPromptTemplate() {
@@ -84,39 +116,23 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
                                .append("\n"));
             sb.append("\n");
         }
-        return sb.toString();
+        return sb.toString().trim();
     }
 
-    private List<PatternInstance> actuallySort(List<PatternInstance> patternInstances, String llmOutput) {
+    private List<PatternInstance> actuallySort(List<PatternInstance> patternInstances, List<ResultRow> sortRows) {
         final List<PatternInstance> result = new ArrayList<>(patternInstances.size());
-        final List<PatternInstanceLine> lines = llmOutput.lines().map(String::trim).filter(this::isSortResult)
-                                                         .map(line -> {
-                                                             final String[] items = line.split(",");
-                                                             assert items.length == 3;
-                                                             try {
-                                                                 return new PatternInstanceLine(Integer.parseInt(items[0].trim()), Integer.parseInt(items[1].trim()));
-                                                             } catch (NumberFormatException e) {
-                                                                 LOG.error("Unable to parse pattern match position or Likert score from LLM response.", e);
-                                                                 throw new LlmSortException("Unable to resolve match order from LLM response.");
-                                                             }
-                                                         })
-                                                         .sorted(Comparator.comparing(PatternInstanceLine::likertScore).reversed())
-                                                         .toList();
-        if (lines.size() != patternInstances.size()) {
+        if (sortRows.size() != patternInstances.size()) {
             throw new LlmSortException("LLM response does not contain equal number of items as provided pattern instances.");
         }
-        for (PatternInstanceLine line : lines) {
-            if (line.number() > patternInstances.size()) {
-                LOG.error("LLM returned line number {} (1-based) which is greater than the number of pattern instances.", line.number());
+        sortRows.sort(Comparator.comparing(ResultRow::likertScore).reversed());
+        for (ResultRow row : sortRows) {
+            if (row.number() > patternInstances.size()) {
+                LOG.error("LLM returned line number {} (1-based) which is greater than the number of pattern instances.", row.number());
                 continue;
             }
-            result.add(patternInstances.get(line.number() - 1));
+            result.add(patternInstances.get(row.number() - 1));
         }
         return result;
-    }
-
-    private boolean isSortResult(String line) {
-        return line.contains(",") && line.split(",").length == 3;
     }
 
     @Override
@@ -124,5 +140,12 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         return Sort.LLM_LIKERT;
     }
 
-    private record PatternInstanceLine(int number, int likertScore) {}
+    private record OllamaInput(String model, String system, String prompt, @JsonRawValue String format,
+                               Map<String, Object> options,
+                               boolean stream) {}
+
+    private record OllamaOutput(String response, String model) {}
+
+    private record ResultRow(@JsonProperty("input_number") int number, @JsonProperty("likert_score") int likertScore,
+                             @JsonProperty("suggested_label") String label) {}
 }
