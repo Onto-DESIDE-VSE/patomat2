@@ -22,7 +22,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Sorts patterns instances by their likelihood of "making sense" using a Likert scale.
@@ -33,6 +35,8 @@ import java.util.stream.Collectors;
 public class OllamaLikertSorter implements PatternInstanceSorter {
 
     private static final Logger LOG = LoggerFactory.getLogger(OllamaLikertSorter.class);
+
+    private static final int MAX_CONCURRENT_BATCH_COUNT = 3;
 
     private static final String promptTemplateFile = "llm_sort_system_prompt.txt";
 
@@ -70,17 +74,74 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
             throw new MaxSortableInstancesThresholdExceededException("Cannot sort, maximum sortable number of pattern instances (" + sortConfig.getMaxInstances() + ") exceeded.");
         }
         if (patternInstances.size() > sortConfig.getBatchSize()) {
-            LOG.trace("Sorting sublist of patterns.");
-            patternInstances = new ArrayList<>(patternInstances.subList(0, sortConfig.getBatchSize()));
+            return sortInBatches(patternInstances);
+        } else {
+            return sortSimple(patternInstances);
         }
+    }
+
+    private List<PatternInstance> sortInBatches(List<PatternInstance> instances) {
+        LOG.debug("Running parallel sort with multiple batches.");
+        final long start = System.currentTimeMillis();
+        final String promptTemplate = loadPromptTemplate();
+        assert !promptTemplate.isBlank();
+
+        final String systemPrompt = promptTemplate.replace("$SPARQL$", instances.getFirst().pattern()
+                                                                                .createInsertSparqlTemplate());
+        final int batchSize = sortConfig.getBatchSize();
+        final int roundSize = batchSize * MAX_CONCURRENT_BATCH_COUNT;
+        final int roundCount = (int) Math.ceil((double) instances.size() / roundSize);
+        final ResultRow[] sortRows = new ResultRow[instances.size()];
+        for (int i = 0; i < roundCount; i++) {
+            LOG.trace("Running batch sort, round {}", (i + 1));
+            final CountDownLatch endLatch = new CountDownLatch(MAX_CONCURRENT_BATCH_COUNT);
+            final int round = i * roundSize;
+            for (int j = 0; j < MAX_CONCURRENT_BATCH_COUNT; j++) {
+                var position = round + j * batchSize;
+                if (position >= instances.size()) {
+                    endLatch.countDown();
+                    continue;
+                }
+                final List<PatternInstance> batch = instances.subList(position, Math.min((round + ((j + 1) * batchSize)), instances.size()));
+                new Thread(() -> {
+                    final List<ResultRow> llmResult = callForBatch(systemPrompt, batch);
+                    for (int r = 0; r < llmResult.size(); r++) {
+                        final ResultRow row = llmResult.get(r);
+                        sortRows[position + r] = row.withNumber(position + r + 1);
+                    }
+                    endLatch.countDown();
+                }).start();
+            }
+            try {
+                endLatch.await();
+            } catch (InterruptedException e) {
+                LOG.error("Batch sorting interrupted.", e);
+                Thread.currentThread().interrupt();
+                throw new LlmSortException("Batch sorting interrupted.");
+            }
+        }
+        final List<PatternInstance> result = actuallySort(instances, Stream.of(sortRows).filter(Objects::nonNull)
+                                                                           .collect(Collectors.toList()));
+        final long end = System.currentTimeMillis();
+        LOG.debug("Batch sorting took {} s.", (end - start) / 1000);
+        return result;
+    }
+
+    private List<PatternInstance> sortSimple(List<PatternInstance> instances) {
+        LOG.debug("Running simple sort with one batch.");
         String promptTemplate = loadPromptTemplate();
         assert !promptTemplate.isBlank();
 
-        promptTemplate = promptTemplate.replace("$SPARQL$", patternInstances.getFirst().pattern()
-                                                                            .createInsertSparqlTemplate());
-        final String values = "These are the values for your task:\n\n" + constructValues(patternInstances);
-        final OllamaInput input = new OllamaInput(sortConfig.getModel(), promptTemplate, values, OUTPUT_FORMAT, Map.of("num_ctx", 8092), false);
-        LOG.debug("Sorting pattern matches using Ollama.");
+        promptTemplate = promptTemplate.replace("$SPARQL$", instances.getFirst().pattern()
+                                                                     .createInsertSparqlTemplate());
+        final List<ResultRow> llmResult = callForBatch(promptTemplate, instances);
+        return actuallySort(instances, llmResult);
+    }
+
+    private List<ResultRow> callForBatch(String systemPrompt, List<PatternInstance> instances) {
+        final String values = "These are the values for your task:\n\n" + constructValues(instances);
+        final OllamaInput input = new OllamaInput(sortConfig.getModel(), systemPrompt, values, OUTPUT_FORMAT, Map.of("num_ctx", 8092), false);
+        LOG.debug("Calling Ollama for batch of {} pattern instances.", instances.size());
         final long start = System.currentTimeMillis();
         try {
             final ResponseEntity<OllamaOutput> response = restTemplate.postForEntity(sortConfig.getApiUrl() + "/api/generate", input, OllamaOutput.class);
@@ -90,8 +151,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
             final long end = System.currentTimeMillis();
             LOG.trace("Received Ollama response: {}.", result);
             LOG.debug("Ollama invocation took {} s.", (end - start) / 1000);
-            assert result != null;
-            return actuallySort(patternInstances, result);
+            return result;
         } catch (Exception e) {
             LOG.error("Unable to retrieve LLM response or process it.", e);
             throw new LlmSortException("Unable to retrieve LLM response or process it.");
@@ -122,7 +182,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
     private List<PatternInstance> actuallySort(List<PatternInstance> patternInstances, List<ResultRow> sortRows) {
         final List<PatternInstance> result = new ArrayList<>(patternInstances.size());
         if (sortRows.size() != patternInstances.size()) {
-            throw new LlmSortException("LLM response does not contain equal number of items as provided pattern instances.");
+            throw new LlmSortException("LLM response does not contain equal number of items as provided pattern instances. Expected " + patternInstances.size() + ", but got " + sortRows.size());
         }
         sortRows.sort(Comparator.comparing(ResultRow::likertScore).reversed());
         for (ResultRow row : sortRows) {
@@ -132,6 +192,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
             }
             result.add(patternInstances.get(row.number() - 1));
         }
+        LOG.trace("Sorting completed.");
         return result;
     }
 
@@ -147,5 +208,10 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
     private record OllamaOutput(String response, String model) {}
 
     private record ResultRow(@JsonProperty("input_number") int number, @JsonProperty("likert_score") int likertScore,
-                             @JsonProperty("suggested_label") String label) {}
+                             @JsonProperty("suggested_label") String label) {
+
+        ResultRow withNumber(int number) {
+            return new ResultRow(number, likertScore, label);
+        }
+    }
 }
