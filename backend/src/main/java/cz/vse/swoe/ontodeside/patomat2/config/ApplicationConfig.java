@@ -169,9 +169,23 @@ public class ApplicationConfig {
         public static class Sort {
 
             /**
-             * Maximum number of pattern instances to be sorted by the LLM.
+             * Maximum number of pattern instances to be sent to the LLM in one batch.
              */
-            private int maxInstances = 10;
+            private int batchSize = 30;
+
+            private int maxInstances = 300;
+
+            private String model;
+
+            private String apiUrl;
+
+            public int getBatchSize() {
+                return batchSize;
+            }
+
+            public void setBatchSize(int batchSize) {
+                this.batchSize = batchSize;
+            }
 
             public int getMaxInstances() {
                 return maxInstances;
@@ -179,6 +193,22 @@ public class ApplicationConfig {
 
             public void setMaxInstances(int maxInstances) {
                 this.maxInstances = maxInstances;
+            }
+
+            public String getModel() {
+                return model;
+            }
+
+            public void setModel(String model) {
+                this.model = model;
+            }
+
+            public String getApiUrl() {
+                return apiUrl;
+            }
+
+            public void setApiUrl(String apiUrl) {
+                this.apiUrl = apiUrl;
             }
         }
     }

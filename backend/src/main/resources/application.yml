@@ -5,16 +5,6 @@ spring:
         multipart:
             max-request-size: 12MB
             max-file-size: 10MB
-    ai:
-        model:
-            chat: "ollama"
-        ollama:
-            base-url:
-            chat:
-                options:
-                    model: llama-3.3-70b-instruct:q4
-                    keep-alive: 1m
-                    num-ctx: 4096
 
 patomat2:
     storage: data
@@ -22,6 +12,12 @@ patomat2:
     new-entity-iri-base: https://owl.vse.cz/patomat2/
     security:
         max-sessions: 20
+    llm:
+        sort:
+            batch-size: 30
+            model:
+            api-url:
+            max-instances: 300
 server:
     servlet:
         context-path: /patomat2

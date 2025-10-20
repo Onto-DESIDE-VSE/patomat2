@@ -1,6 +1,9 @@
 You have the following SPARQL insert operation:
+
 $SPARQL$
+
 And the example of the names of the properties and classes behind the variables are:
+
 ?A = Person
 ?B = City
 ?C = State
@@ -9,9 +12,5 @@ And the example of the names of the properties and classes behind the variables 
 ?q = was born in state.
 
 Your task is, when I give you another set of properties and classes to suggest a new label for property ?q, and to give a number on Likert's scale (1-5), whether it makes sense to create this shortcut, or not. Consider ontological structure, and if the new property would make sense, in the real world.
-
-These are properties and classes for your task:
-
-$VALUES$
 
 On output, return just the comma-separated line per input: the number of input, its Likert score, and the new property label. No further output is allowed. Likert score should reflect meaningfulness and allows ordering the examples in detail.
