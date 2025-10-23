@@ -143,7 +143,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
 
     private List<ResultRow> callForBatch(String systemPrompt, List<PatternInstance> instances) {
         final String values = "These are the values for your task:\n\n" + constructValues(instances);
-        final OllamaInput input = new OllamaInput(sortConfig.getModel(), systemPrompt, values, OUTPUT_FORMAT, Map.of("num_ctx", 8092), false);
+        final OllamaInput input = new OllamaInput(sortConfig.getModel(), systemPrompt, values, OUTPUT_FORMAT, Map.of("num_ctx", sortConfig.getNumCtx()), false);
         LOG.trace("Calling Ollama for batch of {} pattern instances.", instances.size());
         final long start = System.currentTimeMillis();
         try {
