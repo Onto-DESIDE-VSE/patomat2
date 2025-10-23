@@ -36,8 +36,6 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
 
     private static final Logger LOG = LoggerFactory.getLogger(OllamaLikertSorter.class);
 
-    private static final int MAX_CONCURRENT_BATCH_COUNT = 3;
-
     private static final String promptTemplateFile = "llm_sort_system_prompt.txt";
 
     /**
@@ -89,14 +87,14 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         final String systemPrompt = promptTemplate.replace("$SPARQL$", instances.getFirst().pattern()
                                                                                 .createInsertSparqlTemplate());
         final int batchSize = sortConfig.getBatchSize();
-        final int roundSize = batchSize * MAX_CONCURRENT_BATCH_COUNT;
+        final int roundSize = batchSize * sortConfig.getMaxConcurrentRequests();
         final int roundCount = (int) Math.ceil((double) instances.size() / roundSize);
         final ResultRow[] sortRows = new ResultRow[instances.size()];
         for (int i = 0; i < roundCount; i++) {
             LOG.trace("Running batch sort, round {}", (i + 1));
-            final CountDownLatch endLatch = new CountDownLatch(MAX_CONCURRENT_BATCH_COUNT);
+            final CountDownLatch endLatch = new CountDownLatch(sortConfig.getMaxConcurrentRequests());
             final int round = i * roundSize;
-            for (int j = 0; j < MAX_CONCURRENT_BATCH_COUNT; j++) {
+            for (int j = 0; j < sortConfig.getMaxConcurrentRequests(); j++) {
                 var position = round + j * batchSize;
                 if (position >= instances.size()) {
                     endLatch.countDown();
@@ -141,7 +139,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
     private List<ResultRow> callForBatch(String systemPrompt, List<PatternInstance> instances) {
         final String values = "These are the values for your task:\n\n" + constructValues(instances);
         final OllamaInput input = new OllamaInput(sortConfig.getModel(), systemPrompt, values, OUTPUT_FORMAT, Map.of("num_ctx", 8092), false);
-        LOG.debug("Calling Ollama for batch of {} pattern instances.", instances.size());
+        LOG.trace("Calling Ollama for batch of {} pattern instances.", instances.size());
         final long start = System.currentTimeMillis();
         try {
             final ResponseEntity<OllamaOutput> response = restTemplate.postForEntity(sortConfig.getApiUrl() + "/api/generate", input, OllamaOutput.class);
@@ -150,7 +148,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
                                                                                 .response(), new TypeReference<>() {});
             final long end = System.currentTimeMillis();
             LOG.trace("Received Ollama response: {}.", result);
-            LOG.debug("Ollama invocation took {} s.", (end - start) / 1000);
+            LOG.trace("Ollama invocation took {} s.", (end - start) / 1000);
             return result;
         } catch (Exception e) {
             LOG.error("Unable to retrieve LLM response or process it.", e);
@@ -181,16 +179,23 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
 
     private List<PatternInstance> actuallySort(List<PatternInstance> patternInstances, List<ResultRow> sortRows) {
         final List<PatternInstance> result = new ArrayList<>(patternInstances.size());
-        if (sortRows.size() != patternInstances.size()) {
+        if (sortRows.size() > patternInstances.size()) {
             throw new LlmSortException("LLM response does not contain equal number of items as provided pattern instances. Expected " + patternInstances.size() + ", but got " + sortRows.size());
+        }
+        if (sortRows.size() < patternInstances.size()) {
+            LOG.warn("LLM return fewer results than provided instances ({}). Remaining instances will be added to the end.", sortRows.size());
         }
         sortRows.sort(Comparator.comparing(ResultRow::likertScore).reversed());
         for (ResultRow row : sortRows) {
             if (row.number() > patternInstances.size()) {
-                LOG.error("LLM returned line number {} (1-based) which is greater than the number of pattern instances.", row.number());
+                LOG.error("LLM returned line number {} (1-based) which is greater than the number of pattern instances. Ignoring it.", row.number());
                 continue;
             }
             result.add(patternInstances.get(row.number() - 1));
+        }
+        // Add remaining instances in case LLM returned fewer results
+        for (int i = sortRows.size() + 1; i <= patternInstances.size(); i++) {
+            result.add(patternInstances.get(i - 1));
         }
         LOG.trace("Sorting completed.");
         return result;
