@@ -175,6 +175,8 @@ public class ApplicationConfig {
 
             private int maxInstances = 300;
 
+            private int maxConcurrentRequests = 3;
+
             private String model;
 
             private String apiUrl;
@@ -193,6 +195,14 @@ public class ApplicationConfig {
 
             public void setMaxInstances(int maxInstances) {
                 this.maxInstances = maxInstances;
+            }
+
+            public int getMaxConcurrentRequests() {
+                return maxConcurrentRequests;
+            }
+
+            public void setMaxConcurrentRequests(int maxConcurrentRequests) {
+                this.maxConcurrentRequests = maxConcurrentRequests;
             }
 
             public String getModel() {
