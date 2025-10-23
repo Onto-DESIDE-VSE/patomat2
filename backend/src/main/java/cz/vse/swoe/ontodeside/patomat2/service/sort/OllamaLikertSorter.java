@@ -101,14 +101,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
                     continue;
                 }
                 final List<PatternInstance> batch = instances.subList(position, Math.min((round + ((j + 1) * batchSize)), instances.size()));
-                new Thread(() -> {
-                    final List<ResultRow> llmResult = callForBatch(systemPrompt, batch);
-                    for (int r = 0; r < llmResult.size(); r++) {
-                        final ResultRow row = llmResult.get(r);
-                        sortRows[position + r] = row.withNumber(position + r + 1);
-                    }
-                    endLatch.countDown();
-                }).start();
+                runConcurrentSortOfBatch(systemPrompt, batch, sortRows, position, endLatch);
             }
             try {
                 endLatch.await();
@@ -123,6 +116,18 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         final long end = System.currentTimeMillis();
         LOG.debug("Batch sorting took {} s.", (end - start) / 1000);
         return result;
+    }
+
+    private void runConcurrentSortOfBatch(String systemPrompt, List<PatternInstance> batch, ResultRow[] sortRows,
+                                          int position, CountDownLatch endLatch) {
+        new Thread(() -> {
+            final List<ResultRow> llmResult = callForBatch(systemPrompt, batch);
+            for (int r = 0; r < llmResult.size(); r++) {
+                final ResultRow row = llmResult.get(r);
+                sortRows[position + r] = row.withNumber(position + r + 1);
+            }
+            endLatch.countDown();
+        }).start();
     }
 
     private List<PatternInstance> sortSimple(List<PatternInstance> instances) {
@@ -180,7 +185,8 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
     private List<PatternInstance> actuallySort(List<PatternInstance> patternInstances, List<ResultRow> sortRows) {
         final List<PatternInstance> result = new ArrayList<>(patternInstances.size());
         if (sortRows.size() > patternInstances.size()) {
-            throw new LlmSortException("LLM response does not contain equal number of items as provided pattern instances. Expected " + patternInstances.size() + ", but got " + sortRows.size());
+            throw new LlmSortException("LLM response does not contain equal number of items as provided pattern instances. " +
+                    "Expected " + patternInstances.size() + ", but got " + sortRows.size());
         }
         if (sortRows.size() < patternInstances.size()) {
             LOG.warn("LLM return fewer results than provided instances ({}). Remaining instances will be added to the end.", sortRows.size());
