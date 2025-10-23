@@ -177,6 +177,8 @@ public class ApplicationConfig {
 
             private int maxConcurrentRequests = 3;
 
+            private int numCtx = 8092;
+
             private String model;
 
             private String apiUrl;
@@ -203,6 +205,14 @@ public class ApplicationConfig {
 
             public void setMaxConcurrentRequests(int maxConcurrentRequests) {
                 this.maxConcurrentRequests = maxConcurrentRequests;
+            }
+
+            public int getNumCtx() {
+                return numCtx;
+            }
+
+            public void setNumCtx(int numCtx) {
+                this.numCtx = numCtx;
             }
 
             public String getModel() {
