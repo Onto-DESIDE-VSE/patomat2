@@ -13,7 +13,8 @@ import java.util.stream.Stream;
 
 public record Pattern(@JsonIgnore String fileName, String name, List<String> sourceTriples, List<String> filters,
                       List<String> targetTriples,
-                      List<NameTransformation> nameTransformations) {
+                      List<NameTransformation> nameTransformations,
+                      @JsonIgnore List<ExampleValues> examples) {
 
     @Override
     public List<String> sourceTriples() {
@@ -41,6 +42,13 @@ public record Pattern(@JsonIgnore String fileName, String name, List<String> sou
 
     public Set<String> targetVariables() {
         return getVariables(targetTriples);
+    }
+
+    @JsonIgnore
+    public Set<String> newEntityVariables() {
+        final Set<String> targetVars = targetVariables();
+        targetVars.removeAll(sourceVariables());
+        return targetVars;
     }
 
     /**
