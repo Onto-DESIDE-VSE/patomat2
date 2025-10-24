@@ -1,6 +1,8 @@
 package cz.vse.swoe.ontodeside.patomat2.service.pattern;
 
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonpath.Configuration;
@@ -28,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -105,18 +106,16 @@ public class PatternParser {
     private List<NameTransformation> readNameTransformations(DocumentContext doc) {
         try {
             final ObjectNode nameTransformations = doc.read("$.tp.naming_transformation.ntp", new TypeRef<>() {});
-            final Iterator<Map.Entry<String, JsonNode>> it = nameTransformations.fields();
             final List<NameTransformation> result = new ArrayList<>();
-            while (it.hasNext()) {
-                final Map.Entry<String, JsonNode> e = it.next();
-                assert e.getKey().startsWith("?");
-                if (e.getValue().isArray()) {
-                    final ArrayNode array = (ArrayNode) e.getValue();
+            for (Map.Entry<String, JsonNode> prop : nameTransformations.properties()) {
+                assert prop.getKey().startsWith("?");
+                if (prop.getValue().isArray()) {
+                    final ArrayNode array = (ArrayNode) prop.getValue();
                     for (int i = 0; i < array.size(); i++) {
-                        result.add(new NameTransformation(e.getKey().substring(1), array.get(i).asText()));
+                        result.add(new NameTransformation(prop.getKey().substring(1), array.get(i).asText()));
                     }
                 } else {
-                    result.add(new NameTransformation(e.getKey().substring(1), e.getValue().asText()));
+                    result.add(new NameTransformation(prop.getKey().substring(1), prop.getValue().asText()));
                 }
             }
             return result;
@@ -159,8 +158,11 @@ public class PatternParser {
     private static void configureJsonPath() {
         Configuration.setDefaults(new Configuration.Defaults() {
 
-            private final JsonProvider jsonProvider = new JacksonJsonProvider();
-            private final MappingProvider mappingProvider = new JacksonMappingProvider();
+            private final ObjectMapper objectMapper = new ObjectMapper().enable(JsonReadFeature.ALLOW_TRAILING_COMMA.mappedFeature());
+
+            private final JsonProvider jsonProvider = new JacksonJsonProvider(objectMapper);
+            private final MappingProvider mappingProvider = new JacksonMappingProvider(objectMapper);
+
 
             @Override
             public JsonProvider jsonProvider() {
