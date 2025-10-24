@@ -14,8 +14,11 @@ import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import cz.vse.swoe.ontodeside.patomat2.exception.PatternParserException;
+import cz.vse.swoe.ontodeside.patomat2.model.ExampleValues;
 import cz.vse.swoe.ontodeside.patomat2.model.NameTransformation;
 import cz.vse.swoe.ontodeside.patomat2.model.Pattern;
+import cz.vse.swoe.ontodeside.patomat2.model.ResultBinding;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
@@ -68,8 +71,9 @@ public class PatternParser {
             final List<String> sourceTriples = readTriples(name, doc, TripleSource.SOURCE);
             final List<String> targetTriples = readTriples(name, doc, TripleSource.TARGET);
             final List<String> filters = readFilters(name, doc);
+            final List<ExampleValues> examples = readExamples(doc);
             LOG.info("Parsed pattern {} from file {}.", name, patternFile.getName());
-            return new Pattern(patternFile.getName(), name, sourceTriples, filters, targetTriples, readNameTransformations(doc));
+            return new Pattern(patternFile.getName(), name, sourceTriples, filters, targetTriples, readNameTransformations(doc), examples);
         } catch (IOException e) {
             throw new PatternParserException("Unable to read pattern from " + patternFile, e);
         }
@@ -118,6 +122,36 @@ public class PatternParser {
             return result;
         } catch (PathNotFoundException e) {
             LOG.warn("No name transformations found in pattern.");
+            return List.of();
+        }
+    }
+
+    private List<ExampleValues> readExamples(DocumentContext doc) {
+        try {
+            final ArrayNode examples = doc.read("$.tp.llm_sort.example_values", new TypeRef<>() {});
+            final List<ExampleValues> result = new ArrayList<>(examples.size());
+            examples.forEach(example -> {
+                assert example.isObject();
+                final ObjectNode exampleNode = (ObjectNode) example;
+                final List<ResultBinding> values = new ArrayList<>(exampleNode.size());
+                exampleNode.propertyStream().map(e -> {
+                    final String datatype;
+                    if (e.getValue().isBoolean()) {
+                        datatype = XSD.BOOLEAN.stringValue();
+                    } else if (e.getValue().isInt()) {
+                        datatype = XSD.INTEGER.stringValue();
+                    } else if (e.getValue().isNumber()) {
+                        datatype = XSD.DOUBLE.stringValue();
+                    } else {
+                        datatype = XSD.STRING.stringValue();
+                    }
+                    return new ResultBinding(e.getKey(), e.getValue().asText(), datatype);
+                }).forEach(values::add);
+                result.add(new ExampleValues(values));
+            });
+            return result;
+        } catch (PathNotFoundException e) {
+            LOG.trace("No examples found in pattern.");
             return List.of();
         }
     }

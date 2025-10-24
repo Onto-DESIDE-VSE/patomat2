@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.vse.swoe.ontodeside.patomat2.config.ApplicationConfig;
 import cz.vse.swoe.ontodeside.patomat2.exception.LlmSortException;
 import cz.vse.swoe.ontodeside.patomat2.exception.MaxSortableInstancesThresholdExceededException;
+import cz.vse.swoe.ontodeside.patomat2.model.ExampleValues;
+import cz.vse.swoe.ontodeside.patomat2.model.Pattern;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +70,9 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
     @Override
     public List<PatternInstance> sort(List<PatternInstance> patternInstances) {
         Objects.requireNonNull(patternInstances);
+        if (patternInstances.isEmpty()) {
+            return patternInstances;
+        }
         if (patternInstances.size() > sortConfig.getMaxInstances()) {
             throw new MaxSortableInstancesThresholdExceededException("Cannot sort, maximum sortable number of pattern instances (" + sortConfig.getMaxInstances() + ") exceeded.");
         }
@@ -81,11 +86,10 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
     private List<PatternInstance> sortInBatches(List<PatternInstance> instances) {
         LOG.debug("Running parallel sort with multiple batches.");
         final long start = System.currentTimeMillis();
-        final String promptTemplate = loadPromptTemplate();
-        assert !promptTemplate.isBlank();
 
-        final String systemPrompt = promptTemplate.replace("$SPARQL$", instances.getFirst().pattern()
-                                                                                .createInsertSparqlTemplate());
+        final Pattern pattern = instances.getFirst().pattern();
+        final String systemPrompt = loadAndPopulateSystemPromptTemplate(pattern);
+        assert !systemPrompt.isBlank();
         final int batchSize = sortConfig.getBatchSize();
         final int roundSize = batchSize * sortConfig.getMaxConcurrentRequests();
         final int roundCount = (int) Math.ceil((double) instances.size() / roundSize);
@@ -118,6 +122,14 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         return result;
     }
 
+    private static String stringifyExamples(List<ExampleValues> exampleValues) {
+        return exampleValues.stream()
+                            .map(example -> example.bindings().stream()
+                                                   .map(binding -> "?" + binding.name() + "=" + binding.value())
+                                                   .collect(Collectors.joining("\n")))
+                            .collect(Collectors.joining("\n\n and \n\n"));
+    }
+
     private void runConcurrentSortOfBatch(String systemPrompt, List<PatternInstance> batch, ResultRow[] sortRows,
                                           int position, CountDownLatch endLatch) {
         new Thread(() -> {
@@ -132,12 +144,10 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
 
     private List<PatternInstance> sortSimple(List<PatternInstance> instances) {
         LOG.debug("Running simple sort with one batch.");
-        String promptTemplate = loadPromptTemplate();
-        assert !promptTemplate.isBlank();
+        final String systemPrompt = loadAndPopulateSystemPromptTemplate(instances.getFirst().pattern());
+        assert !systemPrompt.isBlank();
 
-        promptTemplate = promptTemplate.replace("$SPARQL$", instances.getFirst().pattern()
-                                                                     .createInsertSparqlTemplate());
-        final List<ResultRow> llmResult = callForBatch(promptTemplate, instances);
+        final List<ResultRow> llmResult = callForBatch(systemPrompt, instances);
         return actuallySort(instances, llmResult);
     }
 
@@ -161,10 +171,13 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         }
     }
 
-    private static String loadPromptTemplate() {
+    private static String loadAndPopulateSystemPromptTemplate(Pattern pattern) {
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
                 OllamaLikertSorter.class.getClassLoader().getResourceAsStream(promptTemplateFile)))) {
-            return reader.lines().collect(Collectors.joining("\n"));
+            final String template = reader.lines().collect(Collectors.joining("\n"));
+            return template.replace("$SPARQL$", pattern.createInsertSparqlTemplate())
+                           .replace("$EXAMPLE$", stringifyExamples(pattern.examples()))
+                           .replace("$NEW_ENTITY$", String.join(", ", pattern.newEntityVariables()));
         } catch (IOException e) {
             LOG.error("Unable to load prompt template.", e);
             return "";

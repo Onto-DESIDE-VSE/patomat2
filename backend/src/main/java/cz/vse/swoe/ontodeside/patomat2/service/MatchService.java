@@ -18,7 +18,6 @@ import org.springframework.web.context.annotation.SessionScope;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -90,8 +89,7 @@ public class MatchService {
     }
 
     private List<NewEntity> initNewEntities(PatternMatch match) {
-        final Set<String> newEntityVars = new HashSet<>(match.getPattern().targetVariables());
-        newEntityVars.removeAll(match.getPattern().sourceVariables());
+        final Set<String> newEntityVars = match.getPattern().newEntityVariables();
         return new ArrayList<>(newEntityVars.stream()
                                             .map(v -> newEntityGenerator.generateNewEntity(v, match.getPattern()
                                                                                                    .nameTransformations()
@@ -119,7 +117,8 @@ public class MatchService {
      */
     public List<PatternInstance> findMatches(Sort sort) {
         final List<PatternInstance> matches = findMatches();
-        final Optional<PatternInstanceSorter> sorter = sorters.stream().filter(s -> s.getSortMethod() == sort).findFirst();
+        final Optional<PatternInstanceSorter> sorter = sorters.stream().filter(s -> s.getSortMethod() == sort)
+                                                              .findFirst();
         if (sorter.isEmpty()) {
             throw new UnsupportedSortMethodException("No sorter for sort method " + sort);
         }
