@@ -63,6 +63,8 @@ The application can be deployed using Docker Compose. The following parameters c
 | `PATOMAT2_LLM_SORT_MAX_CONCURRENT_REQUESTS` | 3                              | Configure maximum number of concurrent requests (per one sorting) sent to LLM.                                                                                                                                                                                   |
 | `PATOMAT2_LLM_SORT_MAXINSTANCES`            | 300                            | Configure maximum number of pattern instances supported by LLM sorting.                                                                                                                                                                                          |
 | `PATOMAT2_LLM_SORT_NUM_CTX`                 | 8092                           | Configure the LLM context size (Ollama's `num_ctx` parameter).                                                                                                                                                                                                   |
+| `PATOMAT2_LOGVIEWER_USERNAME`               | `"admin"`                      | Username for the log viewer.                                                                                                                                                                                                                                     |
+| `PATOMAT2_LOGVIEWER_PASSWORD`               | `"admin"`                      | Password for the log viewer.                                                                                                                                                                                                                                     |
 
 The easiest way to configure them is by creating a `.env` file and setting them there. This file will be automatically
 picked by Docker compose.
@@ -78,7 +80,7 @@ PATOMAT2_EXAMPLES_0_PATTERNS_0=https://example.com/first-pattern,https://example
 
 The examples need to be set in the `.env` file or written directly into the `docker-compose.yml` file.
 
-Deployment process is thus as follows:
+The deployment process is thus as follows:
 
 1. Download/copy the `docker-compose.yml` file and the `nginx` directory.
 2. Create the `.env` file and configure the aforementioned parameters as necessary.
