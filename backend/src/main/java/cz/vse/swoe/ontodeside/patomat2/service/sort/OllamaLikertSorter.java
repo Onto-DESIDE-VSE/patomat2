@@ -155,6 +155,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         final String values = "These are the values for your task:\n\n" + constructValues(instances);
         final OllamaInput input = new OllamaInput(sortConfig.getModel(), systemPrompt, values, OUTPUT_FORMAT, Map.of("num_ctx", sortConfig.getNumCtx()), false);
         LOG.trace("Calling Ollama for batch of {} pattern instances.", instances.size());
+        LOG.trace("LLM input: {}", input);
         final long start = System.currentTimeMillis();
         try {
             final ResponseEntity<OllamaOutput> response = restTemplate.postForEntity(sortConfig.getApiUrl() + "/api/generate", input, OllamaOutput.class);

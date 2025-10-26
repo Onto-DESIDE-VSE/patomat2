@@ -28,6 +28,8 @@ logging:
     level:
         cz.vse.swoe.ontodeside.patomat2: TRACE
         org.springframework: INFO
+    file:
+        name: logs/patomat2.log
 
 springdoc:
     swagger-ui:
