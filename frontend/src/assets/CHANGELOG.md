@@ -4,6 +4,14 @@
 
 <br/>
 
+### 2025-10-26
+
+- Support sorting pattern instances using a LLM.
+
+### 2025-10-10
+
+- Include information about new entities in transformation summary.
+
 ### 2024-09-26
 
 - Support combining files and URLs as transformation input.
