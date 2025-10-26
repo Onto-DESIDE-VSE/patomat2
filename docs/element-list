@@ -9,4 +9,5 @@ cz.vse.swoe.ontodeside.patomat2.rest.handler
 cz.vse.swoe.ontodeside.patomat2.service
 cz.vse.swoe.ontodeside.patomat2.service.pattern
 cz.vse.swoe.ontodeside.patomat2.service.rdf4j
+cz.vse.swoe.ontodeside.patomat2.service.sort
 cz.vse.swoe.ontodeside.patomat2.util
