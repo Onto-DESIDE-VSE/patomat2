@@ -76,7 +76,7 @@ class Rdf4jOntologyHolderTest {
         sut.loadOntology(file);
         final Pattern p = new Pattern("pattern.json", "Pattern", List.of("?p rdfs:domain ?A",
                 "?p rdfs:range ?B",
-                "?C rdfs:subClassOf ?B"), List.of(), List.of(), List.of());
+                "?C rdfs:subClassOf ?B"), List.of(), List.of(), List.of(), List.of());
 
         final List<PatternMatch> result = sut.findMatches(p);
         final List<PatternMatch> blankNodeOnes = result.stream().filter(PatternMatch::isBasedOnBlankNode).toList();
