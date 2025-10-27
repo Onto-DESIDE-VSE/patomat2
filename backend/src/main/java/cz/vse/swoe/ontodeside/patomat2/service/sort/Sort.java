@@ -17,7 +17,7 @@ public enum Sort {
      * Sort using an LLM call with a Likert scale.
      */
     @Schema(description = "LLM with Likert scale")
-    LLM_LIKERT("llm_likert", "LLM with Likert scale");
+    LLM_LIKERT("llm_likert", "Pattern Match Eligibility (LLM/Likert)");
 
     private final String value;
     private final String name;
