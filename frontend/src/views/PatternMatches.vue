@@ -95,6 +95,8 @@ const applySorting = async (sortMethod: SortMethod): Promise<boolean> => {
       sortedData.forEach((sortedInstance: PatternInstance, index: number) => {
         const match = matches.value.find((m) => m.id === sortedInstance.id);
         if (match) {
+          // TODO: New entities may have been extended with LLM-generated label (temporary workaround)
+          match.newEntities = sortedInstance.newEntities;
           match.sortValues = {
             ...(match.sortValues || {}),
             [sortMethod.value]: index

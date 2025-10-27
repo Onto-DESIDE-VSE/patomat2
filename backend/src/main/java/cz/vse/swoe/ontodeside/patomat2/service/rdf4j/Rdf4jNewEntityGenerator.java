@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * Generates new entity (RDF resource) identifier using the loaded ontology.
@@ -49,6 +50,6 @@ public class Rdf4jNewEntityGenerator implements NewEntityGenerator {
         final String id = generateIdentifier();
         return new NewEntity(variableName, id, nameTransformations.stream()
                                                                   .map(n -> new EntityLabel(n.generateName(match, ontologyHolder), Constants.DEFAULT_LABEL_PROPERTY))
-                                                                  .toList());
+                                                                  .collect(Collectors.toList()));
     }
 }

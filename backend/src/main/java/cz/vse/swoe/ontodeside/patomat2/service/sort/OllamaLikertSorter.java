@@ -4,9 +4,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.vse.swoe.ontodeside.patomat2.Constants;
 import cz.vse.swoe.ontodeside.patomat2.config.ApplicationConfig;
 import cz.vse.swoe.ontodeside.patomat2.exception.LlmSortException;
 import cz.vse.swoe.ontodeside.patomat2.exception.MaxSortableInstancesThresholdExceededException;
+import cz.vse.swoe.ontodeside.patomat2.model.EntityLabel;
 import cz.vse.swoe.ontodeside.patomat2.model.ExampleValues;
 import cz.vse.swoe.ontodeside.patomat2.model.Pattern;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
@@ -211,7 +213,14 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
                 LOG.error("LLM returned line number {} (1-based) which is greater than the number of pattern instances. Ignoring it.", row.number());
                 continue;
             }
-            result.add(patternInstances.get(row.number() - 1));
+            final PatternInstance toMove = patternInstances.get(row.number() - 1);
+            // TODO Temporary workaround for providing LLM-suggested label of new entity
+            if (toMove.pattern().newEntityVariables().size() == 1) {
+                final String variable = toMove.pattern().newEntityVariables().iterator().next();
+                toMove.newEntities().stream().filter(ne -> ne.variableName().equals(variable))
+                      .forEach(ne -> ne.labels().add(new EntityLabel(row.label, Constants.DEFAULT_LABEL_PROPERTY)));
+            }
+            result.add(toMove);
         }
         // Add remaining instances in case LLM returned fewer results
         for (int i = sortRows.size() + 1; i <= patternInstances.size(); i++) {
