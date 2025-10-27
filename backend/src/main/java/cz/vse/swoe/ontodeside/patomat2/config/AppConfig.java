@@ -1,6 +1,8 @@
 package cz.vse.swoe.ontodeside.patomat2.config;
 
 import cz.vse.swoe.ontodeside.patomat2.service.FileStorageService;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import jakarta.servlet.http.HttpSessionListener;
@@ -14,6 +16,10 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
+@SecurityScheme(
+        type = SecuritySchemeType.HTTP,
+        name = "basicAuth",
+        scheme = "basic")
 public class AppConfig {
 
     @Bean

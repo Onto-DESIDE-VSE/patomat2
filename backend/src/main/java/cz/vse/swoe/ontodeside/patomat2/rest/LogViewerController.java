@@ -3,12 +3,14 @@ package cz.vse.swoe.ontodeside.patomat2.rest;
 import cz.vse.swoe.ontodeside.patomat2.service.LogViewerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@SecurityRequirement(name = "basicAuth")
 @Tag(name = "Logs", description = "Provides access to application logs")
 @RestController
 @RequestMapping("/logs")
