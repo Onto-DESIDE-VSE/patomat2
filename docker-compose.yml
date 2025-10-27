@@ -24,6 +24,8 @@ services:
             PATOMAT2_SECURITY_MAXSESSIONS: ${MAX_SESSIONS:-20}
         env_file:
             - .env
+        volumes:
+            - backend-logs:/logs
     patomat2:
         image: ghcr.io/onto-deside-vse/patomat2-frontend:latest
         restart: always
@@ -32,3 +34,5 @@ services:
         environment:
             SERVER_URL: ${PUBLIC_URL:-http://localhost:${HOST_PORT:-1234}}${ROOT:-/patomat2}/service/server
             CONTEXT_PATH: ${ROOT:-/patomat2}
+volumes:
+    backend-logs:

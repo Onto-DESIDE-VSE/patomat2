@@ -30,6 +30,11 @@ logging:
         org.springframework: INFO
     file:
         name: logs/patomat2.log
+    logback:
+        rollingpolicy:
+            clean-history-on-start: true
+            max-file-size: 10MB
+            max-history: 1
 
 springdoc:
     swagger-ui:
