@@ -51,6 +51,7 @@ const props = defineProps<{
   defaultSortMethod: SortMethod;
   loadedSortMethods: Set<string>;
   onSortChange: (sortMethod: SortMethod) => Promise<boolean>;
+  onClear: () => void;
 }>();
 
 const selected = computed(() => paginatedItems.value.filter((item) => item.status === true));
@@ -281,6 +282,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
       "
       >Apply transformation
     </v-btn>
+    <v-btn @click="onClear" color="primary" variant="outlined" class="ml-2"> Clear data </v-btn>
   </div>
 
   <v-row class="align-center mt-4" dense>
