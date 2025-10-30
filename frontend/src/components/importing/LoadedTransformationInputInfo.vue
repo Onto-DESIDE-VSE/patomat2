@@ -2,9 +2,18 @@
 import { onMounted, ref } from "vue";
 import { mdiDownload } from "@mdi/js";
 import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
-import { downloadOntologyFile, getLoadedInput } from "@/api/OntologyStorageApi";
+import { clearSessionData, downloadOntologyFile, getLoadedInput } from "@/api/OntologyStorageApi";
+import useMessageStore from "@/store/messageStore";
+
+const messageStore = useMessageStore();
 
 const loadedData = ref<LoadedTransformationInput | null>(null);
+
+const clearData = async () => {
+  await clearSessionData();
+  messageStore.publishMessage("User data cleared.");
+  loadedData.value = null;
+};
 
 onMounted(async () => {
   loadedData.value = await getLoadedInput();
@@ -14,6 +23,15 @@ onMounted(async () => {
 <template>
   <div v-if="loadedData" class="mb-3">
     <p class="text-h6 mb-3">Ontology and patterns already loaded. Uploading new ones will replace the old ones.</p>
+    <v-btn
+      @click="clearData"
+      color="primary"
+      variant="tonal"
+      title="Clear the currently loaded ontology, patterns and pattern matches"
+    >
+      Clear data
+    </v-btn>
+    |
     <RouterLink to="/matches">
       <v-btn color="primary" variant="tonal">Go to Pattern Matches</v-btn>
     </RouterLink>
