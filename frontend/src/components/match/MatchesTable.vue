@@ -282,7 +282,7 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
       "
       >Apply transformation
     </v-btn>
-    <v-btn @click="onClear" color="primary" variant="outlined" class="ml-2"> Clear data </v-btn>
+    <v-btn @click="onClear" color="primary" variant="outlined" class="ml-2">Clear data</v-btn>
   </div>
 
   <v-row class="align-center mt-4" dense>
