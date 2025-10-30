@@ -37,3 +37,10 @@ export async function uploadTransformationInput(ontology: File | string, pattern
     body: formData
   });
 }
+
+export async function clearSessionData() {
+  return await fetch(`${Constants.SERVER_URL}/data`, {
+    method: "DELETE",
+    credentials: "include"
+  });
+}

@@ -11,7 +11,7 @@ import type { TransformationSummary } from "@/types/TransformationSummary";
 import TransformationSummaryView from "@/components/match/TransformationSummaryView.vue";
 import MatchesStatistics from "@/components/match/MatchesStatistics.vue";
 import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
-import { getLoadedInput } from "@/api/OntologyStorageApi";
+import { clearSessionData, getLoadedInput } from "@/api/OntologyStorageApi";
 import type { SortMethod } from "@/types/SortMethod";
 
 const router = useRouter();
@@ -119,6 +119,14 @@ const applySorting = async (sortMethod: SortMethod): Promise<boolean> => {
   }
 };
 
+const clearData = async () => {
+  showProgress.value = true;
+  await clearSessionData();
+  showProgress.value = false;
+  messageStore.publishMessage("User data cleared.");
+  await router.push("/load");
+};
+
 onMounted(async () => {
   transformationInput.value = await getLoadedInput();
   if (transformationInput.value === null) {
@@ -195,6 +203,7 @@ const downloadTransformedOntology = async () => {
     :default-sort-method="defaultSortMethod"
     :loaded-sort-methods="loadedSortMethods"
     :on-sort-change="applySorting"
+    :on-clear="clearData"
   />
   <TransformationSummaryView :summary="transformationSummary" />
 </template>
