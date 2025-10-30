@@ -140,7 +140,10 @@ public class MatchService {
         return Collections.unmodifiableMap(matches);
     }
 
-    public void clear() {
+    /**
+     * Clears the matches.
+     */
+    public void clearMatches() {
         this.matches = null;
     }
 }

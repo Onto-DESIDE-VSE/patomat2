@@ -71,7 +71,7 @@ public class TransformationService {
                                                                                          .toList())))
                                     .toList());
         } catch (RuntimeException e) {
-            matchService.clear();
+            matchService.clearMatches();
             throw e;
         } finally {
             // Reload the original untransformed ontology
