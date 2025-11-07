@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2025-10-30
+
+- Support explicitly clearing user's data (instead of waiting for automatic cleanup after session expiration).
+
 ### 2025-10-26
 
 - Support sorting pattern instances using a LLM.

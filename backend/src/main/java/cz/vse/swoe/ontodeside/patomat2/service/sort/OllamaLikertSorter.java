@@ -218,7 +218,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
             if (toMove.pattern().newEntityVariables().size() == 1) {
                 final String variable = toMove.pattern().newEntityVariables().iterator().next();
                 toMove.newEntities().stream().filter(ne -> ne.variableName().equals(variable))
-                      .forEach(ne -> ne.labels().add(new EntityLabel(row.label, Constants.DEFAULT_LABEL_PROPERTY)));
+                      .forEach(ne -> ne.labels().add(new EntityLabel(makeLabelHumanReadable(row.label), Constants.DEFAULT_LABEL_PROPERTY)));
             }
             result.add(toMove);
         }
@@ -228,6 +228,10 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         }
         LOG.trace("Sorting completed.");
         return result;
+    }
+
+    private static String makeLabelHumanReadable(String label) {
+            return label.replaceAll("[_-]", " ");
     }
 
     @Override
