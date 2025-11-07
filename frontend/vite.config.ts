@@ -18,6 +18,10 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifestFilename: "manifest.json",
+      workbox: {
+        navigateFallback: "/index.html",
+        navigateFallbackDenylist: [new RegExp("^/service/server/")]
+      },
       manifest: {
         name: "PatOMat2",
         short_name: "PatOMat2",
