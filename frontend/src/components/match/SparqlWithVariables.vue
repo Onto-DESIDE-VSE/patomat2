@@ -104,10 +104,9 @@ const tokensToRender = computed(() => {
     }
     lines[i] = lines[i].trim();
 
-    const tokenRegex = /([{}().,;]|[^\s{}().,;]+)/g; //remove whitespace, split words and punctiotions
+    const tokenRegex = /<[^>]*>|[{}.;*]|[a-zA-Z_][\w:-]*|_:[\w-]+|"[^"]*"|\S/g; // Split line into tokens
     const lineTokens = [...lines[i].matchAll(tokenRegex)].map((match) => match[0]);
 
-    //let lineTokens = lines[i].split(" ");
     if (leadingSpacesCount > 0) {
       lineTokens.unshift(" ".repeat(leadingSpacesCount - 1));
     }
