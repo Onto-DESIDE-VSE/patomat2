@@ -20,4 +20,8 @@ public record NewEntity(String variableName, String identifier, List<EntityLabel
     public NewEntity withLabels(List<EntityLabel> labels) {
         return new NewEntity(variableName, identifier, labels);
     }
+
+    public NewEntity withIdentifier(String identifier) {
+        return new NewEntity(variableName, identifier, labels);
+    }
 }
