@@ -9,6 +9,7 @@ import cz.vse.swoe.ontodeside.patomat2.model.NewEntityGenerator;
 import cz.vse.swoe.ontodeside.patomat2.model.Pattern;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternInstance;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternMatch;
+import cz.vse.swoe.ontodeside.patomat2.model.iri.NewEntityIriConfig;
 import cz.vse.swoe.ontodeside.patomat2.service.sort.PatternInstanceSorter;
 import cz.vse.swoe.ontodeside.patomat2.service.sort.Sort;
 import org.springframework.context.event.EventListener;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Finds and applies pattern matches in ontology.
@@ -90,14 +92,14 @@ public class MatchService {
 
     private List<NewEntity> initNewEntities(PatternMatch match) {
         final Set<String> newEntityVars = match.getPattern().newEntityVariables();
-        return new ArrayList<>(newEntityVars.stream()
-                                            .map(v -> newEntityGenerator.generateNewEntity(v, match.getPattern()
-                                                                                                   .nameTransformations()
-                                                                                                   .stream()
-                                                                                                   .filter(nt -> nt.variableName()
-                                                                                                                   .equals(v))
-                                                                                                   .toList(), match))
-                                            .toList());
+        return newEntityVars.stream()
+                            .map(v -> newEntityGenerator.generateNewEntity(v, match.getPattern()
+                                                                                   .nameTransformations()
+                                                                                   .stream()
+                                                                                   .filter(nt -> nt.variableName()
+                                                                                                   .equals(v))
+                                                                                   .toList(), match))
+                            .collect(Collectors.toList());
     }
 
     private void loadOntology(String fileName, boolean resolveImports) {
@@ -125,11 +127,24 @@ public class MatchService {
         return sorter.get().sort(matches);
     }
 
+    public NewEntityIriConfig getNewEntityIriConfig() {
+        return newEntityGenerator.getIriConfig();
+    }
+
+    public void setNewEntityIriConfig(NewEntityIriConfig iriConfig) {
+        newEntityGenerator.setIriConfig(iriConfig);
+        // Update new entities - regenerate identifiers
+        matches.forEach((key, value) -> matches.put(key, value.withNewEntities(value.newEntities().stream()
+                                                                                    .map(ne -> ne.withIdentifier(newEntityGenerator.generateIdentifier(ne.labels())))
+                                                                                    .collect(Collectors.toList()))));
+    }
+
     @EventListener
     public void onOntologyFileUploaded(OntologyFileUploadedEvent event) {
         loadOntology(event.getOntologyFileName(), event.shouldResolveImports());
         this.patterns = new LinkedHashMap<>();
         event.getPatterns().forEach(p -> patterns.put(p.name(), p));
+        newEntityGenerator.initNewEntityIriConfig();
         this.matches = null;
     }
 

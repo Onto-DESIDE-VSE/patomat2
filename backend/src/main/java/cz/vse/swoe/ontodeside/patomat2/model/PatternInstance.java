@@ -32,4 +32,8 @@ public record PatternInstance(int id, @JsonIgnore Pattern pattern, PatternMatch 
     public boolean hasDelete() {
         return sparqlDelete != null;
     }
+
+    public PatternInstance withNewEntities(List<NewEntity> newEntities) {
+        return new PatternInstance(id, pattern, match, sparqlInsert, sparqlDelete, newEntities);
+    }
 }
