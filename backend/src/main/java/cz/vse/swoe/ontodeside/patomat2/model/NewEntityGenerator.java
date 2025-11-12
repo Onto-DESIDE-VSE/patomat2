@@ -1,5 +1,6 @@
 package cz.vse.swoe.ontodeside.patomat2.model;
 
+import cz.vse.swoe.ontodeside.patomat2.model.iri.NewEntityIriConfig;
 import org.springframework.lang.NonNull;
 
 import java.util.List;
@@ -10,11 +11,11 @@ import java.util.List;
 public interface NewEntityGenerator {
 
     /**
-     * Generates a new identifier for an entity.
+     * Generates a new identifier for an entity with the specified labels.
      *
      * @return New entity identifier
      */
-    String generateIdentifier();
+    String generateIdentifier(List<EntityLabel> labels);
 
     /**
      * Generates a new entity with label(s) based on the specified pattern match and name transformations.
@@ -31,4 +32,23 @@ public interface NewEntityGenerator {
      */
     NewEntity generateNewEntity(@NonNull String variableName, @NonNull List<NameTransformation> nameTransformations,
                                 @NonNull PatternMatch match);
+
+    /**
+     * Sets configuration for generating new entity identifiers.
+     *
+     * @param iriConfig Configuration to set
+     */
+    void setIriConfig(NewEntityIriConfig iriConfig);
+
+    /**
+     * Gets the current configuration for generating new entity identifiers.
+     *
+     * @return Current configuration
+     */
+    NewEntityIriConfig getIriConfig();
+
+    /**
+     * Initializes new entity identifier generation configuration.
+     */
+    void initNewEntityIriConfig();
 }
