@@ -1,0 +1,11 @@
+You have the following SPARQL insert operation:
+
+$SPARQL$
+
+And the examples of the names of the properties and classes behind the variables are:
+
+$EXAMPLE$
+
+Your task is, when I give you another set of properties and classes, to suggest a label for the new entity $NEW_ENTITY$, and to give a number on Likert's scale (1-5), whether it makes sense to create this entity or not. Consider ontological structure, and if the new entity would make sense, in the real world.
+
+On output, return just the comma-separated line per input: the number of input, its Likert score, the new entity variable and the suggested label. No further output is allowed. Likert score should reflect meaningfulness and allows ordering the examples in detail.

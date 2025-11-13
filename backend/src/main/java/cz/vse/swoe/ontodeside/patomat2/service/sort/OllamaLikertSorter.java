@@ -41,9 +41,37 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
     private static final Logger LOG = LoggerFactory.getLogger(OllamaLikertSorter.class);
 
     private static final String promptTemplateFile = "llm_sort_system_prompt.txt";
+    private static final String promptTemplateFileMulti = "llm_sort_system_prompt_multi.txt";
 
     /**
-     * JSON schema for the output of the LLM.
+     * JSON schema for the output of the LLM when there are multiple new entities.
+     * <p>
+     * A separate schema is defined for cases with multiple and single variable because the LLM was returning an empty
+     * array of suggested_label items when there was only one new entity variable.
+     */
+    private static final String OUTPUT_FORMAT_MULTI = """
+            {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "input_number": { "type": "integer" },
+                      "likert_score": { "type": "integer", "minimum": 1, "maximum": 5 },
+                      "suggested_label": { "type":
+                            "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {"variable": {"type": "string"}, "label": {"type": "string"}}
+                            }
+                      }
+                    },
+                    "required": ["input_number", "likert_score", "suggested_label"]
+                  }
+                }
+            """;
+
+    /**
+     * JSON schema for the output of the LLM when there is a single new entity.
      */
     private static final String OUTPUT_FORMAT = """
             {
@@ -153,30 +181,11 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         return actuallySort(instances, llmResult);
     }
 
-    private List<ResultRow> callForBatch(String systemPrompt, List<PatternInstance> instances) {
-        final String values = "These are the values for your task:\n\n" + constructValues(instances);
-        final OllamaInput input = new OllamaInput(sortConfig.getModel(), systemPrompt, values, OUTPUT_FORMAT, Map.of("num_ctx", sortConfig.getNumCtx()), false);
-        LOG.trace("Calling Ollama for batch of {} pattern instances.", instances.size());
-        LOG.trace("LLM input: {}", input);
-        final long start = System.currentTimeMillis();
-        try {
-            final ResponseEntity<OllamaOutput> response = restTemplate.postForEntity(sortConfig.getApiUrl() + "/api/generate", input, OllamaOutput.class);
-            assert response.getBody() != null;
-            final List<ResultRow> result = new ObjectMapper().readValue(response.getBody()
-                                                                                .response(), new TypeReference<>() {});
-            final long end = System.currentTimeMillis();
-            LOG.trace("Received Ollama response: {}.", result);
-            LOG.trace("Ollama invocation took {} s.", (end - start) / 1000);
-            return result;
-        } catch (Exception e) {
-            LOG.error("Unable to retrieve LLM response or process it.", e);
-            throw new LlmSortException("Unable to retrieve LLM response or process it.");
-        }
-    }
-
     private static String loadAndPopulateSystemPromptTemplate(Pattern pattern) {
+        final String templateFile = pattern.newEntityVariables()
+                                           .size() > 1 ? promptTemplateFileMulti : promptTemplateFile;
         try (final BufferedReader reader = new BufferedReader(new InputStreamReader(
-                OllamaLikertSorter.class.getClassLoader().getResourceAsStream(promptTemplateFile)))) {
+                OllamaLikertSorter.class.getClassLoader().getResourceAsStream(templateFile)))) {
             final String template = reader.lines().collect(Collectors.joining("\n"));
             return template.replace("$SPARQL$", pattern.createInsertSparqlTemplate())
                            .replace("$EXAMPLE$", stringifyExamples(pattern.examples()))
@@ -184,6 +193,34 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         } catch (IOException e) {
             LOG.error("Unable to load prompt template.", e);
             return "";
+        }
+    }
+
+    private List<ResultRow> callForBatch(String systemPrompt, List<PatternInstance> instances) {
+        final String values = "These are the values for your task:\n\n" + constructValues(instances);
+        final boolean multipleNewEntities = instances.getFirst().pattern().newEntityVariables().size() > 1;
+        final OllamaInput input = new OllamaInput(sortConfig.getModel(), systemPrompt, values, multipleNewEntities ? OUTPUT_FORMAT_MULTI : OUTPUT_FORMAT, Map.of("num_ctx", sortConfig.getNumCtx()), false);
+        LOG.trace("Calling Ollama for batch of {} pattern instances.", instances.size());
+        LOG.trace("LLM input: {}", input);
+        final long start = System.currentTimeMillis();
+        try {
+            final ResponseEntity<OllamaOutput> response = restTemplate.postForEntity(sortConfig.getApiUrl() + "/api/generate", input, OllamaOutput.class);
+            assert response.getBody() != null;
+            final List<? extends ResultRow> result;
+            if (multipleNewEntities) {
+                result = new ObjectMapper().readValue(response.getBody()
+                                                              .response(), new TypeReference<List<ResultRowMulti>>() {});
+            } else {
+                result = new ObjectMapper().readValue(response.getBody()
+                                                              .response(), new TypeReference<List<ResultRowSingle>>() {});
+            }
+            final long end = System.currentTimeMillis();
+            LOG.trace("Received Ollama response: {}.", result);
+            LOG.trace("Ollama invocation took {} s.", (end - start) / 1000);
+            return (List<ResultRow>) result;
+        } catch (Exception e) {
+            LOG.error("Unable to retrieve LLM response or process it.", e);
+            throw new LlmSortException("Unable to retrieve LLM response or process it.");
         }
     }
 
@@ -208,6 +245,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
             LOG.warn("LLM return fewer results than provided instances ({}). Remaining instances will be added to the end.", sortRows.size());
         }
         sortRows.sort(Comparator.comparing(ResultRow::likertScore).reversed());
+        final boolean multipleNewEntities = patternInstances.getFirst().pattern().newEntityVariables().size() > 1;
         for (ResultRow row : sortRows) {
             if (row.number() > patternInstances.size()) {
                 LOG.error("LLM returned line number {} (1-based) which is greater than the number of pattern instances. Ignoring it.", row.number());
@@ -215,10 +253,10 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
             }
             final PatternInstance toMove = patternInstances.get(row.number() - 1);
             // TODO Temporary workaround for providing LLM-suggested label of new entity
-            if (toMove.pattern().newEntityVariables().size() == 1) {
-                final String variable = toMove.pattern().newEntityVariables().iterator().next();
-                toMove.newEntities().stream().filter(ne -> ne.variableName().equals(variable))
-                      .forEach(ne -> ne.labels().add(new EntityLabel(makeLabelHumanReadable(row.label), Constants.DEFAULT_LABEL_PROPERTY)));
+            if (multipleNewEntities) {
+                addMultipleNewEntitiesLabels((ResultRowMulti) row, toMove);
+            } else {
+                addSingleNewEntityLabel((ResultRowSingle) row, toMove);
             }
             result.add(toMove);
         }
@@ -230,8 +268,23 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         return result;
     }
 
+    private static void addMultipleNewEntitiesLabels(ResultRowMulti row, PatternInstance toMove) {
+        for (NewEntityLabel label : row.labels()) {
+            toMove.newEntities().stream().filter(ne -> ne.variableName().equals(label.variable()))
+                  .forEach(ne -> ne.labels()
+                                   .add(new EntityLabel(makeLabelHumanReadable(label.label()), Constants.DEFAULT_LABEL_PROPERTY)));
+        }
+    }
+
+    private static void addSingleNewEntityLabel(ResultRowSingle row, PatternInstance toMove) {
+        final String variable = toMove.pattern().newEntityVariables().iterator().next();
+        toMove.newEntities().stream().filter(ne -> ne.variableName().equals(variable))
+              .forEach(ne -> ne.labels()
+                               .add(new EntityLabel(makeLabelHumanReadable(row.label()), Constants.DEFAULT_LABEL_PROPERTY)));
+    }
+
     private static String makeLabelHumanReadable(String label) {
-            return label.replaceAll("[_-]", " ");
+        return label.replaceAll("[_-]", " ");
     }
 
     @Override
@@ -239,17 +292,40 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
         return Sort.LLM_LIKERT;
     }
 
+
+    // ------ Auxiliary DTO records -----------
+
     private record OllamaInput(String model, String system, String prompt, @JsonRawValue String format,
                                Map<String, Object> options,
                                boolean stream) {}
 
     private record OllamaOutput(String response, String model) {}
 
-    private record ResultRow(@JsonProperty("input_number") int number, @JsonProperty("likert_score") int likertScore,
-                             @JsonProperty("suggested_label") String label) {
+    private interface ResultRow {
+        int number();
 
-        ResultRow withNumber(int number) {
-            return new ResultRow(number, likertScore, label);
+        int likertScore();
+
+        ResultRow withNumber(int number);
+    }
+
+    private record ResultRowSingle(@JsonProperty("input_number") int number,
+                                   @JsonProperty("likert_score") int likertScore,
+                                   @JsonProperty("suggested_label") String label) implements ResultRow {
+
+        public ResultRowSingle withNumber(int number) {
+            return new ResultRowSingle(number, likertScore, label);
         }
     }
+
+    private record ResultRowMulti(@JsonProperty("input_number") int number,
+                                  @JsonProperty("likert_score") int likertScore,
+                                  @JsonProperty("suggested_label") List<NewEntityLabel> labels) implements ResultRow {
+
+        public ResultRowMulti withNumber(int number) {
+            return new ResultRowMulti(number, likertScore, labels);
+        }
+    }
+
+    private record NewEntityLabel(String variable, String label) {}
 }
