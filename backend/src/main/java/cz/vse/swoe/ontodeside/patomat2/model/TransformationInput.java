@@ -8,12 +8,12 @@ import java.util.List;
  * Describes the transformation input provided by the user.
  *
  * @param ontology Ontology to be transformed. This can be a URL or a file name
- * @param patterns List of transformation patterns. These can be URLs or file names
+ * @param patterns List of URLs from which transformation patterns can be fetched
  */
 @Schema(description = "Describes the transformation input provided by the user.")
 public record TransformationInput(@Schema(description = "Ontology to be transformed (name of the ontology file).")
                                   String ontology,
-                                  @Schema(description = "List of pattern files.")
+                                  @Schema(description = "List of URL to fetch patterns from.")
                                   List<String> patterns) {
 
     @Override

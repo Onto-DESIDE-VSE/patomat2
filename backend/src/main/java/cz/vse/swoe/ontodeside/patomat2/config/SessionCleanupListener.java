@@ -28,7 +28,8 @@ public class SessionCleanupListener implements HttpSessionListener {
 
     private final FileStorageService fileStorageService;
 
-    public SessionCleanupListener(ApplicationConfig config, InvalidSessionTracker invalidSessionTracker, FileStorageService fileStorageService) {
+    public SessionCleanupListener(ApplicationConfig config, InvalidSessionTracker invalidSessionTracker,
+                                  FileStorageService fileStorageService) {
         this.config = config;
         this.invalidSessionTracker = invalidSessionTracker;
         this.fileStorageService = fileStorageService;
@@ -63,7 +64,8 @@ public class SessionCleanupListener implements HttpSessionListener {
             fileStorageService.deleteFile(ontologyFile, session.getId());
         }
         if (patterns != null) {
-            patterns.forEach(pi -> fileStorageService.deleteFile(pi.fileName(), session.getId()));
+            patterns.stream().filter(p -> !p.cached())
+                    .forEach(pi -> fileStorageService.deleteFile(pi.fileName(), session.getId()));
         }
     }
 }
