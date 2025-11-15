@@ -8,6 +8,7 @@ import cz.vse.swoe.ontodeside.patomat2.model.LoadedTransformationInput;
 import cz.vse.swoe.ontodeside.patomat2.model.Pattern;
 import cz.vse.swoe.ontodeside.patomat2.model.PatternInfo;
 import cz.vse.swoe.ontodeside.patomat2.model.TransformationInput;
+import cz.vse.swoe.ontodeside.patomat2.service.pattern.PatternCache;
 import cz.vse.swoe.ontodeside.patomat2.service.pattern.PatternParser;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
@@ -33,14 +34,18 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
 
     private final FileStorageService storageService;
 
+    private final PatternCache patternCache;
+
     private final PatternParser patternParser;
 
     private final HttpSession session;
 
     private ApplicationEventPublisher eventPublisher;
 
-    public OntologyStoringService(FileStorageService storageService, PatternParser patternParser, HttpSession session) {
+    public OntologyStoringService(FileStorageService storageService, PatternCache patternCache,
+                                  PatternParser patternParser, HttpSession session) {
         this.storageService = storageService;
+        this.patternCache = patternCache;
         this.patternParser = patternParser;
         this.session = session;
     }
@@ -97,13 +102,13 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
         final List<Pattern> patterns = new ArrayList<>(patternsFromFiles);
         patterns.addAll(patternsFromUrls);
         session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream()
-                                                                                .map(p -> new PatternInfo(p.name(), p.fileName()))
+                                                                                .map(p -> new PatternInfo(p.name(), p.fileName(), false))
                                                                                 .toList());
         return patterns;
     }
 
     /**
-     * Saves ontology and patterns which are specified as URL from which they are to be loaded.
+     * Saves ontology and patterns that are specified as URLs from which they are to be loaded.
      *
      * @param input Transformation input specifying ontology and pattern urls
      */
@@ -115,13 +120,22 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
                                                                                                       .size(), session.getId());
         final File storedFile = storageService.downloadAndSaveFile(input.ontology());
         session.setAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE, storedFile.getName());
+        final List<PatternInfo> forSession = new ArrayList<>(input.patterns().size());
         final List<Pattern> patterns = input.patterns().stream()
-                                            .map(storageService::downloadAndSaveFile)
-                                            .map(patternParser::readPattern)
+                                            .map(url -> {
+                                                final Optional<Pattern> cached = patternCache.getPattern(url);
+                                                if (cached.isPresent()) {
+                                                    forSession.add(new PatternInfo(cached.get().name(), cached.get()
+                                                                                                              .fileName(), true));
+                                                    return cached.get();
+                                                } else {
+                                                    final Pattern p = patternParser.readPattern(storageService.downloadAndSaveFile(url));
+                                                    forSession.add(new PatternInfo(p.name(), p.fileName(), false));
+                                                    return p;
+                                                }
+                                            })
                                             .toList();
-        session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, patterns.stream()
-                                                                                .map(p -> new PatternInfo(p.name(), p.fileName()))
-                                                                                .toList());
+        session.setAttribute(Constants.PATTERN_FILES_SESSION_ATTRIBUTE, forSession);
         eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns));
     }
 

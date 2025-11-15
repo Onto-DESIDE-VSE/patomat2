@@ -22,6 +22,11 @@ public class ApplicationConfig {
      */
     private String newEntityIriBase;
 
+    /**
+     * List of URLs from which predefined patterns can be loaded.
+     */
+    private List<String> patterns = List.of();
+
     private Security security = new Security();
 
     private LLM llm = new LLM();
@@ -50,6 +55,14 @@ public class ApplicationConfig {
 
     public void setNewEntityIriBase(String newEntityIriBase) {
         this.newEntityIriBase = newEntityIriBase;
+    }
+
+    public List<String> getPatterns() {
+        return patterns;
+    }
+
+    public void setPatterns(List<String> patterns) {
+        this.patterns = patterns;
     }
 
     public Security getSecurity() {

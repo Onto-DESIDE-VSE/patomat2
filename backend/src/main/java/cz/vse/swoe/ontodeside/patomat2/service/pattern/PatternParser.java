@@ -62,7 +62,7 @@ public class PatternParser {
      *
      * @param patternFile File containing a pattern
      * @return Pattern read from the file
-     * @throws PatternParserException When unable to read pattern
+     * @throws PatternParserException When unable to read the pattern
      */
     public Pattern readPattern(@NonNull File patternFile) {
         LOG.debug("Parsing pattern from file {}.", patternFile.getName());
