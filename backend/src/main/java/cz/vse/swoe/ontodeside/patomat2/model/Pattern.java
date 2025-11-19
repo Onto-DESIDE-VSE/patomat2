@@ -121,6 +121,15 @@ public record Pattern(@JsonIgnore String fileName, String name, List<String> sou
     }
 
     /**
+     * Generates a {@link PatternInfo} object for this pattern.
+     *
+     * @return {@code PatternInfo} object
+     */
+    public PatternInfo info() {
+        return new PatternInfo(name, fileName, fileName == null);
+    }
+
+    /**
      * Extracts distinct SPARQL variable names from the specified triple patterns.
      * <p>
      * Note that the variable extraction is not 100% per SPARQL standard, but should cover the most common cases.
