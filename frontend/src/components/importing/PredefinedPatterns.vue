@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import { getPredefinedPatterns } from "@/api/PatternApi";
 import type { PatternInfo } from "@/types/LoadedTransformationInput";
+import { mdiFormSelect } from "@mdi/js";
 
 const props = defineProps<{
   selectedPatterns: string[];
@@ -16,6 +17,7 @@ onMounted(async () => {
 </script>
 
 <template>
+  <v-icon icon="mdi-select"></v-icon>
   <v-select
     clearable
     multiple
@@ -27,5 +29,7 @@ onMounted(async () => {
     :model-value="props.selectedPatterns"
     hint="Select one of these predefined patterns to use them for transformation"
     persistent-hint
+    class="mb-2"
+    :prepend-icon="mdiFormSelect"
   ></v-select>
 </template>
