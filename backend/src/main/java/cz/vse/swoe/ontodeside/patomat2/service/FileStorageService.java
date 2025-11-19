@@ -7,6 +7,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -25,6 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.text.Normalizer;
 import java.util.Comparator;
 import java.util.stream.Stream;
@@ -34,11 +36,13 @@ public class FileStorageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileStorageService.class);
 
+    private static final String COMMON_DIRECTORY = "common";
+
     private final ApplicationConfig config;
 
     private final HttpSession session;
 
-    public FileStorageService(ApplicationConfig config, HttpSession session) {
+    public FileStorageService(ApplicationConfig config, @Autowired(required = false) HttpSession session) {
         this.config = config;
         this.session = session;
     }
@@ -89,11 +93,18 @@ public class FileStorageService {
     }
 
     private @NonNull File createStorageDirectory() {
-        final File targetDir = new File(config.getStorage() + File.separator + session.getId());
+        final File targetDir = new File(constructDirectoryPath());
         if (!targetDir.exists()) {
             targetDir.mkdirs();
         }
         return targetDir;
+    }
+
+    private String constructDirectoryPath() {
+        if (session != null) {
+            return config.getStorage() + File.separator + session.getId();
+        }
+        return config.getStorage() + File.separator + COMMON_DIRECTORY;
     }
 
     private static String sanitizeFilename(String fileName) {
@@ -103,7 +114,7 @@ public class FileStorageService {
         fileName = fileName.replaceAll("[^a-zA-Z0-9.\\-_]", "");
 
         if (fileName.indexOf('.') != -1) {
-            // Truncate the file name if it exceeds a maximum allowed length
+            // Truncate the file name if it exceeds the maximum allowed length
             final int dotIndex = fileName.lastIndexOf('.');
             assert dotIndex > 0;
             if (dotIndex > 100) {
@@ -141,7 +152,8 @@ public class FileStorageService {
                                                    .retrieve()
                                                    .bodyToFlux(DataBuffer.class);
 
-            DataBufferUtils.write(flux, targetFile.toPath()).block();
+            DataBufferUtils.write(flux, targetFile.toPath(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)
+                           .block();
         } catch (WebClientResponseException e) {
             LOG.error("Failed to download file from {}.", url, e);
             throw new ResourceFetchException("Unable to fetch file from '" + url + "'. Got status " + e.getStatusCode());
