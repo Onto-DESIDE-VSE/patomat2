@@ -3,7 +3,7 @@ export type LoadedTransformationInput = {
   patterns: PatternInfo[];
 };
 
-declare type PatternInfo = {
+export type PatternInfo = {
   name: string;
   fileName: string;
 };

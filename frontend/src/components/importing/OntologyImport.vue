@@ -4,6 +4,7 @@ import { mdiMinus, mdiPlus, mdiWeb } from "@mdi/js";
 import { uploadTransformationInput } from "@/api/OntologyStorageApi";
 import { useRouter } from "vue-router";
 import useMessageStore from "@/store/messageStore";
+import PredefinedPatterns from "@/components/importing/PredefinedPatterns.vue";
 
 const router = useRouter();
 const messageStore = useMessageStore();
@@ -14,6 +15,7 @@ const ontologyFile = ref<File>();
 const ontologyUrl = ref<string>();
 const patternFiles = ref<File[]>([]);
 const patternUrls = ref<string[]>([]);
+const predefinedPatternUrls = ref<string[]>([]);
 const patternCount = ref<number>(1);
 
 const inputRefs = useTemplateRef<HTMLInputElement[]>("inputs");
@@ -27,13 +29,19 @@ function addPatternInput() {
   }
 }
 
+function onPredefinedPatternsSelected(patterns: readonly any[]) {
+  predefinedPatternUrls.value = [...patterns];
+}
+
 function removePattern(index: number) {
   patternCount.value--;
   patternUrls.value.splice(index, 1);
 }
 
 const valid = computed(() => {
-  const anyPatternUrls = patternUrls.value.length > 0 && patternUrls.value.some((v) => v.trim().length > 0);
+  const anyPatternUrls =
+    (patternUrls.value.length > 0 && patternUrls.value.some((v) => v.trim().length > 0)) ||
+    predefinedPatternUrls.value.length > 0;
   if (ontologyFileOrUrl.value === "file") {
     return ontologyFile.value !== undefined && (anyPatternUrls || patternFiles.value.length > 0);
   } else {
@@ -57,7 +65,7 @@ async function uploadAndHandleResponse(onSuccess: () => Promise<any>) {
   const resp = await uploadTransformationInput(
     ontologyFileOrUrl.value === "file" ? ontologyFile.value! : ontologyUrl.value!,
     patternFiles.value,
-    patternUrls.value
+    [...patternUrls.value, ...predefinedPatternUrls.value]
   );
   showProgress.value = false;
   if (resp.ok) {
@@ -107,6 +115,11 @@ async function uploadAndTransform() {
       @click:append="i === 1 ? addPatternInput() : removePattern(i - 1)"
       class="mb-2"
     ></v-text-field>
+
+    <PredefinedPatterns
+      :selected-patterns="predefinedPatternUrls"
+      :on-patterns-selected="onPredefinedPatternsSelected"
+    ></PredefinedPatterns>
 
     <div class="float-right">
       <v-btn color="primary" :disabled="!valid || showProgress" :loading="showProgress" @click="upload">Load</v-btn>
