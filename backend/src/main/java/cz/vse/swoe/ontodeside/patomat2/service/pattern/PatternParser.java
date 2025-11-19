@@ -171,7 +171,7 @@ public class PatternParser {
     public Pattern readPattern(@NonNull InputStream input) {
         LOG.debug("Parsing pattern from input stream.");
         final DocumentContext doc = JsonPath.parse(input);
-        final Pattern result = readPatternFromDocument(doc, "<input stream>");
+        final Pattern result = readPatternFromDocument(doc, null);
         LOG.info("Parsed pattern {} from input stream.", result.name());
         return result;
     }

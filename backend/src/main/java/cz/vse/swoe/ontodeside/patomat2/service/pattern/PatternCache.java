@@ -92,7 +92,12 @@ public class PatternCache {
      * @return Optional matching pattern, empty when there is no such pattern in the cache
      */
     public Optional<Pattern> getPattern(String url) {
-        return Optional.ofNullable(patterns.get(url));
+        if (patterns.containsKey(url)) {
+            final Pattern p = patterns.get(url);
+            LOG.debug("Pattern '{}' available in cache.", p.name());
+            return Optional.of(p);
+        }
+        return Optional.empty();
     }
 
     /**

@@ -44,7 +44,7 @@ onMounted(async () => {
     <span class="font-weight-bold"> Transformation patterns: </span>
     <span v-for="(pi, index) in loadedData.patterns" :key="pi.fileName">
       <template v-if="index > 0">, </template>
-      {{ pi.name }} ({{ pi.fileName }})
+      {{ pi.name }} <template v-if="pi.fileName">({{ pi.fileName }})</template>
     </span>
   </div>
 </template>
