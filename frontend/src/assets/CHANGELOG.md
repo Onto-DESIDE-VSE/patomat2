@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2025-11-19
+
+- Support specifying predefined patterns for the user to select from.
+
 ### 2025-10-30
 
 - Support explicitly clearing user's data (instead of waiting for automatic cleanup after session expiration).
