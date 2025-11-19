@@ -102,7 +102,20 @@ async function uploadAndTransform() {
     <v-text-field class="mb-2" v-else v-model="ontologyUrl" label="Ontology URL" :prepend-icon="mdiWeb"></v-text-field>
 
     <h4 class="text-h4 mb-3">Transformation Patterns</h4>
-    <v-file-input class="mb-2" v-model="patternFiles" label="Transformation pattern files" persistent-hint multiple />
+
+    <PredefinedPatterns
+      :selected-patterns="predefinedPatternUrls"
+      :on-patterns-selected="onPredefinedPatternsSelected"
+    ></PredefinedPatterns>
+
+    <v-file-input
+      class="mb-2"
+      v-model="patternFiles"
+      label="Transformation pattern files"
+      hint="Or provide pattern files"
+      persistent-hint
+      multiple
+    />
 
     <v-text-field
       v-for="i in patternCount"
@@ -114,12 +127,9 @@ async function uploadAndTransform() {
       v-model="patternUrls[i - 1]"
       @click:append="i === 1 ? addPatternInput() : removePattern(i - 1)"
       class="mb-2"
+      hint="Or provide URLs from which to load patterns"
+      persistent-hint
     ></v-text-field>
-
-    <PredefinedPatterns
-      :selected-patterns="predefinedPatternUrls"
-      :on-patterns-selected="onPredefinedPatternsSelected"
-    ></PredefinedPatterns>
 
     <div class="float-right">
       <v-btn color="primary" :disabled="!valid || showProgress" :loading="showProgress" @click="upload">Load</v-btn>
