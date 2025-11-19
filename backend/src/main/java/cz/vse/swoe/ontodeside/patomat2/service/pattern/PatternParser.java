@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -68,16 +69,21 @@ public class PatternParser {
         LOG.debug("Parsing pattern from file {}.", patternFile.getName());
         try {
             final DocumentContext doc = JsonPath.parse(patternFile);
-            final String name = doc.read("$.tp.name", String.class);
-            final List<String> sourceTriples = readTriples(name, doc, TripleSource.SOURCE);
-            final List<String> targetTriples = readTriples(name, doc, TripleSource.TARGET);
-            final List<String> filters = readFilters(name, doc);
-            final List<ExampleValues> examples = readExamples(doc);
-            LOG.info("Parsed pattern {} from file {}.", name, patternFile.getName());
-            return new Pattern(patternFile.getName(), name, sourceTriples, filters, targetTriples, readNameTransformations(doc), examples);
+            final Pattern result = readPatternFromDocument(doc, patternFile.getName());
+            LOG.info("Parsed pattern {} from file {}.", result.name(), patternFile.getName());
+            return result;
         } catch (IOException e) {
             throw new PatternParserException("Unable to read pattern from " + patternFile, e);
         }
+    }
+
+    private Pattern readPatternFromDocument(DocumentContext doc, String fileName) {
+        final String name = doc.read("$.tp.name", String.class);
+        final List<String> sourceTriples = readTriples(name, doc, TripleSource.SOURCE);
+        final List<String> targetTriples = readTriples(name, doc, TripleSource.TARGET);
+        final List<String> filters = readFilters(name, doc);
+        final List<ExampleValues> examples = readExamples(doc);
+        return new Pattern(fileName, name, sourceTriples, filters, targetTriples, readNameTransformations(doc), examples);
     }
 
     private List<String> readTriples(String patternName, DocumentContext doc, TripleSource source) {
@@ -153,6 +159,21 @@ public class PatternParser {
             LOG.trace("No examples found in pattern.");
             return List.of();
         }
+    }
+
+    /**
+     * Reads pattern from the {@link InputStream}.
+     *
+     * @param input Input stream containing pattern data
+     * @return Pattern read from the stream
+     * @throws PatternParserException When unable to read the pattern
+     */
+    public Pattern readPattern(@NonNull InputStream input) {
+        LOG.debug("Parsing pattern from input stream.");
+        final DocumentContext doc = JsonPath.parse(input);
+        final Pattern result = readPatternFromDocument(doc, "<input stream>");
+        LOG.info("Parsed pattern {} from input stream.", result.name());
+        return result;
     }
 
     private static void configureJsonPath() {
