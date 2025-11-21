@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2025-11-21
+
+- Allow display of pattern instance Likert score when available.
+
 ### 2025-11-19
 
 - Support specifying predefined patterns for the user to select from.
