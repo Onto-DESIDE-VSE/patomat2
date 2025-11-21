@@ -5,6 +5,7 @@ export type PatternInstance = {
   sparqlInsert: string;
   sparqlDelete: string;
   newEntities: NewEntity[];
+  likertScore?: number | null;
   status: boolean | null;
   sortValues?: Record<string, number>;
 };

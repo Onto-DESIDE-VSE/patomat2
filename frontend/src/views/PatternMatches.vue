@@ -97,6 +97,7 @@ const applySorting = async (sortMethod: SortMethod): Promise<boolean> => {
         if (match) {
           // TODO: New entities may have been extended with LLM-generated label (temporary workaround)
           match.newEntities = sortedInstance.newEntities;
+          match.likertScore = sortedInstance.likertScore;
           match.sortValues = {
             ...(match.sortValues || {}),
             [sortMethod.value]: index

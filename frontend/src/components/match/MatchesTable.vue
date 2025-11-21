@@ -17,12 +17,14 @@ import { entityToBinding } from "@/util/Utils";
 interface MatchesTablePreferences {
   showTransformationSparql: boolean;
   showPatternName: boolean;
+  showLikertScore: boolean;
   itemsPerPage: number;
 }
 
 const defaultTablePreferences: MatchesTablePreferences = {
   showTransformationSparql: false,
   showPatternName: true,
+  showLikertScore: false,
   itemsPerPage: 10
 };
 
@@ -57,7 +59,7 @@ const props = defineProps<{
 const selected = computed(() => paginatedItems.value.filter((item) => item.status === true));
 //const rejected = computed(() => paginatedItems.value.filter((item) => item.status === false));
 
-// keys are pattern instance ids, value are mapping of variable names to new labels
+// keys are pattern instance ids, values are mapping of variable names to new labels
 const newEntityLabels = ref<Map<number, { [key: string]: string }>>(new Map());
 
 const sortMethod = ref<SortMethod>(props.defaultSortMethod);
@@ -236,6 +238,15 @@ const headers = computed(() => [
     filterable: false,
     visible: true,
     sortable: false
+  },
+  {
+    title: "Likert score",
+    key: "likertScore",
+    value: "likertScore",
+    filterable: false,
+    visible: tablePreferences.value.showLikertScore,
+    sortable: false,
+    align: "center"
   }
 ]);
 
@@ -266,7 +277,10 @@ function applyTransformation(applyDeletes: boolean) {
   props.onTransform(applyDeletes, instances);
 }
 
-let applyTransformationDisabled = computed(() => selected.value.length === 0);
+const applyTransformationDisabled = computed(() => selected.value.length === 0);
+const likertScoreAvailable = computed(
+  () => props.matches.length > 0 && props.matches.some((v) => v.likertScore !== undefined && v.likertScore !== null)
+);
 </script>
 
 <template>
@@ -447,6 +461,19 @@ let applyTransformationDisabled = computed(() => selected.value.length === 0);
         >
           <template #label>
             <span class="text-body-2" title="Show Transformation SPARQL">Show SPARQL</span>
+          </template>
+        </v-switch>
+        <v-switch
+          v-if="likertScoreAvailable"
+          v-model="tablePreferences.showLikertScore"
+          title="Show Likert score"
+          label="Show Likert score"
+          density="compact"
+          hide-details
+          class="ml-6"
+        >
+          <template #label>
+            <span class="text-body-2" title="Show Likert score">Likert score</span>
           </template>
         </v-switch>
       </div>
