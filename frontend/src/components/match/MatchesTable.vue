@@ -246,7 +246,7 @@ const headers = computed(() => [
     filterable: false,
     visible: tablePreferences.value.showLikertScore,
     sortable: false,
-    align: "center"
+    align: "center" as "center" // For some reason TS will not let just "center" pass
   }
 ]);
 
