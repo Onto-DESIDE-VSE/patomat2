@@ -258,7 +258,7 @@ public class OllamaLikertSorter implements PatternInstanceSorter {
             } else {
                 addSingleNewEntityLabel((ResultRowSingle) row, toMove);
             }
-            result.add(toMove);
+            result.add(toMove.withLikertScore(row.likertScore()));
         }
         // Add remaining instances in case LLM returned fewer results
         for (int i = sortRows.size() + 1; i <= patternInstances.size(); i++) {
