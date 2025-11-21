@@ -7,12 +7,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record PatternInstance(int id, @JsonIgnore Pattern pattern, PatternMatch match, String sparqlInsert, String sparqlDelete,
-                              List<NewEntity> newEntities) {
+                              List<NewEntity> newEntities, Integer likertScore) {
+
+    public PatternInstance(int id, Pattern pattern, PatternMatch match, String sparqlInsert, String sparqlDelete,
+                           List<NewEntity> newEntities) {
+        this(id, pattern, match, sparqlInsert, sparqlDelete, newEntities, null);
+    }
 
     public PatternInstance deepCopy() {
         return new PatternInstance(id, pattern, match, sparqlInsert, sparqlDelete, new ArrayList<>(newEntities.stream()
                                                                                                                 .map(ne -> new NewEntity(ne.variableName(), ne.identifier(), ne.labels()))
-                                                                                                                .toList()));
+                                                                                                                .toList()), likertScore);
+    }
+
+    public PatternInstance withLikertScore(int likertScore) {
+        return new PatternInstance(id, pattern, match, sparqlInsert, sparqlDelete, newEntities, likertScore);
     }
 
     @JsonProperty
