@@ -13,9 +13,13 @@ public enum EntityIriLocalNameFormat {
      */
     UUID,
     /**
-     * Entity label formatted to {@literal CamelCase} and appended to the namespace
+     * Entity label formatted to {@literal camelCase} and appended to the namespace
      */
     LABEL_CAMEL_CASE,
+    /**
+     * Entity label formatted to {@literal PascalCase} and appended to the namespace
+     */
+    LABEL_PASCAL_CASE,
     /**
      * Entity label formatted to {@literal snake_case} and appended to the namespace
      */
