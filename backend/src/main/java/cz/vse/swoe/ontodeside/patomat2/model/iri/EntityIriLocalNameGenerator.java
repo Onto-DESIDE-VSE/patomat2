@@ -24,13 +24,26 @@ public class EntityIriLocalNameGenerator {
         return switch (format) {
             case RANDOM_NUMBER -> String.valueOf(RAND.nextInt(100000));
             case UUID -> UUID.randomUUID().toString();
-            case LABEL_CAMEL_CASE -> {
+            case LABEL_PASCAL_CASE -> {
                 assert !labels.isEmpty();
                 final String value = labels.getFirst().value();
                 final String[] words = value.split(" ");
                 final StringBuilder sb = new StringBuilder();
                 for (String word : words) {
                     sb.append(word.substring(0, 1).toUpperCase()).append(word.substring(1).toLowerCase());
+                }
+                yield sb.toString();
+            }
+            case LABEL_CAMEL_CASE -> {
+                assert !labels.isEmpty();
+                final String value = labels.getFirst().value();
+                final String[] words = value.split(" ");
+                final StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                for (String word : words) {
+                    sb.append(first ? word.substring(0, 1).toLowerCase() : word.substring(0, 1).toUpperCase())
+                      .append(word.substring(1).toLowerCase());
+                    first = false;
                 }
                 yield sb.toString();
             }

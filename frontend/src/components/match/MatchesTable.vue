@@ -13,6 +13,7 @@ import { mdiInformation, mdiMenuDown, mdiCloseCircle, mdiCloudDownloadOutline, m
 import Constants from "@/constants/Constants";
 import type { SortMethod } from "@/types/SortMethod";
 import { entityToBinding } from "@/util/Utils";
+import NewEntityIriConfigDialog from "@/components/match/NewEntityIriConfigDialog.vue";
 
 interface MatchesTablePreferences {
   showTransformationSparql: boolean;
@@ -29,6 +30,7 @@ const defaultTablePreferences: MatchesTablePreferences = {
 };
 
 const tablePreferences = ref<MatchesTablePreferences>(defaultTablePreferences);
+const newEntityIriConfigDialog = ref(false);
 
 onMounted(() => {
   const saved = localStorage.getItem("tablePreferences");
@@ -297,7 +299,11 @@ const likertScoreAvailable = computed(
       >Apply transformation
     </v-btn>
     <v-btn @click="onClear" color="primary" variant="outlined" class="ml-2">Clear data</v-btn>
+    <v-btn @click="newEntityIriConfigDialog = true" color="primary" variant="outlined" class="ml-2"
+      >New entity identifier config</v-btn
+    >
   </div>
+  <NewEntityIriConfigDialog :show="newEntityIriConfigDialog" @close="newEntityIriConfigDialog = false" />
 
   <v-row class="align-center mt-4" dense>
     <v-col cols="12" lg="2">
