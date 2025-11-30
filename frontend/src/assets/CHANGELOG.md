@@ -24,6 +24,19 @@
 
 - Include information about new entities in transformation summary.
 
+### 2025-10-01
+- Support external sorting in frontend
+
+### 2025-09-02
+
+- SPARQL code highlighting and labels displaying
+- Extended filtering of pattern matches
+
+### 2025-08-23
+
+- Selection improvements of pattern matches to apply
+- Display pagination also above the table with pattern matches
+
 ### 2024-09-26
 
 - Support combining files and URLs as transformation input.
