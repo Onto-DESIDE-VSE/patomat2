@@ -4,6 +4,10 @@
 
 <br/>
 
+### 2025-12-01
+
+- Support resolving ontology imports (`owl:imports`).
+
 ### 2025-11-21
 
 - Allow display of pattern instance Likert score when available.
@@ -25,6 +29,7 @@
 - Include information about new entities in transformation summary.
 
 ### 2025-10-01
+
 - Support external sorting in frontend
 
 ### 2025-09-02
