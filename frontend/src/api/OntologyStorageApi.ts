@@ -21,10 +21,15 @@ export async function downloadOntologyFile() {
   await downloadAttachment(resp);
 }
 
-export async function uploadTransformationInput(ontology: File | string, patternFiles: File[], patternUrls: string[]) {
+export async function uploadTransformationInput(
+  ontology: File | string,
+  patternFiles: File[],
+  patternUrls: string[],
+  resolveImports: boolean
+) {
   const formData = new FormData();
   patternFiles.forEach((file) => formData.append("pattern", file));
-  const data = { patterns: patternUrls } as any;
+  const data = { patterns: patternUrls, resolveImports } as any;
   if (typeof ontology === "string") {
     data.ontology = ontology;
   } else {

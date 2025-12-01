@@ -17,6 +17,7 @@ const patternFiles = ref<File[]>([]);
 const patternUrls = ref<string[]>([]);
 const predefinedPatternUrls = ref<string[]>([]);
 const patternCount = ref<number>(1);
+const resolveImports = ref<boolean>(false);
 
 const inputRefs = useTemplateRef<HTMLInputElement[]>("inputs");
 
@@ -65,7 +66,8 @@ async function uploadAndHandleResponse(onSuccess: () => Promise<any>) {
   const resp = await uploadTransformationInput(
     ontologyFileOrUrl.value === "file" ? ontologyFile.value! : ontologyUrl.value!,
     patternFiles.value,
-    [...patternUrls.value, ...predefinedPatternUrls.value]
+    [...patternUrls.value, ...predefinedPatternUrls.value],
+    resolveImports.value
   );
   showProgress.value = false;
   if (resp.ok) {
@@ -100,6 +102,11 @@ async function uploadAndTransform() {
     ></v-switch>
     <v-file-input class="mb-2" v-if="ontologyFileOrUrl === 'file'" v-model="ontologyFile" label="Ontology file" />
     <v-text-field class="mb-2" v-else v-model="ontologyUrl" label="Ontology URL" :prepend-icon="mdiWeb"></v-text-field>
+    <v-switch
+      v-model="resolveImports"
+      label="Resolve ontology imports"
+      title="Should owl:imports be resolved and included in pattern processing?"
+    />
 
     <h4 class="text-h4 mb-3">Transformation Patterns</h4>
 
@@ -132,15 +139,15 @@ async function uploadAndTransform() {
     ></v-text-field>
 
     <div class="float-right">
-      <v-btn color="primary" :disabled="!valid || showProgress" :loading="showProgress" @click="upload">Load</v-btn>
+      <v-btn color="primary" :disabled="!valid || showProgress" :loading="showProgress" @click="upload">Load </v-btn>
       <v-btn
         color="primary"
         :disabled="!valid || showProgress"
         :loading="showProgress"
         @click="uploadAndTransform"
         class="ml-2"
-        >Load and transform</v-btn
-      >
+        >Load and transform
+      </v-btn>
     </div>
   </v-form>
 </template>
