@@ -32,6 +32,7 @@ import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.jetbrains.annotations.NotNull;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.formats.TrigDocumentFormat;
+import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.MissingImportHandlingStrategy;
 import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
@@ -114,8 +115,12 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
             LOG.debug("Error: {}", e.getCreationException().getMessage());
         });
         try {
-            m.loadOntologyFromOntologyDocument(ontologyFile);
-            final OWLOntology mergedOntology = new OWLOntologyMerger(m).createMergedOntology(m, null);
+            final OWLOntology rootOntology = m.loadOntologyFromOntologyDocument(ontologyFile);
+            if (rootOntology.getOntologyID().getOntologyIRI().isEmpty()) {
+                throw new OntologyReadException("Ontology in " + ontologyFile + " does not have IRI and cannot be processed.");
+            }
+            final IRI ontologyIri = rootOntology.getOntologyID().getOntologyIRI().get();
+            final OWLOntology mergedOntology = new OWLOntologyMerger(m).createMergedOntology(m, ontologyIri);
             final ByteArrayOutputStream bos = new ByteArrayOutputStream();
             mergedOntology.saveOntology(new TrigDocumentFormat(), bos);
             return new ByteArrayInputStream(bos.toByteArray());
