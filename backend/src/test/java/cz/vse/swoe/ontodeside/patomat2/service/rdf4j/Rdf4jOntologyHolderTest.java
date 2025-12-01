@@ -98,6 +98,8 @@ class Rdf4jOntologyHolderTest {
         final Rdf4jOntologyHolder sut = new Rdf4jOntologyHolder();
         sut.loadOntology(file, true);
 
+        assertTrue(sut.getOntologyIri().isPresent());
+        assertEquals("http://w3id.org/CEON/ontology/plan/", sut.getOntologyIri().get());
         final Optional<String> eventLabel = sut.getLabel("http://w3id.org/CEON/ontology/processODP/Event");
         assertTrue(eventLabel.isPresent());
         assertEquals("Event", eventLabel.get());
