@@ -130,13 +130,16 @@ public class ApplicationConfig {
          */
         private List<String> patterns;
 
+        private boolean resolveImports = false;
+
         public Example() {
         }
 
-        public Example(String name, String ontology, List<String> patterns) {
+        public Example(String name, String ontology, List<String> patterns, boolean resolveImports) {
             this.name = name;
             this.ontology = ontology;
             this.patterns = patterns;
+            this.resolveImports = resolveImports;
         }
 
         public String getName() {
@@ -161,6 +164,14 @@ public class ApplicationConfig {
 
         public void setPatterns(List<String> patterns) {
             this.patterns = patterns;
+        }
+
+        public boolean isResolveImports() {
+            return resolveImports;
+        }
+
+        public void setResolveImports(boolean resolveImports) {
+            this.resolveImports = resolveImports;
         }
     }
 

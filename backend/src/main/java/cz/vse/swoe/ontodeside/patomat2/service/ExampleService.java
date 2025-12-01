@@ -44,8 +44,8 @@ public class ExampleService {
         if (example.isEmpty()) {
             throw new NotFoundException("Example with name '" + exampleName + "' not found.");
         }
-        final TransformationInput input = new TransformationInput(example.get().getOntology(), example.get()
-                                                                                                      .getPatterns());
+        final TransformationInput input = new TransformationInput(example.get().getOntology(),
+                example.get().getPatterns(), example.get().isResolveImports());
         ontologyStoringService.saveOntologyAndPatterns(input);
     }
 }

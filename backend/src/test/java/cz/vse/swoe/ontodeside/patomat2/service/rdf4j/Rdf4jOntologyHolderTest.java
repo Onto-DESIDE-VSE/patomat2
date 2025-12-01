@@ -27,7 +27,7 @@ class Rdf4jOntologyHolderTest {
     void getOntologyIriExtractsIriOfLoadedOntology() {
         final File file = new File(getClass().getClassLoader().getResource("archivo-partial.nt").getFile());
         final Rdf4jOntologyHolder sut = new Rdf4jOntologyHolder();
-        sut.loadOntology(file);
+        sut.loadOntology(file, false);
         final Optional<String> result = sut.getOntologyIri();
         assertTrue(result.isPresent());
         assertEquals("https://w3id.org/cdc", result.get());
@@ -37,7 +37,7 @@ class Rdf4jOntologyHolderTest {
     void getLabelResolvesResourceLabel() {
         final File file = new File(getClass().getClassLoader().getResource("archivo-partial.nt").getFile());
         final Rdf4jOntologyHolder sut = new Rdf4jOntologyHolder();
-        sut.loadOntology(file);
+        sut.loadOntology(file, false);
         final Optional<String> result = sut.getLabel("https://w3id.org/cdc#MEPDesignDS");
         assertTrue(result.isPresent());
         assertEquals("MEP design dataset", result.get());
@@ -47,7 +47,7 @@ class Rdf4jOntologyHolderTest {
     void applyTransformationQueryAppliesSpecifiedSparqlUpdate() {
         final File file = new File(getClass().getClassLoader().getResource("archivo-partial.nt").getFile());
         final Rdf4jOntologyHolder sut = new Rdf4jOntologyHolder();
-        sut.loadOntology(file);
+        sut.loadOntology(file, false);
         final String subject = SKOS.CONCEPT.stringValue();
         final String label = "Concept";
         final String sparqlUpdate = "INSERT DATA { <" + subject + "> rdfs:label \"" + label + "\" . }";
@@ -61,7 +61,7 @@ class Rdf4jOntologyHolderTest {
     void exportExportsCurrentRepositoryContent() throws Exception {
         final File file = new File(getClass().getClassLoader().getResource("archivo-partial.nt").getFile());
         final Rdf4jOntologyHolder sut = new Rdf4jOntologyHolder();
-        sut.loadOntology(file);
+        sut.loadOntology(file, false);
         final ByteArrayOutputStream result = sut.export("application/n-triples");
         assertNotNull(result);
         final Model expectedModel = Rio.parse(new FileInputStream(file), RDFFormat.NTRIPLES);
@@ -73,7 +73,7 @@ class Rdf4jOntologyHolderTest {
     void findMatchesReplacesBlankNodeRepresentingUnionWithUnionConstituents() {
         final File file = new File(getClass().getClassLoader().getResource("cmt.owl").getFile());
         final Rdf4jOntologyHolder sut = new Rdf4jOntologyHolder();
-        sut.loadOntology(file);
+        sut.loadOntology(file, false);
         final Pattern p = new Pattern("pattern.json", "Pattern", List.of("?p rdfs:domain ?A",
                 "?p rdfs:range ?B",
                 "?C rdfs:subClassOf ?B"), List.of(), List.of(), List.of(), List.of());
@@ -90,5 +90,16 @@ class Rdf4jOntologyHolderTest {
         assertTrue(blankNodeOnes.stream()
                                 .anyMatch(pm -> pm.getBinding("A").isPresent() && pm.getBinding("A").get().value()
                                                                                     .equals("http://cmt/#Author")));
+    }
+
+    @Test
+    void loadOntologyWithImportsResolvingLoadsOntologyAndItsImports() {
+        final File file = new File(getClass().getClassLoader().getResource("ceon_plan.ttl").getFile());
+        final Rdf4jOntologyHolder sut = new Rdf4jOntologyHolder();
+        sut.loadOntology(file, true);
+
+        final Optional<String> eventLabel = sut.getLabel("http://w3id.org/CEON/ontology/processODP/Event");
+        assertTrue(eventLabel.isPresent());
+        assertEquals("Event", eventLabel.get());
     }
 }

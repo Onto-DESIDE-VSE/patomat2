@@ -100,12 +100,12 @@ public class MatchService {
                                             .toList());
     }
 
-    private void loadOntology(String fileName) {
+    private void loadOntology(String fileName, boolean resolveImports) {
         final File ontologyFile = storageService.getFile(fileName);
         if (ontologyHolder.isLoaded()) {
             ontologyHolder.clear();
         }
-        ontologyHolder.loadOntology(ontologyFile);
+        ontologyHolder.loadOntology(ontologyFile, resolveImports);
     }
 
     /**
@@ -127,7 +127,7 @@ public class MatchService {
 
     @EventListener
     public void onOntologyFileUploaded(OntologyFileUploadedEvent event) {
-        loadOntology(event.getOntologyFileName());
+        loadOntology(event.getOntologyFileName(), event.shouldResolveImports());
         this.patterns = new LinkedHashMap<>();
         event.getPatterns().forEach(p -> patterns.put(p.name(), p));
         this.matches = null;

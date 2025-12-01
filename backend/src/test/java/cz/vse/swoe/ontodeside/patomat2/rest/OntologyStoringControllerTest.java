@@ -42,7 +42,7 @@ class OntologyStoringControllerTest extends BaseControllerTestRunner {
         final MockMultipartFile pattern = new MockMultipartFile("pattern", "pattern.json",
                 MediaType.APPLICATION_JSON_VALUE,
                 OntologyStoringControllerTest.class.getClassLoader().getResourceAsStream("pattern-example.json"));
-        final TransformationInput emptyInput = new TransformationInput(null, List.of());
+        final TransformationInput emptyInput = new TransformationInput(null, List.of(), false);
         final MockMultipartFile data = new MockMultipartFile("data", "data.json",
                 MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(emptyInput));
 
@@ -57,7 +57,7 @@ class OntologyStoringControllerTest extends BaseControllerTestRunner {
     @Test
     void storeTransformationInputSavesTransformationInputWhenNoFilesAreProvided() throws Exception {
         final TransformationInput input = new TransformationInput("https://www.w3.org/TR/skos-reference/skos.rdf",
-                List.of("https://raw.githubusercontent.com/Onto-DESIDE-VSE/patomat2/main/backend/src/test/resources/pattern-example.json"));
+                List.of("https://raw.githubusercontent.com/Onto-DESIDE-VSE/patomat2/main/backend/src/test/resources/pattern-example.json"), false);
         final MockMultipartFile data = new MockMultipartFile("data", "data.json",
                 MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(input));
 
@@ -73,7 +73,7 @@ class OntologyStoringControllerTest extends BaseControllerTestRunner {
                 MediaType.APPLICATION_JSON_VALUE,
                 OntologyStoringControllerTest.class.getClassLoader().getResourceAsStream("pattern-example.json"));
         final TransformationInput input = new TransformationInput("https://www.w3.org/TR/skos-reference/skos.rdf",
-                List.of("https://raw.githubusercontent.com/Onto-DESIDE-VSE/patomat2/main/backend/src/test/resources/pattern-example.json"));
+                List.of("https://raw.githubusercontent.com/Onto-DESIDE-VSE/patomat2/main/backend/src/test/resources/pattern-example.json"), false);
         final MockMultipartFile data = new MockMultipartFile("data", "data.json",
                 MediaType.APPLICATION_JSON_VALUE, objectMapper.writeValueAsBytes(input));
 
