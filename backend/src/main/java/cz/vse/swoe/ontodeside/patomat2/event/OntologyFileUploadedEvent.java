@@ -14,10 +14,14 @@ public class OntologyFileUploadedEvent extends ApplicationEvent {
 
     private final List<Pattern> patterns;
 
-    public OntologyFileUploadedEvent(Object source, String ontologyFileName, List<Pattern> patterns) {
+    private final boolean resolveImports;
+
+    public OntologyFileUploadedEvent(Object source, String ontologyFileName, List<Pattern> patterns,
+                                     boolean resolveImports) {
         super(source);
         this.ontologyFileName = ontologyFileName;
         this.patterns = patterns;
+        this.resolveImports = resolveImports;
     }
 
     public String getOntologyFileName() {
@@ -26,5 +30,9 @@ public class OntologyFileUploadedEvent extends ApplicationEvent {
 
     public List<Pattern> getPatterns() {
         return patterns;
+    }
+
+    public boolean shouldResolveImports() {
+        return resolveImports;
     }
 }

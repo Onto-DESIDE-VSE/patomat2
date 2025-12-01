@@ -30,15 +30,25 @@ import org.eclipse.rdf4j.rio.RDFWriter;
 import org.eclipse.rdf4j.rio.Rio;
 import org.eclipse.rdf4j.sail.memory.MemoryStore;
 import org.jetbrains.annotations.NotNull;
+import org.semanticweb.owlapi.apibinding.OWLManager;
+import org.semanticweb.owlapi.formats.TrigDocumentFormat;
+import org.semanticweb.owlapi.model.MissingImportHandlingStrategy;
+import org.semanticweb.owlapi.model.OWLException;
+import org.semanticweb.owlapi.model.OWLOntology;
+import org.semanticweb.owlapi.model.OWLOntologyManager;
+import org.semanticweb.owlapi.model.OWLRuntimeException;
+import org.semanticweb.owlapi.util.OWLOntologyMerger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -56,6 +66,8 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
 
     private String ontologyFileName;
 
+    private boolean resolveImports;
+
     private final Repository repository = new SailRepository(new MemoryStore());
 
     @Override
@@ -64,15 +76,52 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
     }
 
     @Override
-    public void loadOntology(@NonNull File ontologyFile) {
+    public boolean isLoadedWithImports() {
+        return isLoaded() && resolveImports;
+    }
+
+    @Override
+    public void loadOntology(@NonNull File ontologyFile, boolean resolveImports) {
         Objects.requireNonNull(ontologyFile);
         this.ontologyFileName = ontologyFile.getName();
+        this.resolveImports = resolveImports;
         try (final RepositoryConnection conn = repository.getConnection()) {
             try {
-                conn.add(ontologyFile);
+                if (resolveImports) {
+                    conn.add(loadOntologyWithImports(ontologyFile), RDFFormat.TRIG);
+                } else {
+                    conn.add(ontologyFile);
+                }
             } catch (IOException e) {
                 throw new OntologyReadException("Unable to load ontology file " + ontologyFile.getName(), e);
             }
+        }
+    }
+
+    /**
+     * Uses OWLAPI to load the ontology and transitively resolve all its imports.
+     * <p>
+     * Failed imports are only logged.
+     *
+     * @param ontologyFile Ontology file to import
+     * @return Input stream containing the merged ontology (root ontology and all its imports) in TRIG format
+     */
+    private InputStream loadOntologyWithImports(File ontologyFile) {
+        final OWLOntologyManager m = OWLManager.createOWLOntologyManager();
+        m.getOntologyConfigurator().setMissingImportHandlingStrategy(MissingImportHandlingStrategy.SILENT);
+        m.addMissingImportListener(e -> {
+            LOG.warn("Unable to import ontology {}.", e.getImportedOntologyURI());
+            LOG.debug("Error: {}", e.getCreationException().getMessage());
+        });
+        try {
+            m.loadOntologyFromOntologyDocument(ontologyFile);
+            final OWLOntology mergedOntology = new OWLOntologyMerger(m).createMergedOntology(m, null);
+            final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            mergedOntology.saveOntology(new TrigDocumentFormat(), bos);
+            return new ByteArrayInputStream(bos.toByteArray());
+        } catch (OWLException | OWLRuntimeException e) {
+            LOG.error(e.getMessage(), e);
+            throw new PatOMat2Exception("Unable to load ontology from file " + ontologyFile, e);
         }
     }
 
@@ -162,7 +211,8 @@ public class Rdf4jOntologyHolder implements OntologyHolder {
         return toResultBinding(name, bs, conn, Optional.empty());
     }
 
-    private static List<ResultBinding> toResultBinding(String name, @NotNull BindingSet bs, RepositoryConnection conn, Optional<String> label) {
+    private static List<ResultBinding> toResultBinding(String name, @NotNull BindingSet bs, RepositoryConnection conn,
+                                                       Optional<String> label) {
         final Value value = bs.getValue(name);
         final String strValue = value.stringValue();
         if (value.isBNode()) {

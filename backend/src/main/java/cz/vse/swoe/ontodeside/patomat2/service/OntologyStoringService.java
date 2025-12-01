@@ -75,7 +75,7 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
         final List<Pattern> patterns = storePatterns(patternsFiles, input);
         LOG.info("Stored ontology '{}' and {} patterns for session {}.", storedOntology.getName(), patterns.size(), session.getId());
         eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, session.getAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE)
-                                                                               .toString(), patterns));
+                                                                               .toString(), patterns, input.resolveImports()));
     }
 
     private File storeOntology(MultipartFile ontologyFile, TransformationInput input) {
@@ -132,7 +132,7 @@ public class OntologyStoringService implements ApplicationEventPublisherAware {
         session.setAttribute(Constants.ONTOLOGY_FILE_SESSION_ATTRIBUTE, storedFile.getName());
         final List<Pattern> patterns = loadPatterns(input);
         storePatternsInSession(patterns);
-        eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns));
+        eventPublisher.publishEvent(new OntologyFileUploadedEvent(this, storedFile.getName(), patterns, input.resolveImports()));
     }
 
     /**

@@ -24,7 +24,7 @@ class ExampleServiceTest {
     @Test
     void getExamplesReturnsNamesOfConfiguredExamples() {
         final ApplicationConfig config = new ApplicationConfig();
-        config.setExamples(List.of(new ApplicationConfig.Example("test", "http://example.com/ontology.ttl", List.of("http://example.com/pattern.json"))));
+        config.setExamples(List.of(new ApplicationConfig.Example("test", "http://example.com/ontology.ttl", List.of("http://example.com/pattern.json"), false)));
         final ExampleService sut = new ExampleService(storingService, config);
 
         assertEquals(List.of("test"), sut.getExamples());
@@ -33,17 +33,17 @@ class ExampleServiceTest {
     @Test
     void loadExampleLoadsExamplesFromUrls() {
         final ApplicationConfig config = new ApplicationConfig();
-        config.setExamples(List.of(new ApplicationConfig.Example("test", "http://example.com/ontology.ttl", List.of("http://example.com/pattern.json"))));
+        config.setExamples(List.of(new ApplicationConfig.Example("test", "http://example.com/ontology.ttl", List.of("http://example.com/pattern.json"), false)));
         final ExampleService sut = new ExampleService(storingService, config);
 
         sut.loadExample("test");
-        verify(storingService).saveOntologyAndPatterns(new TransformationInput("http://example.com/ontology.ttl", List.of("http://example.com/pattern.json")));
+        verify(storingService).saveOntologyAndPatterns(new TransformationInput("http://example.com/ontology.ttl", List.of("http://example.com/pattern.json"), false));
     }
 
     @Test
     void loadExampleThrowsNotFoundExceptionWhenNoSuchExampleExists() {
         final ApplicationConfig config = new ApplicationConfig();
-        config.setExamples(List.of(new ApplicationConfig.Example("test", "http://example.com/ontology.ttl", List.of("http://example.com/pattern.json"))));
+        config.setExamples(List.of(new ApplicationConfig.Example("test", "http://example.com/ontology.ttl", List.of("http://example.com/pattern.json"), false)));
         final ExampleService sut = new ExampleService(storingService, config);
 
         assertThrows(NotFoundException.class, () -> sut.loadExample("unknown"));

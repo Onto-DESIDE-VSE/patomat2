@@ -23,11 +23,20 @@ public interface OntologyHolder {
     boolean isLoaded();
 
     /**
+     * Returns true if the ontology was loaded including its imports.
+     *
+     * @return {@code true} if ontology was loaded with imports
+     * @see #loadOntology(File, boolean)
+     */
+    boolean isLoadedWithImports();
+
+    /**
      * Loads ontology from the specified file.
      *
-     * @param ontologyFile File containing ontology
+     * @param ontologyFile   File containing ontology
+     * @param resolveImports Whether to resolve ontology imports ({@literal owl:imports})
      */
-    void loadOntology(@NonNull File ontologyFile);
+    void loadOntology(@NonNull File ontologyFile, boolean resolveImports);
 
     /**
      * Resolves IRI of the loaded ontology, if available.

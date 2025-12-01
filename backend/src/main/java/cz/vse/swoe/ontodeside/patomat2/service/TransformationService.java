@@ -76,7 +76,7 @@ public class TransformationService {
         } finally {
             // Reload the original untransformed ontology
             ontologyHolder.clear();
-            ontologyHolder.loadOntology(storingService.getOntologyFile());
+            ontologyHolder.loadOntology(storingService.getOntologyFile(), ontologyHolder.isLoadedWithImports());
         }
     }
 
