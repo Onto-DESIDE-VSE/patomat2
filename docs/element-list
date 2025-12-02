@@ -4,6 +4,7 @@ cz.vse.swoe.ontodeside.patomat2.event
 cz.vse.swoe.ontodeside.patomat2.exception
 cz.vse.swoe.ontodeside.patomat2.model
 cz.vse.swoe.ontodeside.patomat2.model.function
+cz.vse.swoe.ontodeside.patomat2.model.iri
 cz.vse.swoe.ontodeside.patomat2.rest
 cz.vse.swoe.ontodeside.patomat2.rest.handler
 cz.vse.swoe.ontodeside.patomat2.service
