@@ -1,27 +1,39 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
-import { getNewEntityIdentifierConfig, setNewEntityIdentifierConfig } from "@/api/NewEntityIdentifier";
+import { getNewEntityIdentifierConfig } from "@/api/NewEntityIdentifier";
 import { EntityLocalNameFormatOptions, type NewEntityIdentifierConfig } from "@/types/NewEntityIdentifierConfig";
 
 const emit = defineEmits(["close"]);
 
 const props = defineProps<{
   show: boolean;
+  onSave: (config: NewEntityIdentifierConfig) => void;
 }>();
+
+const originalConfig = ref<NewEntityIdentifierConfig>({
+  localNameFormat: EntityLocalNameFormatOptions[0],
+  namespace: ""
+});
 
 const config = ref<NewEntityIdentifierConfig>({
   localNameFormat: EntityLocalNameFormatOptions[0],
   namespace: ""
 });
 
-onMounted(() => {
-  getNewEntityIdentifierConfig().then((value) => (config.value = value));
-});
+const handleSave = () => {
+  props.onSave({ ...config.value });
+};
 
-const onSave = () => {
-  setNewEntityIdentifierConfig(config.value);
+const handleCancel = () => {
+  config.value = { ...originalConfig.value };
   emit("close");
 };
+onMounted(() => {
+  getNewEntityIdentifierConfig().then((value) => {
+    originalConfig.value = value;
+    config.value = value;
+  });
+});
 </script>
 
 <template>
@@ -38,8 +50,8 @@ const onSave = () => {
         />
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" @click="onSave">Save</v-btn>
-        <v-btn @click="emit('close')">Close</v-btn>
+        <v-btn color="primary" @click="handleSave">Save</v-btn>
+        <v-btn @click="handleCancel">Close</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

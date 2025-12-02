@@ -22,7 +22,7 @@ export async function setNewEntityIdentifierConfig(config: NewEntityIdentifierCo
     }
   });
   if (resp.ok) {
-    return resp.json();
+    return;
   } else {
     throw new Error("Failed to set new entity identifier config");
   }
