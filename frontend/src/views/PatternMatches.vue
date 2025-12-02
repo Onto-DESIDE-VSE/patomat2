@@ -13,6 +13,8 @@ import MatchesStatistics from "@/components/match/MatchesStatistics.vue";
 import type { LoadedTransformationInput } from "@/types/LoadedTransformationInput";
 import { clearSessionData, getLoadedInput } from "@/api/OntologyStorageApi";
 import type { SortMethod } from "@/types/SortMethod";
+import type { NewEntityIdentifierConfig } from "@/types/NewEntityIdentifierConfig";
+import { setNewEntityIdentifierConfig } from "@/api/NewEntityIdentifier";
 
 const router = useRouter();
 const messageStore = useMessageStore();
@@ -149,6 +151,12 @@ function onInstanceChange(change: PatternInstance) {
   matches.value.splice(index, 1, change);
 }
 
+const onNewEntityIriConfigChange = async (config: NewEntityIdentifierConfig) => {
+  await setNewEntityIdentifierConfig(config);
+  messageStore.publishMessage("New entity IRI config updated. Reloading pattern matches.");
+  await fetchMatches();
+};
+
 const applyTransformation = async (applyDeletes: boolean, instances: PatternInstanceTransformation[]) => {
   showProgress.value = true;
   const resp = await fetch(`${Constants.SERVER_URL}/transformation`, {
@@ -205,6 +213,7 @@ const downloadTransformedOntology = async () => {
     :loaded-sort-methods="loadedSortMethods"
     :on-sort-change="applySorting"
     :on-clear="clearData"
+    :on-new-entity-iri-config-change="onNewEntityIriConfigChange"
   />
   <TransformationSummaryView :summary="transformationSummary" />
 </template>

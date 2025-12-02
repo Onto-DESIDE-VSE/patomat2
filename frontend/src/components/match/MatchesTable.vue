@@ -14,6 +14,7 @@ import Constants from "@/constants/Constants";
 import type { SortMethod } from "@/types/SortMethod";
 import { entityToBinding } from "@/util/Utils";
 import NewEntityIriConfigDialog from "@/components/match/NewEntityIriConfigDialog.vue";
+import type { NewEntityIdentifierConfig } from "@/types/NewEntityIdentifierConfig";
 
 interface MatchesTablePreferences {
   showTransformationSparql: boolean;
@@ -55,6 +56,7 @@ const props = defineProps<{
   defaultSortMethod: SortMethod;
   loadedSortMethods: Set<string>;
   onSortChange: (sortMethod: SortMethod) => Promise<boolean>;
+  onNewEntityIriConfigChange: (config: NewEntityIdentifierConfig) => void;
   onClear: () => void;
 }>();
 
@@ -134,6 +136,11 @@ function filterByStatus(value: boolean | null) {
       return true;
   }
 }
+
+const onNewEntityIriConfigChange = (config: NewEntityIdentifierConfig) => {
+  newEntityIriConfigDialog.value = false;
+  props.onNewEntityIriConfigChange(config);
+};
 
 const searchText = ref<string>();
 
@@ -303,7 +310,11 @@ const likertScoreAvailable = computed(
       >New entity identifier config</v-btn
     >
   </div>
-  <NewEntityIriConfigDialog :show="newEntityIriConfigDialog" @close="newEntityIriConfigDialog = false" />
+  <NewEntityIriConfigDialog
+    :show="newEntityIriConfigDialog"
+    :onSave="onNewEntityIriConfigChange"
+    @close="newEntityIriConfigDialog = false"
+  />
 
   <v-row class="align-center mt-4" dense>
     <v-col cols="12" lg="2">
