@@ -134,9 +134,15 @@ public class MatchService {
     public void setNewEntityIriConfig(NewEntityIriConfig iriConfig) {
         newEntityGenerator.setIriConfig(iriConfig);
         // Update new entities - regenerate identifiers
-        matches.forEach((key, value) -> matches.put(key, value.withNewEntities(value.newEntities().stream()
-                                                                                    .map(ne -> ne.withIdentifier(newEntityGenerator.generateIdentifier(ne.labels())))
-                                                                                    .collect(Collectors.toList()))));
+        matches.forEach((key, value) -> {
+            final List<NewEntity> newEntities = value.newEntities().stream()
+                                                     .map(ne -> ne.withIdentifier(newEntityGenerator.generateIdentifier(ne.labels())))
+                                                     .collect(Collectors.toList());
+            final PatternMatch pm = value.match();
+            matches.put(key, new PatternInstance(key, value.pattern(), pm, value.pattern()
+                                                                                .createTargetInsertSparql(pm, newEntities),
+                    value.pattern().createTargetDeleteSparql(pm), newEntities));
+        });
     }
 
     @EventListener
