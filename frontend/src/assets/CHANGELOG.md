@@ -7,7 +7,7 @@
 ### 2025-12-02
 
 - Allow configuring new entity IRI generation.
-- 
+  
 ### 2025-12-01
 
 - Support resolving ontology imports (`owl:imports`).
